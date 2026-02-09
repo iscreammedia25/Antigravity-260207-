@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kids Reading Adventure - Preview</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Jua&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --font-fredoka: 'Fredoka', sans-serif;
+            --font-jua: 'Jua', sans-serif;
+        }
+
+        body {
+            font-family: var(--font-fredoka);
+            background: linear-gradient(to bottom, #FEFCE8, #EFF6FF);
+            /* yellow-50 to blue-50 */
+            color: #334155;
+            min-height: 100vh;
+        }
+
+        .font-jua {
+            font-family: var(--font-jua);
+        }
+
+        .btn-jelly {
+            border-radius: 9999px;
+            border-width: 4px;
+            border-color: #334155;
+            box-shadow: 0 6px 0 rgba(0, 0, 0, 0.1);
+            transition: all 0.2s;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .btn-jelly:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 rgba(0, 0, 0, 0.1);
+        }
+
+        .card-bubble {
+            border-radius: 40px;
+            background-color: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border-width: 6px;
+            border-color: #ffffff;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.05);
+        }
+
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            height: 10px;
+            background: transparent;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #FFEDD5;
+            /* orange-100 */
+            border-radius: 9999px;
+            border: 3px solid transparent;
+            background-clip: padding-box;
+            transition: background-color 0.3s;
+        }
+
+        .custom-scrollbar:hover::-webkit-scrollbar-thumb {
+            background-color: #FED7AA;
+            /* orange-200 */
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background-color: #FDBA74;
+            /* orange-300 */
+        }
+
+        .animate-twinkle {
+            animation: twinkle 2s infinite;
+        }
+
+        @keyframes twinkle {
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+                filter: brightness(1);
+            }
+
+            50% {
+                opacity: 0.8;
+                transform: scale(1.05);
+                filter: brightness(1.3);
+                drop-shadow: 0 0 20px rgba(255, 107, 0, 0.4);
+            }
+        }
+
+        #learningModeOverlay {
+            transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            transform: translateY(100%);
+            background-color: #000000;
+        }
+
+        #learningModeOverlay.active {
+            transform: translateY(0);
+        }
+
+        #studyGnb {
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            background-color: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+        }
+
+        #gnbHandle {
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+    </style>
+</head>
+
+<body class="p-4 md:p-8">
+    <div class="max-w-6xl mx-auto space-y-12">
+        <!-- Header -->
+        <header class="flex justify-between items-center mb-4">
+            <div class="flex items-center gap-6">
+                <div
+                    class="w-16 h-16 bg-yellow-300 rounded-full border-[6px] border-white shadow-xl flex items-center justify-center overflow-hidden transform hover:scale-110 transition-transform">
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Ami" alt="User Avatar">
+                </div>
+                <div>
+                    <h1 class="text-3xl font-black text-slate-700 tracking-tight font-jua">Ami's Adventure</h1>
+                    <div
+                        class="flex items-center gap-2 text-green-500 text-sm font-bold bg-green-50 px-3 py-1 rounded-full w-fit mt-1">
+                        <span class="w-2.5 h-2.5 bg-green-500 rounded-full animate-pulse"></span>
+                        Ready to Learn!
+                    </div>
+                </div>
+            </div>
+            <div class="flex gap-4">
+                <button
+                    class="w-14 h-14 bg-white rounded-3xl shadow-lg flex items-center justify-center text-slate-400 hover:text-orange-500 transition-all border-4 border-white active:scale-95"><i
+                        data-lucide="bell" class="w-7 h-7"></i></button>
+                <button
+                    class="w-14 h-14 bg-white rounded-3xl shadow-lg flex items-center justify-center text-slate-400 hover:text-orange-500 transition-all border-4 border-white active:scale-95"><i
+                        data-lucide="menu" class="w-7 h-7"></i></button>
+            </div>
+        </header>
+
+        <!-- Hero Section -->
+        <section
+            class="card-bubble relative overflow-hidden p-8 md:p-12 transition-all duration-700 bg-gradient-to-br from-orange-400 to-orange-500 border-none shadow-orange-100 min-h-[420px] flex items-center">
+            <div class="absolute top-[-20%] left-[-10%] w-72 h-72 bg-white/20 rounded-full blur-3xl animate-pulse">
+            </div>
+            <div class="absolute bottom-[-20%] right-[-10%] w-96 h-96 bg-yellow-300/30 rounded-full blur-3xl"></div>
+
+            <div class="flex flex-col md:flex-row items-center gap-14 w-full relative z-10">
+                <div class="relative group flex-shrink-0">
+                    <div
+                        class="absolute -inset-6 bg-white/40 rounded-[48px] blur-2xl opacity-0 group-hover:opacity-100 transition-opacity">
+                    </div>
+                    <div class="w-64 h-80 bg-white rounded-[40px] shadow-2xl flex-shrink-0 relative overflow-hidden transform -rotate-3 border-[8px] border-white transition-all group-hover:rotate-0 group-hover:scale-105 cursor-pointer"
+                        onclick="openModal('rainbow-cloud')">
+                        <img src="./public/image/The Rainbow Cloud.png" alt="The Rainbow Cloud"
+                            class="w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent flex items-end p-6">
+                            <p class="text-white font-black text-sm font-jua uppercase tracking-widest">Recommended!</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-white space-y-10 text-center md:text-left flex-1">
+                    <div class="space-y-6">
+                        <h2
+                            class="text-5xl md:text-7xl font-black drop-shadow-md leading-tight tracking-tight font-jua">
+                            Ready for a<br>New Adventure?
+                        </h2>
+                        <p
+                            class="text-orange-50 text-2xl font-medium opacity-100 leading-relaxed font-fredoka max-w-xl">
+                            We've prepared <span
+                                class="text-yellow-200 font-bold underline decoration-wavy underline-offset-8">"The
+                                Rainbow Cloud"</span> just for you, Ami!
+                        </p>
+                    </div>
+                    <div class="flex flex-wrap gap-6 justify-center md:justify-start pt-4">
+                        <button onclick="startLearning()"
+                            class="px-12 py-6 bg-green-400 text-white btn-jelly text-3xl flex items-center gap-4 hover:bg-green-500">
+                            Start Reading <i data-lucide="play" class="w-8 h-8 fill-current"></i>
+                        </button>
+                        <button
+                            class="px-10 py-6 bg-white/30 backdrop-blur-md text-white btn-jelly text-xl hover:bg-white/40 border-white/50">
+                            Other Books
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Library Section -->
+        <div class="card-bubble p-8 md:p-10 w-full relative">
+            <div class="flex justify-between items-center mb-10">
+                <h3 class="text-4xl font-black text-slate-700 flex items-center gap-5 font-jua">
+                    <span
+                        class="w-14 h-14 bg-sky-100 rounded-[20px] flex items-center justify-center text-sky-400 shadow-sm shadow-sky-100 transform rotate-3">
+                        <i data-lucide="sparkles" class="w-9 h-9 fill-current"></i>
+                    </span>
+                    Recommended for Ami
+                </h3>
+                <a href="#"
+                    class="px-6 py-4 bg-sky-50 text-sky-400 font-black btn-jelly text-sm flex items-center gap-3 hover:bg-sky-100 group">
+                    SEE ALL <i data-lucide="chevron-right"
+                        class="w-5 h-5 group-hover:translate-x-1 transition-transform"></i>
+                </a>
+            </div>
+
+            <div class="relative group/scroll px-4">
+                <!-- Bookshelf Base -->
+                <div
+                    class="absolute bottom-10 left-0 right-0 h-16 bg-slate-200/40 rounded-full mx-6 border-b-4 border-slate-300/20">
+                </div>
+
+                <button id="scrollLeftBtn" onclick="scrollContainer(-400)"
+                    class="absolute left-0 top-[35%] -translate-y-1/2 -translate-x-6 w-14 h-14 bg-white text-sky-400 rounded-full shadow-lg border border-slate-100 flex items-center justify-center z-20 opacity-0 group-hover/scroll:opacity-100 transition-all hover:bg-sky-50 active:scale-90 invisible">
+                    <i data-lucide="chevron-left" class="w-9 h-9"></i>
+                </button>
+
+                <div id="bookContainer"
+                    class="flex gap-4 md:gap-6 overflow-x-auto pt-10 pb-12 scroll-smooth custom-scrollbar relative z-10 cursor-grab active:cursor-grabbing select-none">
+                    <!-- Books will be injected by script -->
+                </div>
+
+                <button onclick="scrollContainer(400)"
+                    class="absolute right-0 top-[35%] -translate-y-1/2 translate-x-6 w-14 h-14 bg-white text-sky-400 rounded-full shadow-lg border border-slate-100 flex items-center justify-center z-20 opacity-0 group-hover/scroll:opacity-100 transition-all hover:bg-sky-50 active:scale-90">
+                    <i data-lucide="chevron-right" class="w-9 h-9"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Container -->
+    <div id="bookModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden">
+        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="closeModal()"></div>
+        <div class="card-bubble w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col relative z-10 scale-95 opacity-0 transition-all duration-300"
+            id="modalContent">
+            <!-- Bookmark Ribbon - Stuck to Top -->
+            <div class="absolute top-0 left-12 z-20 pointer-events-none">
+                <button onclick="toggleBookmarkModal()" id="modalBookmarkBtn"
+                    class="w-16 h-24 flex items-center justify-center pt-2 pb-8 transition-all pointer-events-auto active:scale-95 shadow-xl rounded-b-3xl border-[6px] border-t-0 border-white bg-white text-slate-200">
+                    <i data-lucide="bookmark" id="modalBookmarkIcon" class="w-10 h-10"></i>
+                </button>
+            </div>
+
+            <!-- Modal Header -->
+            <div class="p-6 md:p-8 flex justify-between items-center border-b-[6px] border-slate-50">
+                <div class="w-16"></div> <!-- Spacer for ribbon -->
+                <h2 id="modalTitle"
+                    class="text-3xl md:text-4xl font-black text-slate-700 font-jua text-center flex-1 mx-4 truncate">
+                    Book Title
+                </h2>
+                <button onclick="closeModal()"
+                    class="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-600 transition-colors">
+                    <i data-lucide="x" class="w-8 h-8"></i>
+                </button>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="flex-1 overflow-y-auto p-6 md:p-10">
+                <div class="flex flex-col md:flex-row gap-10">
+                    <div class="w-full md:w-1/2 flex-shrink-0">
+                        <div
+                            class="aspect-[3/4] rounded-[48px] overflow-hidden border-[8px] border-white shadow-2xl shadow-slate-200">
+                            <img id="modalImg" src="" alt="" class="w-full h-full object-cover">
+                        </div>
+                    </div>
+                    <div class="w-full md:w-1/2 space-y-8">
+                        <div class="flex flex-wrap gap-3">
+                            <span id="modalLexile"
+                                class="px-5 py-2 bg-orange-100 text-orange-500 rounded-full font-black text-sm border-2 border-orange-200">Lexile:
+                                300</span>
+                            <span id="modalWords"
+                                class="px-5 py-2 bg-green-100 text-green-500 rounded-full font-black text-sm border-2 border-green-200">140
+                                Words</span>
+                            <span id="modalCategory"
+                                class="px-5 py-2 bg-sky-100 text-sky-500 rounded-full font-black text-sm border-2 border-sky-200">Science</span>
+                        </div>
+                        <div class="space-y-4">
+                            <h4 class="text-xl font-black text-slate-800 font-jua">Summary</h4>
+                            <p id="modalSummary" class="text-lg text-slate-600 leading-relaxed font-fredoka">Summary
+                                goes here...</p>
+                        </div>
+                        <div class="space-y-4">
+                            <h4 class="text-xl font-black text-slate-800 font-jua">Keywords</h4>
+                            <div id="modalKeywords" class="flex flex-wrap gap-2"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="p-8 md:p-10 bg-slate-50/50">
+                <button onclick="startLearning()"
+                    class="w-full py-6 bg-orange-500 text-white btn-jelly text-3xl flex items-center justify-center gap-4 hover:bg-orange-600">
+                    START READING <i data-lucide="play" class="w-8 h-8 fill-current"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Learning Mode Overlay -->
+    <div id="learningModeOverlay"
+        class="fixed inset-0 z-[100] bg-black hidden overflow-hidden shadow-[0_-20px_50px_rgba(0,0,0,0.3)]">
+        <!-- Floating GNB Wrapper -->
+        <div id="gnbWrapper" class="fixed top-0 inset-x-0 z-[110]">
+            <nav id="studyGnb"
+                class="h-24 px-8 flex items-center justify-between shadow-xl border-b-2 border-slate-100">
+                <div class="flex items-center gap-4">
+                    <div
+                        class="w-12 h-12 bg-sky-100 rounded-2xl flex items-center justify-center text-sky-500 shadow-inner">
+                        <i data-lucide="video" class="w-7 h-7 fill-current"></i>
+                    </div>
+                    <h2 id="studyBookTitle" class="text-2xl font-black text-slate-700 font-jua">Book Title</h2>
+                </div>
+
+                <!-- Phase Tabs -->
+                <div class="flex bg-slate-100 p-1.5 rounded-2xl gap-1">
+                    <button id="tab-watch" onclick="setPhase('watch')"
+                        class="px-6 py-2.5 rounded-xl font-black text-sm transition-all flex items-center gap-2 bg-white text-orange-500 shadow-sm">
+                        <i data-lucide="play-circle" class="w-4 h-4 fill-current"></i> Watch
+                    </button>
+                    <button id="tab-read" onclick="setPhase('read')"
+                        class="px-6 py-2.5 rounded-xl font-black text-sm transition-all flex items-center gap-2 text-slate-400 opacity-50 cursor-not-allowed">
+                        <i data-lucide="book-open" class="w-4 h-4"></i> Read <i data-lucide="lock" class="w-3 h-3"></i>
+                    </button>
+                    <button id="tab-quiz"
+                        class="px-6 py-2.5 rounded-xl font-black text-sm transition-all flex items-center gap-2 text-slate-400 opacity-50 cursor-not-allowed">
+                        <i data-lucide="help-circle" class="w-4 h-4"></i> Quiz <i data-lucide="lock"
+                            class="w-3 h-3"></i>
+                    </button>
+                    <button id="tab-talk"
+                        class="px-6 py-2.5 rounded-xl font-black text-sm transition-all flex items-center gap-2 text-slate-400 opacity-50 cursor-not-allowed">
+                        <i data-lucide="message-circle" class="w-4 h-4"></i> Talk <i data-lucide="lock"
+                            class="w-3 h-3"></i>
+                    </button>
+                </div>
+
+                <div class="w-48 flex justify-end">
+                    <button id="gnbCloseBtn" onclick="exitLearningMode()"
+                        class="w-14 h-14 bg-slate-50 rounded-2xl border-4 border-white flex items-center justify-center text-slate-400 shadow-sm hover:bg-red-50 hover:text-red-500 hover:border-red-100 transition-all active:scale-95 group">
+                        <i data-lucide="x" class="w-8 h-8 group-hover:rotate-90 transition-transform"></i>
+                    </button>
+                </div>
+
+                <!-- The Handle (Sticky to top when GNB hides) -->
+                <button id="gnbHandle" onclick="toggleGnb(true); event.stopPropagation();"
+                    class="absolute -bottom-10 left-1/2 -translate-x-1/2 w-24 h-10 bg-white border-b-4 border-x-4 border-slate-50 rounded-b-[32px] flex items-center justify-center text-slate-300 hover:text-sky-400 shadow-lg transition-all active:h-12 pointer-events-auto">
+                    <i data-lucide="chevron-up" id="gnbHandleIcon" class="w-8 h-8"></i>
+                </button>
+            </nav>
+        </div>
+
+        <!-- Study Content Area -->
+        <main class="w-full h-full bg-black flex items-center justify-center relative cursor-pointer"
+            onclick="handleMainClick()">
+            <!-- Watch Phase -->
+            <div id="phase-watch" class="w-full h-full flex items-center justify-center p-4">
+                <div
+                    class="w-full h-full max-w-screen-2xl min-h-[60vh] bg-black rounded-[24px] overflow-hidden relative group">
+                    <video id="studyVideo" class="w-full h-full object-contain pointer-events-auto"
+                        onplay="document.getElementById('nextPhaseContainer').classList.add('opacity-0', 'translate-y-10', 'pointer-events-none');"
+                        onended="onVideoEnded()" src="public/video/Intro.mp4"></video>
+
+                    <!-- Custom Video Controls -->
+                    <div id="videoControls"
+                        class="absolute bottom-0 inset-x-0 h-24 bg-gradient-to-t from-black/80 to-transparent flex items-center px-10 gap-8 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <button onclick="togglePlay()" class="text-white hover:scale-110 transition-transform">
+                            <i data-lucide="play" id="playIcon" class="w-10 h-10 fill-current"></i>
+                        </button>
+
+                        <div class="flex items-center gap-4">
+                            <button onclick="skipVideo(-3)" class="text-white/80 hover:text-white transition-colors">
+                                <i data-lucide="rotate-ccw" class="w-7 h-7"></i>
+                            </button>
+                            <button onclick="skipVideo(3)" class="text-white/80 hover:text-white transition-colors">
+                                <i data-lucide="rotate-cw" class="w-7 h-7"></i>
+                            </button>
+                        </div>
+
+                        <!-- Progress Bar -->
+                        <div class="flex-1 h-2 bg-white/20 rounded-full overflow-hidden cursor-pointer relative"
+                            onclick="seekVideo(event)">
+                            <div id="videoProgress" class="absolute inset-y-0 left-0 bg-sky-400 rounded-full w-0"></div>
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                            <button onclick="cyclePlaybackRate()"
+                                class="px-4 py-1.5 bg-white/10 text-white rounded-xl text-sm font-black border border-white/20 hover:bg-white/20">
+                                <span id="playbackRateText">1.0x</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Next Button (hidden initially) -->
+                    <div id="nextPhaseContainer"
+                        class="absolute bottom-12 right-12 transition-all duration-500 transform translate-y-10 opacity-0 pointer-events-none z-30">
+                        <button onclick="setPhase('read')"
+                            class="px-10 py-5 bg-[#FF6B00] text-white rounded-3xl font-black text-xl flex items-center gap-3 shadow-2xl animate-twinkle hover:scale-105 active:scale-95 transition-all">
+                            Read Next <i data-lucide="chevron-right" class="w-6 h-6"></i>
+                        </button>
+                    </div>
+
+                    <!-- Big Play/Pause Button Overlay (YouTube Style) -->
+                    <div id="videoCentralOverlay"
+                        class="absolute inset-0 bg-black/20 flex items-center justify-center z-20 transition-all duration-300 pointer-events-none">
+                        <button onclick="togglePlay(); event.stopPropagation();"
+                            class="w-32 h-32 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center text-white border-2 border-white/30 shadow-2xl hover:scale-110 active:scale-95 transition-all group pointer-events-auto">
+                            <i data-lucide="play" id="centralPlayIcon" class="w-16 h-16 fill-current"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Read Phase - 3 Steps Flow -->
+            <div id="phase-read" class="w-full h-full flex flex-col relative overflow-hidden hidden">
+                <!-- Background Layer: Cover Image (Darkened) -->
+                <div id="read-bg" class="absolute inset-0 bg-cover bg-center transition-all duration-1000"
+                    style="filter: brightness(0.3) blur(8px)">
+                </div>
+
+                <!-- Step 1: Mode Selection -->
+                <div id="read-step-selection"
+                    class="relative z-10 flex-1 flex flex-col items-center justify-center p-8 animate-in fade-in zoom-in duration-500">
+                    <h2 class="text-5xl font-black text-white mb-12 font-jua text-center drop-shadow-2xl">
+                        How would you like to read?
+                    </h2>
+                    <div class="flex gap-8 max-w-5xl w-full">
+                        <!-- E-Book Card -->
+                        <button onclick="selectReadingMode('ebook')" id="card-ebook"
+                            class="flex-1 group relative p-10 rounded-[40px] border-4 transition-all duration-300 bg-white/10 border-white/20 hover:bg-white/20">
+                            <div
+                                class="w-24 h-24 rounded-3xl flex items-center justify-center mb-8 mx-auto transition-colors bg-white/20 text-white">
+                                <i data-lucide="book" class="w-12 h-12"></i>
+                            </div>
+                            <h3 class="text-3xl font-black mb-4 text-white">E-Book</h3>
+                            <p class="text-lg font-medium opacity-80 text-slate-300">Classic reading experience with
+                                clean text.</p>
+                        </button>
+
+                        <!-- Interactive Card -->
+                        <button onclick="selectReadingMode('interactive')" id="card-interactive"
+                            class="flex-1 group relative p-10 rounded-[40px] border-4 transition-all duration-300 bg-white/10 border-white/20 hover:bg-white/20">
+                            <div
+                                class="w-24 h-24 rounded-3xl flex items-center justify-center mb-8 mx-auto transition-colors bg-white/20 text-white">
+                                <i data-lucide="sparkles" class="w-12 h-12"></i>
+                            </div>
+                            <h3 class="text-3xl font-black mb-4 text-white">Interactive</h3>
+                            <p class="text-lg font-medium opacity-80 text-slate-300">Read along with voice, images, and
+                                fun effects!</p>
+                        </button>
+                    </div>
+
+                    <button id="modeOkBtn" disabled onclick="goToReadStep('intro')"
+                        class="mt-16 px-16 py-6 rounded-3xl font-black text-3xl transition-all bg-slate-700 text-slate-500 cursor-not-allowed">
+                        OK
+                    </button>
+                </div>
+
+                <!-- Step 2: Book Intro -->
+                <div id="read-step-intro"
+                    class="relative z-10 flex-1 flex flex-col items-center justify-between p-16 hidden">
+                    <div class="w-full max-w-6xl flex flex-col items-center gap-6">
+                        <div id="intro-level"
+                            class="px-6 py-2 bg-sky-500 text-white rounded-full font-black text-xl shadow-lg">Level 4
+                        </div>
+                        <h2 id="intro-title"
+                            class="text-7xl font-black text-white text-center font-jua drop-shadow-2xl">Book Title</h2>
+                    </div>
+
+                    <div class="w-full max-w-7xl flex items-end justify-between gap-12">
+                        <div
+                            class="flex-1 bg-black/60 backdrop-blur-xl p-12 rounded-[48px] border-2 border-white/10 flex flex-col gap-8 shadow-2xl text-left">
+                            <div class="flex gap-12 text-white">
+                                <div class="flex flex-col gap-1">
+                                    <span class="text-sky-300 text-sm font-bold uppercase tracking-widest">Lexile</span>
+                                    <span id="intro-lexile" class="text-3xl font-black tracking-tight">300~350</span>
+                                </div>
+                                <div class="w-px h-12 bg-white/20"></div>
+                                <div class="flex flex-col gap-1">
+                                    <span class="text-sky-300 text-sm font-bold uppercase tracking-widest">Words</span>
+                                    <span id="intro-words" class="text-3xl font-black tracking-tight">140</span>
+                                </div>
+                            </div>
+                            <p id="intro-summary" class="text-2xl text-slate-100 font-medium leading-[1.6]">
+                                Summary...
+                            </p>
+                            <div id="intro-keywords" class="flex flex-wrap gap-3"></div>
+                        </div>
+
+                        <button onclick="goToReadStep('viewing')"
+                            class="w-48 h-48 bg-white text-slate-900 rounded-full flex items-center justify-center font-black text-4xl shadow-2xl hover:scale-110 active:scale-95 transition-all animate-twinkle">
+                            START
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Step 3: Reading Viewer -->
+                <div id="read-step-viewing" class="relative z-10 flex-1 flex flex-col p-8 hidden">
+                    <div class="flex-1 flex gap-8 max-w-[1600px] mx-auto w-full">
+                        <!-- Left: Image Panel -->
+                        <div
+                            class="flex-[1.2] rounded-[48px] overflow-hidden shadow-2xl bg-white/5 border border-white/10 relative">
+                            <img id="viewing-img" src="" alt="scene" class="w-full h-full object-cover">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent">
+                            </div>
+                            <div id="viewing-scene-no"
+                                class="absolute bottom-8 left-8 px-6 py-2 bg-black/40 backdrop-blur-md rounded-2xl text-white font-black">
+                                #SC01
+                            </div>
+                        </div>
+
+                        <!-- Right: Text Panel -->
+                        <div class="flex-1 flex flex-col gap-6">
+                            <div
+                                class="flex-1 bg-white rounded-[48px] shadow-2xl p-16 flex flex-col justify-center gap-12 text-left">
+                                <p id="viewing-script"
+                                    class="text-5xl font-bold text-slate-800 leading-[1.4] tracking-tight">
+                                    Script...
+                                </p>
+                                <div class="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
+                                    <div id="viewing-progress" class="h-full bg-sky-500 transition-all duration-500"
+                                        style="width: 33%"></div>
+                                </div>
+                            </div>
+
+                            <!-- Navigation Buttons -->
+                            <div class="flex gap-4">
+                                <button id="prevBtn" onclick="changeScene(-1)"
+                                    class="flex-1 h-32 rounded-[32px] border-4 flex items-center justify-center transition-all bg-white/10 border-white/20 text-white hover:bg-white/20 active:scale-95">
+                                    <i data-lucide="chevron-left" class="w-12 h-12"></i>
+                                </button>
+                                <button id="nextBtn" onclick="changeScene(1)"
+                                    class="flex-[2] h-32 bg-white text-slate-900 rounded-[32px] flex items-center justify-center font-black text-3xl shadow-xl hover:scale-105 active:scale-95 transition-all">
+                                    <span id="nextBtnText" class="flex items-center gap-4">Next Scene <i
+                                            data-lucide="chevron-right" class="w-8 h-8"></i></span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const booksData = [
+            { id: 'missing-planet', title: 'The Missing Planet', src: './public/image/The Missing Planet.png', lexile: '250~300', wordCount: 120, category: 'Space 🚀', summary: 'A brave little astronaut goes on a mission to find a planet that disappeared from the star maps. Join the cosmic adventure!', keywords: ['planet', 'space', 'astronaut', 'star'], isBookmarked: false },
+            { id: 'rainbow', title: 'Rainbow', src: './public/image/Rainbow.png', lexile: '150~200', wordCount: 85, category: 'Nature 🌈', summary: 'Follow the beautiful colors across the sky after a rainy day. Learn how rainbows are made of light and magic!', keywords: ['color', 'rain', 'sky', 'sun'], isBookmarked: false },
+            { id: 'two-friends', title: 'Two Friends', src: './public/image/Two Friends.png', lexile: '200~250', wordCount: 110, category: 'Friendship 🤝', summary: 'A story about a rabbit and a turtle who discover that being different is what makes their friendship so special.', keywords: ['friends', 'together', 'help', 'game'], isBookmarked: false },
+            { id: 'silent-seed', title: 'The Silent Seed', src: './public/image/The Silent Seed.png', lexile: '300~350', wordCount: 145, category: 'Science 🔬', summary: 'Deep under the ground, a tiny seed waits silently for the perfect moment to grow into a magnificent tree.', keywords: ['grow', 'wait', 'ground', 'leaf'], isBookmarked: false },
+            { id: 'silent-stick', title: 'The Silent Stick', src: './public/image/The Silent Stick.png', lexile: '250~320', wordCount: 130, category: 'Adventure 🗺️', summary: 'A magic stick that doesn\'t make a sound helps a quiet boy find his way through a mysterious forest.', keywords: ['magic', 'quiet', 'forest', 'path'], isBookmarked: false },
+            { id: 'broken-branch', title: 'The Broken Branch', src: './public/image/The Broken Branch.png', lexile: '280~340', wordCount: 135, category: 'Nature 🌳', summary: 'When a strong wind breaks a branch, the forest animals work together to make it a new home for a bird family.', keywords: ['tree', 'wind', 'home', 'birds'], isBookmarked: false },
+            { id: 'pea', title: 'The Pea', src: './public/image/The Pea.png', lexile: '180~230', wordCount: 95, category: 'Food 🫛', summary: 'One tiny green pea rolls off the plate and travels across the kitchen floor. Where will it end up?', keywords: ['green', 'roll', 'kitchen', 'floor'], isBookmarked: false },
+            { id: 'milo', title: 'Milo', src: './public/image/Milo.png', lexile: '320~380', wordCount: 160, category: 'Animals 🐶', summary: 'Milo is a dog with a very big imagination. Every time he goes for a walk, he sees a world full of dragons.', keywords: ['dog', 'dream', 'adventure', 'wild'], isBookmarked: false },
+            { id: 'rainbow-cloud', title: 'Rainbow Cloud', src: './public/image/The Rainbow Cloud.png', lexile: '350~400', wordCount: 180, category: 'Fantasy ✨', summary: 'A magical cloud that rains colors instead of water changes everything in the gray city of Grumbletown.', keywords: ['magic', 'cloud', 'color', 'happy'], isBookmarked: true },
+            { id: 'cindellar', title: 'Cindellar', src: './public/image/Cindellar.png', lexile: '380~450', wordCount: 210, category: 'Classic 🏰', summary: 'A new retelling of the classic fairy tale with a focus on being kind to yourself and others.', keywords: ['princess', 'kind', 'dance', 'shoe'], isBookmarked: false },
+            { id: 'flying-trunk', title: 'The Flying Trunk', src: './public/image/The Fyling Trunk.png', lexile: '340~390', wordCount: 175, category: 'Adventure 🗺️', summary: 'Travel the world in a magic trunk that can fly over mountains and oceans.', keywords: ['fly', 'travel', 'ocean', 'magic'], isBookmarked: false },
+            { id: 'rapunzel', title: 'The Rapunzel', src: './public/image/The Rapunzel.png', lexile: '360~410', wordCount: 190, category: 'Classic 🏰', summary: 'A story about inner strength and finding your own voice from high up in a stone tower.', keywords: ['hair', 'tower', 'voice', 'strong'], isBookmarked: false },
+            { id: 'ugly-dukling', title: 'The Ugly Dukling', src: './public/image/The Ugly Dukling.png', lexile: '300~360', wordCount: 155, category: 'Animals 🦢', summary: 'Discover how being different can lead to finding where you truly belong.', keywords: ['different', 'belong', 'lake', 'swan'], isBookmarked: false },
+        ];
+
+        let currentModalBookId = null;
+
+        function renderBooks() {
+            const container = document.getElementById('bookContainer');
+            container.innerHTML = booksData.map(book => `
+                <div class="w-40 flex-shrink-0 group cursor-pointer space-y-4 relative" onclick="openModal('${book.id}')">
+                    <div class="aspect-[3/4] bg-slate-50 rounded-[32px] shadow-sm border-[4px] border-white group-hover:border-sky-300 transition-all group-hover:-translate-y-3 group-hover:shadow-2xl group-hover:shadow-sky-100 overflow-hidden relative">
+                        <img src="${book.src}" class="w-full h-full object-cover pointer-events-none">
+                        <div class="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                        
+                        <!-- Card Bookmark Ribbon - Only show when bookmarked -->
+                        ${book.isBookmarked ? `
+                        <div class="absolute top-0 left-4 z-10 transition-transform group-hover:scale-110">
+                            <div class="w-10 h-12 flex items-center justify-center pt-1 pb-4 rounded-b-xl border-2 border-t-0 border-white shadow-md transition-all bg-[#FF6B00] text-white">
+                                <i data-lucide="bookmark" class="w-6 h-6 fill-current"></i>
+                            </div>
+                        </div>
+                        ` : ''}
+                    </div>
+                    <p class="text-[10px] font-black text-center text-slate-400 truncate px-4 uppercase tracking-[0.15em] group-hover:text-sky-400 transition-colors font-fredoka">${book.title}</p>
+                </div>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        function openModal(bookId) {
+            const book = booksData.find(b => b.id === bookId);
+            if (!book) return;
+            currentModalBookId = bookId;
+
+            document.getElementById('modalTitle').innerText = book.title;
+            document.getElementById('modalImg').src = book.src;
+            document.getElementById('modalLexile').innerText = `Lexile: ${book.lexile}`;
+            document.getElementById('modalWords').innerText = `${book.wordCount} Words`;
+            document.getElementById('modalCategory').innerText = book.category;
+            document.getElementById('modalSummary').innerText = book.summary;
+            document.getElementById('modalKeywords').innerHTML = book.keywords.map(kw => `
+                <span class="px-4 py-1.5 bg-slate-100 text-slate-500 rounded-xl font-bold text-sm">#${kw}</span>
+            `).join('');
+
+            updateBookmarkIcon(book.isBookmarked);
+
+            const modal = document.getElementById('bookModal');
+            const content = document.getElementById('modalContent');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                content.classList.remove('scale-95', 'opacity-0');
+                content.classList.add('scale-100', 'opacity-100');
+            }, 10);
+            document.body.style.overflow = 'hidden';
+            lucide.createIcons();
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('bookModal');
+            const content = document.getElementById('modalContent');
+            content.classList.remove('scale-100', 'opacity-100');
+            content.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+            document.body.style.overflow = 'auto';
+        }
+
+        function toggleBookmarkModal() {
+            const book = booksData.find(b => b.id === currentModalBookId);
+            if (book) {
+                book.isBookmarked = !book.isBookmarked;
+                updateBookmarkIcon(book.isBookmarked);
+                renderBooks();
+            }
+        }
+
+        function updateBookmarkIcon(isBookmarked) {
+            const btn = document.getElementById('modalBookmarkBtn');
+            const icon = document.getElementById('modalBookmarkIcon');
+            if (isBookmarked) {
+                btn.classList.remove('bg-white', 'text-slate-200');
+                btn.classList.add('bg-[#FF6B00]', 'text-white');
+                icon.classList.add('fill-current');
+            } else {
+                btn.classList.remove('bg-[#FF6B00]', 'text-white');
+                btn.classList.add('bg-white', 'text-slate-200');
+                icon.classList.remove('fill-current');
+            }
+            lucide.createIcons();
+        }
+
+        let isGnbVisible = true;
+        let gnbTimeout = null;
+        let currentPhase = 'watch';
+        let isReadUnlocked = false;
+
+        function startLearning() {
+            const book = booksData.find(b => b.id === currentModalBookId) || booksData[0];
+            document.getElementById('studyBookTitle').innerText = book.title;
+            const video = document.getElementById('studyVideo');
+            video.src = "public/video/Intro.mp4";
+            video.load();
+
+            document.getElementById('learningModeOverlay').classList.remove('hidden');
+            setTimeout(() => {
+                document.getElementById('learningModeOverlay').classList.add('active');
+            }, 10);
+            document.body.style.overflow = 'hidden';
+            closeModal();
+
+            // Initial GNB visibility
+            showGnb();
+            startGnbTimer();
+
+            // Video listeners
+            video.addEventListener('timeupdate', updateProgressBar);
+            video.addEventListener('play', () => {
+                document.getElementById('playIcon').setAttribute('data-lucide', 'pause');
+                lucide.createIcons();
+            });
+            video.addEventListener('pause', () => {
+                document.getElementById('playIcon').setAttribute('data-lucide', 'play');
+                lucide.createIcons();
+            });
+        }
+
+        function exitLearningMode() {
+            const video = document.getElementById('studyVideo');
+            video.pause();
+            document.getElementById('learningModeOverlay').classList.remove('active');
+            setTimeout(() => {
+                document.getElementById('learningModeOverlay').classList.add('hidden');
+                document.body.style.overflow = 'auto';
+                resetLearningMode();
+            }, 600);
+        }
+
+        function resetLearningMode() {
+            isReadUnlocked = false;
+            currentPhase = 'watch';
+            document.getElementById('tab-read').classList.add('opacity-50', 'cursor-not-allowed');
+            document.getElementById('tab-read').innerHTML = '<i data-lucide="book-open" class="w-4 h-4"></i> Read <i data-lucide="lock" class="w-3 h-3"></i>';
+            document.getElementById('nextPhaseContainer').classList.add('opacity-0', 'translate-y-10', 'pointer-events-none');
+            setPhase('watch');
+            lucide.createIcons();
+        }
+
+        function showGnb() {
+            document.getElementById('studyGnb').style.transform = 'translateY(0)';
+            document.getElementById('gnbHandleIcon').setAttribute('data-lucide', 'chevron-up');
+            // Show GNB background overlay if it was closed
+            isGnbVisible = true;
+            lucide.createIcons();
+        }
+
+        function hideGnb() {
+            document.getElementById('studyGnb').style.transform = 'translateY(-100%)';
+            document.getElementById('gnbHandleIcon').setAttribute('data-lucide', 'chevron-down');
+            isGnbVisible = false;
+            lucide.createIcons();
+        }
+
+        function toggleGnb(forceToggle = false) {
+            if (isGnbVisible) hideGnb();
+            else showGnb();
+        }
+
+        function startGnbTimer() {
+            clearTimeout(gnbTimeout);
+            gnbTimeout = setTimeout(() => {
+                const video = document.getElementById('studyVideo');
+                if (!video.paused) {
+                    hideGnb();
+                }
+            }, 3000);
+        }
+
+        function handleMainClick() {
+            // No automatic toggle on background click as requested
+        }
+
+        function setPhase(phase) {
+            if (phase === 'read' && !isReadUnlocked) return;
+
+            currentPhase = phase;
+            document.getElementById('phase-watch').classList.add('hidden');
+            document.getElementById('phase-read').classList.add('hidden');
+            document.getElementById(`phase-${phase}`).classList.remove('hidden');
+
+            // Update Tabs
+            const tabs = ['watch', 'read'];
+            tabs.forEach(t => {
+                const btn = document.getElementById(`tab-${t}`);
+                if (btn) {
+                    btn.classList.remove('bg-white', 'text-orange-500', 'shadow-sm');
+                    if (t === phase) {
+                        btn.classList.add('bg-white', 'text-orange-500', 'shadow-sm');
+                    }
+                }
+            });
+
+            if (phase === 'read') {
+                document.getElementById('studyVideo').pause();
+            }
+        }
+
+        // Video Logic
+        function togglePlay() {
+            const video = document.getElementById('studyVideo');
+            const centralIcon = document.getElementById('centralPlayIcon');
+            const playIcon = document.getElementById('playIcon');
+            const overlay = document.getElementById('videoCentralOverlay');
+
+            if (video.paused) {
+                video.play();
+                centralIcon.setAttribute('data-lucide', 'pause');
+                playIcon.setAttribute('data-lucide', 'pause');
+                overlay.classList.add('opacity-0', 'group-hover:opacity-100');
+                hideGnb();
+            } else {
+                video.pause();
+                centralIcon.setAttribute('data-lucide', 'play');
+                playIcon.setAttribute('data-lucide', 'play');
+                overlay.classList.remove('opacity-0', 'group-hover:opacity-100');
+                showGnb();
+            }
+            lucide.createIcons();
+        }
+
+        function skipVideo(seconds) {
+            const video = document.getElementById('studyVideo');
+            video.currentTime += seconds;
+        }
+
+        function seekVideo(e) {
+            const video = document.getElementById('studyVideo');
+            const rect = e.currentTarget.getBoundingClientRect();
+            const pos = (e.clientX - rect.left) / rect.width;
+            video.currentTime = pos * video.duration;
+        }
+
+        function updateProgressBar() {
+            const video = document.getElementById('studyVideo');
+            const progress = (video.currentTime / video.duration) * 100;
+            document.getElementById('videoProgress').style.width = `${progress}%`;
+        }
+
+        function cyclePlaybackRate() {
+            const video = document.getElementById('studyVideo');
+            const rates = [1, 1.5, 2, 0.5];
+            let currentIdx = rates.indexOf(video.playbackRate);
+            let nextIdx = (currentIdx + 1) % rates.length;
+            video.playbackRate = rates[nextIdx];
+            document.getElementById('playbackRateText').innerText = `${rates[nextIdx]}x`;
+        }
+
+        const mockBookMeta = {
+            title: "The Silent Stick",
+            level: 4,
+            lexile: "300~350",
+            word_count: 140,
+            summary: "The frozen lake lay still under the winter moon. A lone boy discovered a mysterious staff that hummed with a quiet power... Join him as he uncovers the secrets of the enchanted forest.",
+            keywords: ["frozen lake", "mysterious staff", "enchanted forest", "adventure"],
+            cover_url: "https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?q=80&w=2070"
+        };
+
+        const mockScenes = [
+            { scene_no: "#SC01", script: "The frozen lake lay still under the cold winter moon. Everything was silent, until Leo found the stick.", image_url: "https://images.unsplash.com/photo-1453228200676-e89c628f59d5?q=80&w=2070" },
+            { scene_no: "#SC02", script: "It was a long, dark branch that seemed to pulse with a faint golden light. When Leo touched it, he felt a warm tingle.", image_url: "https://images.unsplash.com/photo-1542385151-efd9000785a0?q=80&w=1978" },
+            { scene_no: "#SC03", script: "Suddenly, the forest around him began to glow. The Silent Stick was guiding him to something hidden deep within the trees.", image_url: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?q=80&w=2071" }
+        ];
+
+        let selectedReadingMode = null;
+        let currentReadStep = 'selection';
+        let currentSceneIndex = 0;
+
+        function selectReadingMode(mode) {
+            selectedReadingMode = mode;
+            const ebook = document.getElementById('card-ebook');
+            const interactive = document.getElementById('card-interactive');
+            const okBtn = document.getElementById('modeOkBtn');
+
+            ebook.classList.remove('bg-white', 'border-sky-400', 'scale-105', 'shadow-2xl');
+            ebook.classList.add('bg-white/10', 'border-white/20');
+            ebook.querySelector('div').classList.remove('bg-sky-500');
+            ebook.querySelector('div').classList.add('bg-white/20');
+            ebook.querySelector('h3').classList.remove('text-slate-800');
+            ebook.querySelector('h3').classList.add('text-white');
+            ebook.querySelector('p').classList.remove('text-slate-600');
+            ebook.querySelector('p').classList.add('text-slate-300');
+
+            interactive.classList.remove('bg-white', 'border-orange-400', 'scale-105', 'shadow-2xl');
+            interactive.classList.add('bg-white/10', 'border-white/20');
+            interactive.querySelector('div').classList.remove('bg-orange-500');
+            interactive.querySelector('div').classList.add('bg-white/20');
+            interactive.querySelector('h3').classList.remove('text-slate-800');
+            interactive.querySelector('h3').classList.add('text-white');
+            interactive.querySelector('p').classList.remove('text-slate-600');
+            interactive.querySelector('p').classList.add('text-slate-300');
+
+            if (mode === 'ebook') {
+                ebook.classList.add('bg-white', 'border-sky-400', 'scale-105', 'shadow-2xl');
+                ebook.classList.remove('bg-white/10', 'border-white/20');
+                ebook.querySelector('div').classList.add('bg-sky-500');
+                ebook.querySelector('div').classList.remove('bg-white/20');
+                ebook.querySelector('h3').classList.add('text-slate-800');
+                ebook.querySelector('h3').classList.remove('text-white');
+                ebook.querySelector('p').classList.add('text-slate-600');
+                ebook.querySelector('p').classList.remove('text-slate-300');
+            } else {
+                interactive.classList.add('bg-white', 'border-orange-400', 'scale-105', 'shadow-2xl');
+                interactive.classList.remove('bg-white/10', 'border-white/20');
+                interactive.querySelector('div').classList.add('bg-orange-500');
+                interactive.querySelector('div').classList.remove('bg-white/20');
+                interactive.querySelector('h3').classList.add('text-slate-800');
+                interactive.querySelector('h3').classList.remove('text-white');
+                interactive.querySelector('p').classList.add('text-slate-600');
+                interactive.querySelector('p').classList.remove('text-slate-300');
+            }
+
+            okBtn.disabled = false;
+            okBtn.classList.remove('bg-slate-700', 'text-slate-500', 'cursor-not-allowed');
+            okBtn.classList.add('bg-[#FF6B00]', 'text-white', 'shadow-2xl', 'animate-pulse', 'cursor-pointer', 'hover:scale-110');
+        }
+
+        function goToReadStep(step) {
+            currentReadStep = step;
+            document.getElementById('read-step-selection').classList.add('hidden');
+            document.getElementById('read-step-intro').classList.add('hidden');
+            document.getElementById('read-step-viewing').classList.add('hidden');
+            document.getElementById(`read-step-${step}`).classList.remove('hidden');
+
+            if (step === 'intro') {
+                document.getElementById('intro-title').innerText = mockBookMeta.title;
+                document.getElementById('intro-lexile').innerText = mockBookMeta.lexile;
+                document.getElementById('intro-words').innerText = mockBookMeta.word_count;
+                document.getElementById('intro-summary').innerText = mockBookMeta.summary;
+                document.getElementById('intro-keywords').innerHTML = mockBookMeta.keywords.map(kw => `
+                    <span class="px-4 py-2 bg-white/10 rounded-xl text-sky-200 font-bold border border-white/10">#${kw}</span>
+                `).join('');
+            } else if (step === 'viewing') {
+                renderScene();
+            }
+        }
+
+        function renderScene() {
+            const scene = mockScenes[currentSceneIndex];
+            document.getElementById('viewing-img').src = scene.image_url;
+            document.getElementById('viewing-scene-no').innerText = scene.scene_no;
+            document.getElementById('viewing-script').innerText = scene.script;
+            document.getElementById('viewing-progress').style.width = `${((currentSceneIndex + 1) / mockScenes.length) * 100}%`;
+
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtnText = document.getElementById('nextBtnText');
+
+            if (currentSceneIndex === 0) {
+                prevBtn.classList.add('opacity-20');
+                prevBtn.disabled = true;
+            } else {
+                prevBtn.classList.remove('opacity-20');
+                prevBtn.disabled = false;
+            }
+
+            if (currentSceneIndex === mockScenes.length - 1) {
+                nextBtnText.innerHTML = 'Finish & Quiz <i data-lucide="sparkles" class="w-8 h-8"></i>';
+                nextBtnText.classList.add('text-orange-600');
+            } else {
+                nextBtnText.innerHTML = 'Next Scene <i data-lucide="chevron-right" class="w-8 h-8"></i>';
+                nextBtnText.classList.remove('text-orange-600');
+            }
+            lucide.createIcons();
+        }
+
+        function changeScene(delta) {
+            if (delta === 1 && currentSceneIndex === mockScenes.length - 1) {
+                // Finish reading - Placeholder for Quiz
+                alert("Reading Finished! Transitioning to Quiz...");
+                exitLearningMode();
+                return;
+            }
+            currentSceneIndex = Math.max(0, Math.min(mockScenes.length - 1, currentSceneIndex + delta));
+            renderScene();
+        }
+
+        function onVideoEnded() {
+            isReadUnlocked = true;
+            document.getElementById('tab-read').classList.remove('opacity-50', 'cursor-not-allowed');
+            document.getElementById('tab-read').innerHTML = '<i data-lucide="book-open" class="w-4 h-4"></i> Read';
+            document.getElementById('nextPhaseContainer').classList.remove('opacity-0', 'translate-y-10', 'pointer-events-none');
+
+            // Reset central button and bottom icon to play
+            document.getElementById('centralPlayIcon').setAttribute('data-lucide', 'play');
+            document.getElementById('playIcon').setAttribute('data-lucide', 'play');
+
+            // Make overlay always visible again
+            document.getElementById('videoCentralOverlay').classList.remove('opacity-0', 'group-hover:opacity-100');
+
+            // Set background for Read phase
+            document.getElementById('read-bg').style.backgroundImage = `url(${mockBookMeta.cover_url})`;
+
+            showGnb();
+            lucide.createIcons();
+        }
+
+        const bookContainer = document.getElementById('bookContainer');
+        const scrollLeftBtn = document.getElementById('scrollLeftBtn');
+
+        function scrollContainer(amount) {
+            bookContainer.scrollBy({
+                left: amount,
+                behavior: 'smooth'
+            });
+        }
+
+        bookContainer.addEventListener('scroll', () => {
+            if (bookContainer.scrollLeft > 10) {
+                scrollLeftBtn.classList.remove('invisible', 'opacity-0');
+                scrollLeftBtn.classList.add('opacity-100');
+            } else {
+                scrollLeftBtn.classList.add('invisible', 'opacity-0');
+                scrollLeftBtn.classList.remove('opacity-100');
+            }
+        });
+
+        // Swipe / Drag Scroll Logic
+        let isDown = false;
+        let startX;
+        let scrollLeftPos;
+
+        bookContainer.addEventListener('mousedown', (e) => {
+            isDown = true;
+            bookContainer.classList.remove('scroll-smooth');
+            startX = e.pageX - bookContainer.offsetLeft;
+            scrollLeftPos = bookContainer.scrollLeft;
+        });
+
+        bookContainer.addEventListener('mouseleave', () => {
+            isDown = false;
+        });
+
+        bookContainer.addEventListener('mouseup', () => {
+            isDown = false;
+            bookContainer.classList.add('scroll-smooth');
+        });
+
+        bookContainer.addEventListener('mousemove', (e) => {
+            if (!isDown) return;
+            e.preventDefault();
+            const x = e.pageX - bookContainer.offsetLeft;
+            const walk = (x - startX) * 2;
+            bookContainer.scrollLeft = scrollLeftPos - walk;
+        });
+
+        renderBooks();
+    </script>
+</body>
+
+</html>

@@ -125,6 +125,53 @@
         #gnbHandle {
             transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
+
+        .animate-suck-to-hero {
+            animation: suck-to-hero 1.0s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+            position: fixed;
+            z-index: 9999;
+            pointer-events: none;
+        }
+
+        @keyframes suck-to-hero {
+            0% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1) rotate(0deg);
+                left: 50%;
+                top: 50%;
+            }
+
+            30% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1.1) rotate(-5deg);
+            }
+
+            100% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.1) rotate(25deg);
+                left: var(--target-x, 75%);
+                top: var(--target-y, 25%);
+            }
+        }
+
+        @keyframes flash-yellow {
+
+            0%,
+            100% {
+                filter: brightness(1) contrast(1);
+                transform: scale(1);
+            }
+
+            50% {
+                filter: brightness(1.2) contrast(1.1);
+                transform: scale(1.02);
+                box-shadow: 0 0 30px rgba(251, 191, 36, 0.6);
+            }
+        }
+
+        .animate-flash-yellow {
+            animation: flash-yellow 1s infinite;
+        }
     </style>
 </head>
 
@@ -146,7 +193,11 @@
                     </div>
                 </div>
             </div>
-            <div class="flex gap-4">
+            <div class="flex gap-4 items-center">
+                <button id="modeToggleBtn" onclick="toggleMode()"
+                    class="px-6 py-3 rounded-2xl text-sm font-black transition-all border-[3px] shadow-sm bg-sky-500 text-white border-sky-400 shadow-sky-100 hover:scale-105 active:scale-95">
+                    HISTORY MODE
+                </button>
                 <button
                     class="w-14 h-14 bg-white rounded-3xl shadow-lg flex items-center justify-center text-slate-400 hover:text-orange-500 transition-all border-4 border-white active:scale-95"><i
                         data-lucide="bell" class="w-7 h-7"></i></button>
@@ -157,53 +208,10 @@
         </header>
 
         <!-- Hero Section -->
-        <section
-            class="card-bubble relative overflow-hidden p-8 md:p-12 transition-all duration-700 bg-gradient-to-br from-orange-400 to-orange-500 border-none shadow-orange-100 min-h-[420px] flex items-center">
-            <div class="absolute top-[-20%] left-[-10%] w-72 h-72 bg-white/20 rounded-full blur-3xl animate-pulse">
-            </div>
-            <div class="absolute bottom-[-20%] right-[-10%] w-96 h-96 bg-yellow-300/30 rounded-full blur-3xl"></div>
-
-            <div class="flex flex-col md:flex-row items-center gap-14 w-full relative z-10">
-                <div class="relative group flex-shrink-0">
-                    <div
-                        class="absolute -inset-6 bg-white/40 rounded-[48px] blur-2xl opacity-0 group-hover:opacity-100 transition-opacity">
-                    </div>
-                    <div class="w-64 h-80 bg-white rounded-[40px] shadow-2xl flex-shrink-0 relative overflow-hidden transform -rotate-3 border-[8px] border-white transition-all group-hover:rotate-0 group-hover:scale-105 cursor-pointer"
-                        onclick="openModal('rainbow-cloud')">
-                        <img src="./public/image/The Rainbow Cloud.png" alt="The Rainbow Cloud"
-                            class="w-full h-full object-cover">
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent flex items-end p-6">
-                            <p class="text-white font-black text-sm font-jua uppercase tracking-widest">Recommended!</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="text-white space-y-10 text-center md:text-left flex-1">
-                    <div class="space-y-6">
-                        <h2
-                            class="text-5xl md:text-7xl font-black drop-shadow-md leading-tight tracking-tight font-jua">
-                            Ready for a<br>New Adventure?
-                        </h2>
-                        <p
-                            class="text-orange-50 text-2xl font-medium opacity-100 leading-relaxed font-fredoka max-w-xl">
-                            We've prepared <span
-                                class="text-yellow-200 font-bold underline decoration-wavy underline-offset-8">"The
-                                Rainbow Cloud"</span> just for you, Ami!
-                        </p>
-                    </div>
-                    <div class="flex flex-wrap gap-6 justify-center md:justify-start pt-4">
-                        <button onclick="startLearning()"
-                            class="px-12 py-6 bg-green-400 text-white btn-jelly text-3xl flex items-center gap-4 hover:bg-green-500">
-                            Start Reading <i data-lucide="play" class="w-8 h-8 fill-current"></i>
-                        </button>
-                        <button
-                            class="px-10 py-6 bg-white/30 backdrop-blur-md text-white btn-jelly text-xl hover:bg-white/40 border-white/50">
-                            Other Books
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </section>
+        <!-- Hero Section Container -->
+        <div id="heroContainer">
+            <!-- Will be rendered by script -->
+        </div>
 
         <!-- Library Section -->
         <div class="card-bubble p-8 md:p-10 w-full relative">
@@ -306,10 +314,10 @@
             </div>
 
             <!-- Modal Footer -->
-            <div class="p-8 md:p-10 bg-slate-50/50">
-                <button onclick="startLearning()"
-                    class="w-full py-6 bg-orange-500 text-white btn-jelly text-3xl flex items-center justify-center gap-4 hover:bg-orange-600">
-                    START READING <i data-lucide="play" class="w-8 h-8 fill-current"></i>
+            <div class="p-8 md:p-10 bg-slate-50/50 flex justify-center">
+                <button onclick="startLearning()" id="modalStartBtn"
+                    class="w-full md:max-w-md py-6 rounded-[28px] font-black text-4xl flex items-center justify-center gap-4 transition-all hover:scale-[1.02] active:scale-[0.98] shadow-2xl">
+                    START READING <i data-lucide="play" class="w-10 h-10 fill-current ml-2"></i>
                 </button>
             </div>
         </div>
@@ -324,7 +332,7 @@
                 class="h-24 px-8 flex items-center justify-between shadow-xl border-b-2 border-slate-100">
                 <div class="flex items-center gap-4">
                     <div
-                        class="w-12 h-12 bg-sky-100 rounded-2xl flex items-center justify-center text-sky-500 shadow-inner">
+                        class="w-12 h-12 bg-orange-100 rounded-2xl flex items-center justify-center text-orange-500 shadow-inner">
                         <i data-lucide="video" class="w-7 h-7 fill-current"></i>
                     </div>
                     <h2 id="studyBookTitle" class="text-2xl font-black text-slate-700 font-jua">Book Title</h2>
@@ -368,7 +376,7 @@
         </div>
 
         <!-- Study Content Area -->
-        <main class="w-full h-full bg-black flex items-center justify-center relative cursor-pointer"
+        <main id="mainContent" class="w-full h-full bg-black flex items-center justify-center relative cursor-pointer"
             onclick="handleMainClick()">
             <!-- Watch Phase -->
             <div id="phase-watch" class="w-full h-full flex items-center justify-center p-4">
@@ -561,27 +569,200 @@
 
     <script>
         const booksData = [
-            { id: 'missing-planet', title: 'The Missing Planet', src: './public/image/The Missing Planet.png', lexile: '250~300', wordCount: 120, category: 'Space 🚀', summary: 'A brave little astronaut goes on a mission to find a planet that disappeared from the star maps. Join the cosmic adventure!', keywords: ['planet', 'space', 'astronaut', 'star'], isBookmarked: false },
-            { id: 'rainbow', title: 'Rainbow', src: './public/image/Rainbow.png', lexile: '150~200', wordCount: 85, category: 'Nature 🌈', summary: 'Follow the beautiful colors across the sky after a rainy day. Learn how rainbows are made of light and magic!', keywords: ['color', 'rain', 'sky', 'sun'], isBookmarked: false },
-            { id: 'two-friends', title: 'Two Friends', src: './public/image/Two Friends.png', lexile: '200~250', wordCount: 110, category: 'Friendship 🤝', summary: 'A story about a rabbit and a turtle who discover that being different is what makes their friendship so special.', keywords: ['friends', 'together', 'help', 'game'], isBookmarked: false },
-            { id: 'silent-seed', title: 'The Silent Seed', src: './public/image/The Silent Seed.png', lexile: '300~350', wordCount: 145, category: 'Science 🔬', summary: 'Deep under the ground, a tiny seed waits silently for the perfect moment to grow into a magnificent tree.', keywords: ['grow', 'wait', 'ground', 'leaf'], isBookmarked: false },
-            { id: 'silent-stick', title: 'The Silent Stick', src: './public/image/The Silent Stick.png', lexile: '250~320', wordCount: 130, category: 'Adventure 🗺️', summary: 'A magic stick that doesn\'t make a sound helps a quiet boy find his way through a mysterious forest.', keywords: ['magic', 'quiet', 'forest', 'path'], isBookmarked: false },
-            { id: 'broken-branch', title: 'The Broken Branch', src: './public/image/The Broken Branch.png', lexile: '280~340', wordCount: 135, category: 'Nature 🌳', summary: 'When a strong wind breaks a branch, the forest animals work together to make it a new home for a bird family.', keywords: ['tree', 'wind', 'home', 'birds'], isBookmarked: false },
-            { id: 'pea', title: 'The Pea', src: './public/image/The Pea.png', lexile: '180~230', wordCount: 95, category: 'Food 🫛', summary: 'One tiny green pea rolls off the plate and travels across the kitchen floor. Where will it end up?', keywords: ['green', 'roll', 'kitchen', 'floor'], isBookmarked: false },
-            { id: 'milo', title: 'Milo', src: './public/image/Milo.png', lexile: '320~380', wordCount: 160, category: 'Animals 🐶', summary: 'Milo is a dog with a very big imagination. Every time he goes for a walk, he sees a world full of dragons.', keywords: ['dog', 'dream', 'adventure', 'wild'], isBookmarked: false },
-            { id: 'rainbow-cloud', title: 'Rainbow Cloud', src: './public/image/The Rainbow Cloud.png', lexile: '350~400', wordCount: 180, category: 'Fantasy ✨', summary: 'A magical cloud that rains colors instead of water changes everything in the gray city of Grumbletown.', keywords: ['magic', 'cloud', 'color', 'happy'], isBookmarked: true },
-            { id: 'cindellar', title: 'Cindellar', src: './public/image/Cindellar.png', lexile: '380~450', wordCount: 210, category: 'Classic 🏰', summary: 'A new retelling of the classic fairy tale with a focus on being kind to yourself and others.', keywords: ['princess', 'kind', 'dance', 'shoe'], isBookmarked: false },
-            { id: 'flying-trunk', title: 'The Flying Trunk', src: './public/image/The Fyling Trunk.png', lexile: '340~390', wordCount: 175, category: 'Adventure 🗺️', summary: 'Travel the world in a magic trunk that can fly over mountains and oceans.', keywords: ['fly', 'travel', 'ocean', 'magic'], isBookmarked: false },
-            { id: 'rapunzel', title: 'The Rapunzel', src: './public/image/The Rapunzel.png', lexile: '360~410', wordCount: 190, category: 'Classic 🏰', summary: 'A story about inner strength and finding your own voice from high up in a stone tower.', keywords: ['hair', 'tower', 'voice', 'strong'], isBookmarked: false },
-            { id: 'ugly-dukling', title: 'The Ugly Dukling', src: './public/image/The Ugly Dukling.png', lexile: '300~360', wordCount: 155, category: 'Animals 🦢', summary: 'Discover how being different can lead to finding where you truly belong.', keywords: ['different', 'belong', 'lake', 'swan'], isBookmarked: false },
+            { id: 'missing-planet', title: 'The Missing Planet', src: './public/Image/Cover/The Missing Planet.png', lexile: '250~300', wordCount: 120, category: 'Space 🚀', summary: 'A brave little astronaut goes on a mission to find a planet that disappeared from the star maps. Join the cosmic adventure!', keywords: ['planet', 'space', 'astronaut', 'star'], isBookmarked: false, videoUrl: './public/Video/the_silent_stick_watch.mp4' },
+            { id: 'rainbow', title: 'Rainbow', src: './public/Image/Cover/Rainbow.png', lexile: '150~200', wordCount: 85, category: 'Nature 🌈', summary: 'Follow the beautiful colors across the sky after a rainy day. Learn how rainbows are made of light and magic!', keywords: ['color', 'rain', 'sky', 'sun'], isBookmarked: false, videoUrl: './public/Video/the_silent_stick_watch.mp4' },
+            { id: 'two-friends', title: 'Two Friends', src: './public/Image/Cover/Two Friends.png', lexile: '200~250', wordCount: 110, category: 'Friendship 🤝', summary: 'A story about a rabbit and a turtle who discover that being different is what makes their friendship so special.', keywords: ['friends', 'together', 'help', 'game'], isBookmarked: false, videoUrl: './public/Video/the_silent_stick_watch.mp4' },
+            { id: 'silent-seed', title: 'The Silent Seed', src: './public/Image/Cover/The Silent Seed.png', lexile: '300~350', wordCount: 145, category: 'Science 🔬', summary: 'Deep under the ground, a tiny seed waits silently for the perfect moment to grow into a magnificent tree.', keywords: ['grow', 'wait', 'ground', 'leaf'], isBookmarked: false, videoUrl: './public/Video/the_silent_stick_watch.mp4' },
+            { id: 'silent-stick', title: 'The Silent Stick', src: './public/Image/Cover/The Silent Stick.png', lexile: '250~320', wordCount: 130, category: 'Adventure 🗺️', summary: 'A magic stick that doesn\'t make a sound helps a quiet boy find his way through a mysterious forest.', keywords: ['magic', 'quiet', 'forest', 'path'], isBookmarked: false, videoUrl: './public/Video/the_silent_stick_watch.mp4' },
+            { id: 'broken-branch', title: 'The Broken Branch', src: './public/Image/Cover/The Broken Branch.png', lexile: '280~340', wordCount: 135, category: 'Nature 🌳', summary: 'When a strong wind breaks a branch, the forest animals work together to make it a new home for a bird family.', keywords: ['tree', 'wind', 'home', 'birds'], isBookmarked: false, videoUrl: './public/Video/the_silent_stick_watch.mp4' },
+            { id: 'pea', title: 'The Pea', src: './public/Image/Cover/The Pea.png', lexile: '180~230', wordCount: 95, category: 'Food 🫛', summary: 'One tiny green pea rolls off the plate and travels across the kitchen floor. Where will it end up?', keywords: ['green', 'roll', 'kitchen', 'floor'], isBookmarked: false, videoUrl: './public/Video/the_silent_stick_watch.mp4' },
+            { id: 'milo', title: 'Milo and the Lost Color', src: './public/Image/Cover/Milo and the Lost Color.png', lexile: '320~380', wordCount: 160, category: 'Animals 🐶', summary: 'Milo is a dog with a very big imagination. Every time he goes for a walk, he sees a world full of dragons.', keywords: ['dog', 'dream', 'adventure', 'wild'], isBookmarked: false, videoUrl: './public/Video/milo_and_the_lost_color_watch.mp4' },
+            { id: 'rainbow-cloud', title: 'Rainbow Cloud', src: './public/Image/Cover/The Rainbow Cloud.png', lexile: '350~400', wordCount: 180, category: 'Fantasy ✨', summary: 'A magical cloud that rains colors instead of water changes everything in the gray city of Grumbletown.', keywords: ['magic', 'cloud', 'color', 'happy'], isBookmarked: true, videoUrl: './public/Video/rainbow_cloud_watch.mp4' },
+            { id: 'cindellar', title: 'Cindellar', src: './public/Image/Cover/Cindellar.png', lexile: '380~450', wordCount: 210, category: 'Classic 🏰', summary: 'A new retelling of the classic fairy tale with a focus on being kind to yourself and others.', keywords: ['princess', 'kind', 'dance', 'shoe'], isBookmarked: false, videoUrl: './public/Video/the_silent_stick_watch.mp4' },
+            { id: 'flying-trunk', title: 'The Flying Trunk', src: './public/Image/Cover/The Fyling Trunk.png', lexile: '340~390', wordCount: 175, category: 'Adventure 🗺️', summary: 'Travel the world in a magic trunk that can fly over mountains and oceans.', keywords: ['fly', 'travel', 'ocean', 'magic'], isBookmarked: false, videoUrl: './public/Video/the_silent_stick_watch.mp4' },
+            { id: 'rapunzel', title: 'The Rapunzel', src: './public/Image/Cover/The Rapunzel.png', lexile: '360~410', wordCount: 190, category: 'Classic 🏰', summary: 'A story about inner strength and finding your own voice from high up in a stone tower.', keywords: ['hair', 'tower', 'voice', 'strong'], isBookmarked: false, videoUrl: './public/Video/the_silent_stick_watch.mp4' },
+            { id: 'ugly-dukling', title: 'The Ugly Dukling', src: './public/Image/Cover/The Ugly Dukling.png', lexile: '300~360', wordCount: 155, category: 'Animals Swan', summary: 'Discover how being different can lead to finding where you truly belong.', keywords: ['different', 'belong', 'lake', 'swan'], isBookmarked: false, videoUrl: './public/Video/the_silent_stick_watch.mp4' },
         ];
 
         let currentModalBookId = null;
+        let isHistoryMode = true;
+        let freshHeroBook = null;
+        let currentHeroIndex = 1; // Start with Silent Stick in middle
+        let isHeroCTAFlashing = false;
+        let currentModalOrigin = 'recommendation';
+
+        let mockHistory = [
+            { id: 'milo', title: 'Milo and the Lost Color', src: './public/Image/Cover/Milo and the Lost Color.png', progress: 50, phase: 'quiz', completedPhases: ['watch', 'read'] },
+            { id: 'silent-stick', title: 'The Silent Stick', src: './public/Image/Cover/The Silent Stick.png', progress: 0, phase: 'watch', completedPhases: [] },
+            { id: 'empty-placeholder', title: '', src: '', progress: 0, phase: '', completedPhases: [], isPlaceholder: true }
+        ];
+
+        let currentPhase = 'home'; // 'home' or 'read'
+        let currentSceneIndex = 0;
+        let selectedReadingMode = 'ebook';
+        const scenesData = [
+            { book_id: "silent-stick", scene_no: "SC01", script: "The frozen lake lay still, a big area of gray ice beneath a heavy winter sky.", image_url: "./public/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC01.png" },
+            { book_id: "silent-stick", scene_no: "SC02", script: "He hit the puck with force, but his old stick broke suddenly upon impact.", image_url: "./public/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC02.png" },
+            { book_id: "silent-stick", scene_no: "SC03", script: "Two pieces of wood lay on the ice, showing the end of his practice.", image_url: "./public/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC03.png" },
+            { book_id: "silent-stick", scene_no: "SC04", script: "Ren worked for hours, cutting the skin to show the hard wood under.", image_url: "./public/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC04.png" },
+            { book_id: "silent-stick", scene_no: "SC05", script: "When he tested it, the puck flew in strange circles due to the wood’s natural shape.", image_url: "./public/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC05.png" },
+            { book_id: "silent-stick", scene_no: "SC06", script: "Jax glanced at Ren’s rough branch and offered a cold smile, saying nothing.", image_url: "./public/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC06.png" },
+            { book_id: "silent-stick", scene_no: "SC07", script: "Jax controlled the ice, his speed pushing Ren back toward his own goal.", image_url: "./public/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC07.png" },
+            { book_id: "silent-stick", scene_no: "SC08", script: "The puck turned around the confused player, going quietly into the net as the whistle blew.", image_url: "./public/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC08.png" },
+            { book_id: "silent-stick", scene_no: "SC09", script: "Ren smiled at his rough stick and skated away silently.", image_url: "./public/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC09.png" }
+        ];
+
+        function toggleMode() {
+            isHistoryMode = !isHistoryMode;
+            currentHeroIndex = 0;
+            const btn = document.getElementById('modeToggleBtn');
+            if (isHistoryMode) {
+                btn.innerText = 'HISTORY MODE';
+                btn.classList.remove('bg-white', 'text-slate-400', 'border-slate-100');
+                btn.classList.add('bg-sky-500', 'text-white', 'border-sky-400', 'shadow-sky-100');
+            } else {
+                btn.innerText = 'FRESH MODE';
+                btn.classList.add('bg-white', 'text-slate-400', 'border-slate-100');
+                btn.classList.remove('bg-sky-500', 'text-white', 'border-sky-400', 'shadow-sky-100');
+            }
+            renderHero();
+        }
+
+        function renderHero() {
+            const container = document.getElementById('heroContainer');
+            const isHistory = isHistoryMode;
+            const items = isHistory ? mockHistory : [
+                freshHeroBook || booksData.find(b => b.id === 'silent-stick')
+            ];
+
+            const userName = "Ami";
+            const safeIndex = currentHeroIndex >= items.length ? 0 : currentHeroIndex; // lint: Ensure index is within bounds.
+            const item = items[safeIndex];
+            if (item) currentModalBookId = item.id; // lint: Safely set currentModalBookId.
+            const prevItem = items[(currentHeroIndex - 1 + items.length) % items.length];
+            const nextItem = items[(currentHeroIndex + 1) % items.length];
+
+            const progress = (isHistory && !item.isPlaceholder) ? item.progress : 0;
+            const phasesText = (isHistory && !item.isPlaceholder) ? `
+                <div class="flex gap-3 mb-1">
+                    <span class="text-xs uppercase ${item.completedPhases.includes('watch') ? 'text-green-400' : 'text-yellow-300 font-black'}">watch</span>
+                    <span class="text-xs uppercase ${item.phase === 'read' ? 'text-yellow-300 font-black' : item.completedPhases.includes('read') ? 'text-green-400' : 'opacity-40'}">> read</span>
+                    <span class="text-xs uppercase ${item.phase === 'quiz' ? 'text-yellow-300 font-black' : item.completedPhases.includes('quiz') ? 'text-green-400' : 'opacity-40'}">> quiz</span>
+                    <span class="text-xs uppercase ${item.phase === 'speak' ? 'text-yellow-300 font-black' : 'opacity-40'}">> speak</span>
+                </div>
+            ` : '<div class="text-xs uppercase opacity-40">watch > read > quiz > speak</div>';
+
+            container.innerHTML = `
+                <section class="card-bubble relative overflow-hidden p-6 md:p-10 transition-all duration-700 border-none shadow-2xl ${isHistory ? 'bg-[#0f172a]' : 'bg-[#fbbf24]'} min-h-[360px] flex items-center">
+                    
+                    <div id="heroContentChunk" class="flex flex-col md:flex-row items-center gap-12 w-full relative z-10 animate-in fade-in slide-in-from-right duration-500">
+                        <!-- Book Display Unit -->
+                        <div class="relative flex items-center justify-center w-full md:w-[320px] h-[340px] flex-shrink-0">
+                            ${isHistory && items.length > 1 ? `
+                                <div id="hero-left-slot" data-index="${(currentHeroIndex - 1 + items.length) % items.length}" class="absolute left-[-22%] scale-75 opacity-70 pointer-events-none transform -rotate-6 transition-all duration-500">
+                                    <div class="w-48 h-64 bg-slate-900/60 backdrop-blur-md rounded-[28px] shadow-xl overflow-hidden border-2 border-white/20">
+                                        ${prevItem.isPlaceholder ? `
+                                            <div class="w-full h-full border-4 border-dashed border-white/30 rounded-[28px] flex flex-col items-center justify-center gap-2">
+                                                <div class="w-12 h-12 rounded-full border-2 border-dashed border-white/30 flex items-center justify-center">
+                                                    <span class="text-white/20 text-3xl font-black">+</span>
+                                                </div>
+                                            </div>
+                                        ` : `<img src="${prevItem.src}" class="w-full h-full object-cover brightness-90">`}
+                                    </div>
+                                </div>
+                            ` : ''}
+
+                            <!-- Main Hero Card -->
+                            <div id="hero-center-slot" data-index="${currentHeroIndex}" class="relative z-10 group">
+                                <div class="w-56 h-[280px] rounded-[28px] shadow-2xl overflow-hidden transform border-4 ${isHistory ? 'border-white' : 'border-[#0f172a]/10'} transition-all group-hover:scale-105 cursor-pointer ${item.isPlaceholder ? 'bg-slate-900/60 backdrop-blur-xl' : 'bg-white'}" 
+                                     onclick="${item.isPlaceholder ? '' : `openModal('${item.id}', '${isHistory ? 'history' : 'recommendation'}')`}">
+                                    ${item.isPlaceholder ? `
+                                        <div class="w-full h-full border-4 border-dashed border-white/20 rounded-[28px] flex flex-col items-center justify-center gap-4 bg-slate-900/20">
+                                            <div class="w-20 h-20 rounded-full border-4 border-dashed border-white/20 flex items-center justify-center">
+                                                <span class="text-white/20 text-5xl font-black">+</span>
+                                            </div>
+                                            <p class="text-white/20 font-black text-xl uppercase tracking-widest">Empty</p>
+                                        </div>
+                                    ` : `
+                                        <img src="${item.src}" class="w-full h-full object-cover">
+                                        <div class="absolute top-4 left-4 z-20">
+                                            <div class="bg-black/40 backdrop-blur-md px-3 py-1 rounded-full border border-white/20">
+                                                <p class="text-white font-black text-[9px] uppercase tracking-widest opacity-90">${isHistory ? 'In Progress' : 'Recommended'}</p>
+                                            </div>
+                                        </div>
+                                        <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex flex-col justify-end p-5 min-h-[40%]">
+                                            <h3 class="text-white font-black leading-tight text-center" style="font-size: ${item.title.length > 20 ? '14px' : '18px'}">${item.title}</h3>
+                                        </div>
+                                    `}
+                                </div>
+
+                                ${isHistory && items.length > 1 ? `
+                                    <div class="absolute inset-y-0 -left-6 -right-6 flex items-center justify-between pointer-events-none">
+                                        <button onclick="event.stopPropagation(); navigateHero(-1)" class="w-10 h-10 bg-white/30 hover:bg-white/50 backdrop-blur-md rounded-full flex items-center justify-center text-white pointer-events-auto border border-white/40 shadow-lg transition-all active:scale-90"><i data-lucide="chevron-left" class="w-6 h-6"></i></button>
+                                        <button onclick="event.stopPropagation(); navigateHero(1)" class="w-10 h-10 bg-white/30 hover:bg-white/50 backdrop-blur-md rounded-full flex items-center justify-center text-white pointer-events-auto border border-white/40 shadow-lg transition-all active:scale-90"><i data-lucide="chevron-right" class="w-6 h-6"></i></button>
+                                    </div>
+                                ` : ''}
+                            </div>
+
+                            ${isHistory && items.length > 1 ? `
+                                <div id="hero-right-slot" data-index="${(currentHeroIndex + 1) % items.length}" class="absolute right-[-22%] scale-75 opacity-70 pointer-events-none transform rotate-6 transition-all duration-500">
+                                    <div class="w-48 h-64 bg-slate-900/60 backdrop-blur-md rounded-[28px] shadow-xl overflow-hidden border-2 border-white/20">
+                                        ${nextItem.isPlaceholder ? `
+                                            <div class="w-full h-full border-4 border-dashed border-white/30 rounded-[28px] flex flex-col items-center justify-center gap-2">
+                                                <div class="w-12 h-12 rounded-full border-2 border-dashed border-white/30 flex items-center justify-center">
+                                                    <span class="text-white/20 text-3xl font-black">+</span>
+                                                </div>
+                                            </div>
+                                        ` : `<img src="${nextItem.src}" class="w-full h-full object-cover brightness-90">`}
+                                    </div>
+                                </div>
+                            ` : ''}
+                        </div>
+
+                        <!-- Right: Text & Actions Unit -->
+                        <div class="flex-1 space-y-8 text-center md:text-left transition-all duration-700 md:pl-16 ${isHistory ? 'text-white' : 'text-[#0f172a]'}">
+                            <div class="space-y-4">
+                                <h2 class="text-5xl md:text-7xl font-black font-fredoka drop-shadow-md leading-tight whitespace-nowrap">
+                                    ${isHistory ? `Continue Your<br>Adventure, ${userName}!` : `Start Your<br>Adventure, ${userName}!`}
+                                </h2>
+                            </div>
+
+                            <div class="space-y-3 max-w-2xl">
+                                <div class="flex flex-col md:flex-row items-baseline justify-between font-black font-fredoka gap-6 ${isHistory ? 'text-white' : 'text-[#0f172a]'}">
+                                    <div class="flex flex-wrap gap-x-8 gap-y-2 uppercase tracking-normal font-black" style="font-size: clamp(1.5rem, 4vw, 3.5rem); line-height: 1;">
+                                        ${phasesText}
+                                    </div>
+                                    <div class="flex items-baseline gap-4 font-black ${isHistory ? 'text-sky-100' : 'text-[#0f172a]'}" style="font-size: clamp(2rem, 5vw, 3rem); line-height: 1;">
+                                        ${progress}% <span class="opacity-80 uppercase" style="font-size: 0.6em;">Completed!</span>
+                                    </div>
+                                </div>
+
+                                <div class="h-4 w-full rounded-full overflow-hidden border p-1 shadow-inner ${isHistory ? 'bg-black/20 border-white/10' : 'bg-[#0f172a]/10 border-[#0f172a]/10'}">
+                                    <div class="h-full rounded-full transition-all duration-1000 bg-gradient-to-r ${isHistory ? 'from-sky-400 to-blue-400 shadow-[0_0_20px_rgba(56,189,248,0.4)]' : 'from-orange-500 to-orange-400 shadow-[0_0_20px_rgba(249,115,22,0.2)]'}" style="width: ${isHistory ? (progress > 0 ? Math.max(progress, 5) : 0) : 100}%"></div>
+                                </div>
+                            </div>
+
+                            <div class="pt-4">
+                                <button onclick="startLearning()" class="w-full md:max-w-md py-6 rounded-[28px] font-black text-4xl flex items-center justify-center gap-4 transition-all hover:scale-[1.02] active:scale-[0.98] shadow-2xl ${isHistory ? 'bg-[#fbbf24] text-[#0f172a] shadow-amber-900/40' : 'bg-[#0f172a] text-white hover:bg-[#1e293b] shadow-amber-900/20'} ${isHeroCTAFlashing ? 'animate-flash-yellow' : ''}">
+                                    ${isHistory ? 'CONTINUE READING' : 'START READING'} <i data-lucide="play" class="w-10 h-10 fill-current ml-2"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            `;
+            lucide.createIcons(); // lint: Initialize icons after rendering hero.
+        }
+
+        function navigateHero(dir) {
+            currentHeroIndex = (currentHeroIndex + dir + mockHistory.length) % mockHistory.length;
+            renderHero();
+        }
 
         function renderBooks() {
             const container = document.getElementById('bookContainer');
             container.innerHTML = booksData.map(book => `
-                <div class="w-40 flex-shrink-0 group cursor-pointer space-y-4 relative" onclick="openModal('${book.id}')">
+                <div key="${book.id}" onclick="openModal('${book.id}', 'recommendation')" class="w-36 md:w-40 flex-shrink-0 group cursor-pointer space-y-3 relative select-none">
                     <div class="aspect-[3/4] bg-slate-50 rounded-[32px] shadow-sm border-[4px] border-white group-hover:border-sky-300 transition-all group-hover:-translate-y-3 group-hover:shadow-2xl group-hover:shadow-sky-100 overflow-hidden relative">
                         <img src="${book.src}" class="w-full h-full object-cover pointer-events-none">
                         <div class="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
@@ -601,10 +782,11 @@
             lucide.createIcons();
         }
 
-        function openModal(bookId) {
+        function openModal(bookId, origin = 'recommendation') {
             const book = booksData.find(b => b.id === bookId);
             if (!book) return;
             currentModalBookId = bookId;
+            currentModalOrigin = origin;
 
             document.getElementById('modalTitle').innerText = book.title;
             document.getElementById('modalImg').src = book.src;
@@ -617,6 +799,29 @@
             `).join('');
 
             updateBookmarkIcon(book.isBookmarked);
+
+            // Dynamic Button Logic for Modal (Refined: Use explicit origin)
+            const startBtn = document.getElementById('modalStartBtn');
+
+            if (origin === 'history') {
+                startBtn.innerHTML = `CONTINUE READING <i data-lucide="play" class="w-10 h-10 fill-current ml-2"></i>`;
+                startBtn.className = "w-full py-6 rounded-[28px] font-black text-4xl flex items-center justify-center gap-4 transition-all hover:scale-[1.02] active:scale-[0.98] shadow-2xl bg-[#fbbf24] text-[#0f172a] shadow-amber-900/40";
+                startBtn.onclick = startLearning;
+            } else {
+                startBtn.innerHTML = `START READING <i data-lucide="play" class="w-10 h-10 fill-current ml-2"></i>`;
+                startBtn.className = "w-full py-6 rounded-[28px] font-black text-4xl flex items-center justify-center gap-4 transition-all hover:scale-[1.02] active:scale-[0.98] shadow-2xl bg-[#0f172a] text-white hover:bg-[#1e293b] shadow-amber-900/20";
+                startBtn.onclick = () => {
+                    const isInHistory = isHistoryMode ? mockHistory.some(h => h.id === bookId) : false;
+                    const currentHeroId = freshHeroBook ? freshHeroBook.id : 'silent-stick';
+                    const isCurrentHero = !isHistoryMode && bookId === currentHeroId;
+
+                    if (!isInHistory && !isCurrentHero) {
+                        addBookWithAnimation(bookId);
+                    } else {
+                        startLearning();
+                    }
+                };
+            }
 
             const modal = document.getElementById('bookModal');
             const content = document.getElementById('modalContent');
@@ -639,6 +844,247 @@
             }, 300);
             document.body.style.overflow = 'auto';
         }
+
+        function playWhoosh() {
+            try {
+                const context = new (window.AudioContext || window.webkitAudioContext)();
+                if (context.state === 'suspended') {
+                    context.resume();
+                }
+                const oscillator = context.createOscillator();
+                const gain = context.createGain();
+                const filter = context.createBiquadFilter();
+
+                oscillator.type = 'triangle';
+                filter.type = 'highpass';
+                filter.Q.value = 10;
+
+                oscillator.connect(filter);
+                filter.connect(gain);
+                gain.connect(context.destination);
+
+                const now = context.currentTime;
+                const duration = 1.0;
+
+                // Frequency sweep: Swish up then down
+                oscillator.frequency.setValueAtTime(400, now);
+                oscillator.frequency.exponentialRampToValueAtTime(1800, now + duration * 0.4);
+                oscillator.frequency.exponentialRampToValueAtTime(600, now + duration);
+
+                // Filter resonance sweep
+                filter.frequency.setValueAtTime(1000, now);
+                filter.frequency.exponentialRampToValueAtTime(4000, now + duration * 0.5);
+                filter.frequency.exponentialRampToValueAtTime(1500, now + duration);
+
+                gain.gain.setValueAtTime(0, now);
+                gain.gain.linearRampToValueAtTime(0.2, now + 0.1);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + duration);
+
+                oscillator.start(now);
+                oscillator.stop(now + duration);
+            } catch (e) {
+                console.error("Audio failed:", e);
+            }
+        }
+
+
+        function renderReadPhase() {
+            const phaseContainer = document.getElementById('phase-read');
+            const book = booksData.find(b => b.id === currentModalBookId);
+            const filteredScenes = mockScenes.filter(s => s.id === currentModalBookId);
+            setPhase('read');
+            currentPhase = 'read';
+            if (currentReadStep === 'selection') {
+                phaseContainer.innerHTML = `
+                    <div class="relative z-10 flex-1 flex flex-col items-center justify-center animate-in fade-in duration-500 min-h-screen">
+                        <!-- Backdrop -->
+                        <div class="absolute inset-0">
+                            <img src="./public/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC01.png" class="w-full h-full object-cover opacity-60 brightness-75" />
+                            <div class="absolute inset-0 bg-black/40"></div>
+                        </div>
+
+                        <!-- Selection Modal -->
+                        <div class="relative z-20 w-full max-w-4xl bg-white rounded-[48px] shadow-2xl p-12 flex flex-col items-center gap-12">
+                            <div class="flex gap-8 w-full">
+                                <button onclick="selectReadingMode('ebook')" id="card-ebook" class="flex-1 group transition-all duration-300">
+                                    <div class="aspect-[4/3] bg-slate-50 rounded-[32px] p-8 border-4 transition-all flex flex-col items-center justify-center gap-6 group-hover:bg-sky-50 outline-none
+                                        ${selectedReadingMode === 'ebook' ? 'border-sky-400 bg-sky-50 shadow-[0_0_30px_rgba(56,189,248,0.3)]' : 'border-slate-100 group-hover:border-sky-200'}">
+                                        <div class="w-full h-48 bg-white rounded-2xl shadow-lg flex items-center justify-center group-hover:scale-110 transition-transform overflow-hidden relative border-4 border-white px-4">
+                                            <img src="./public/UI/Ebook.png" alt="ebook" class="w-full h-full object-contain" onerror="this.src='https://img.icons8.com/color/144/storybook.png'"/>
+                                        </div>
+                                        <h3 class="text-3xl font-black text-slate-800 font-fredoka">E-book</h3>
+                                    </div>
+                                </button>
+                                <button onclick="selectReadingMode('interactive')" id="card-interactive" class="flex-1 group transition-all duration-300">
+                                    <div class="aspect-[4/3] bg-slate-50 rounded-[32px] p-8 border-4 transition-all flex flex-col items-center justify-center gap-6 group-hover:bg-sky-50 outline-none
+                                        ${selectedReadingMode === 'interactive' ? 'border-sky-400 bg-sky-50 shadow-[0_0_30px_rgba(56,189,248,0.3)]' : 'border-slate-100 group-hover:border-sky-200'}">
+                                        <div class="w-full h-48 bg-white rounded-2xl shadow-lg flex items-center justify-center group-hover:rotate-12 transition-transform overflow-hidden relative border-4 border-white px-4">
+                                            <img src="./public/UI/Anibook.png" alt="anibook" class="w-full h-full object-contain" onerror="this.src='https://img.icons8.com/color/144/dragon.png'"/>
+                                        </div>
+                                        <h3 class="text-3xl font-black text-slate-800 font-fredoka">Ani-book</h3>
+                                    </div>
+                                </button>
+                            </div>
+                            <button id="modeOkBtn" onclick="goToReadStep('intro')" ${!selectedReadingMode ? 'disabled' : ''} class="w-full h-20 bg-slate-900 text-white rounded-[24px] text-2xl font-black shadow-xl hover:bg-slate-800 active:scale-95 transition-all disabled:opacity-30 disabled:pointer-events-none">OK</button>
+                            <p class="text-slate-400 font-bold">* You <span class="underline decoration-slate-300">can't change the mode</span> while reading.</p>
+                        </div>
+                    </div>
+                `;
+            } else if (currentReadStep === 'intro') {
+                phaseContainer.innerHTML = `
+                    <div class="relative z-10 flex-1 flex flex-col animate-in fade-in duration-500 min-h-screen">
+                        <div class="absolute inset-0">
+                            <img src="./public/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC01.png" class="w-full h-full object-cover" />
+                        </div>
+                        <div class="absolute top-20 left-1/2 -translate-x-1/2 px-16 py-6 bg-white/70 backdrop-blur-md rounded-[32px] shadow-2xl border-4 border-white/20">
+                            <h1 class="text-7xl font-black text-slate-900 font-fredoka tracking-tight">${book.title}</h1>
+                        </div>
+                        <div class="absolute bottom-12 left-12 w-[580px] bg-white/70 backdrop-blur-md rounded-[48px] shadow-2xl p-12 flex flex-col gap-6 border-4 border-white/30 text-left">
+                            <div class="flex gap-4">
+                                <span class="px-5 py-2 bg-white rounded-2xl text-slate-900 font-black text-xl border-2 border-slate-200 tracking-tight text-center uppercase">${selectedReadingMode}</span>
+                                <span class="px-5 py-2 bg-white rounded-2xl text-slate-900 font-black text-xl border-2 border-slate-200 tracking-tight text-center uppercase">LEXILE ${book.lexile}</span>
+                            </div>
+                            <p class="text-slate-900 text-[2.2rem] font-black leading-tight text-left">
+                                "${filteredScenes[0]?.script?.substring(0, 100)}..."
+                            </p>
+                            <div class="flex flex-col gap-3 mt-2">
+                                <span class="px-4 py-1.5 bg-sky-100 text-sky-600 rounded-xl font-black text-sm uppercase self-start">Keywords</span>
+                                <p class="text-slate-600 font-black text-xl leading-relaxed text-left">${book.keywords.join(', ')}</p>
+                            </div>
+                        </div>
+                        <button onclick="goToReadStep('viewing')" class="absolute bottom-12 right-12 px-24 h-28 bg-white rounded-[40px] flex items-center justify-center text-slate-900 text-5xl font-black font-fredoka shadow-2xl hover:scale-110 active:scale-95 transition-all border-8 border-white animate-twinkle">START</button>
+                    </div>
+                `;
+            } else {
+                if (currentSceneIndex > maxReachedSceneIndex) {
+                    maxReachedSceneIndex = currentSceneIndex;
+                }
+
+                const scene = filteredScenes[currentSceneIndex];
+
+                if (!scene.fetchedScript && !scene.isFetching) {
+                    scene.isFetching = true;
+                    fetchSceneScript(scene).then(text => {
+                        scene.fetchedScript = text;
+                        scene.isFetching = false;
+                        if (currentSceneIndex === filteredScenes.indexOf(scene)) {
+                            renderReadPhase();
+                        }
+                    });
+                }
+
+                const script = scene.fetchedScript || scene.script;
+                const sentences = script.split(/(?<=[.!?]) +/);
+                const sentencesHtml = sentences.map((sentence, idx) => `
+                    <span onclick="event.stopPropagation(); playSentenceAudio(${idx})" class="cursor-pointer hover:text-orange-300 transition-colors pointer-events-auto inline-block mr-3 mb-2 ${playingSentenceIndex === idx ? 'text-orange-400 drop-shadow-[0_0_15px_rgba(251,146,60,0.8)] scale-105' : ''}">
+                        ${sentence}
+                    </span>
+                `).join('');
+
+                const dotsHtml = filteredScenes.map((_, index) => `
+                    <div class="w-3 h-3 rounded-full transition-all duration-300 ${index === currentSceneIndex ? 'bg-[#FF6B00] scale-125 shadow-[0_0_10px_#FF6B00]' : 'bg-white/40'}"></div>
+                `).join('');
+
+                const positionClass = getTextPositionClass(currentSceneIndex);
+
+                phaseContainer.innerHTML = `
+                    <div class="absolute inset-0 bg-black z-0 flex flex-col overflow-hidden animate-in fade-in duration-500">
+                        <img src="${scene.image_url}" class="absolute inset-0 w-full h-full object-cover" />
+                        
+                        <!-- Shared Text Overlay -->
+                        <div class="absolute z-50 p-12 max-w-[1400px] transition-all duration-500 ease-in-out flex items-start gap-8 pointer-events-none ${positionClass.replace('items-start', '').replace('items-end', '')} ${positionClass.includes('left-') ? 'ml-32' : ''} ${positionClass.includes('right-') ? 'mr-32' : ''}">
+                            <!-- Play Button -->
+                            <button onclick="event.stopPropagation(); playFullSceneAudio()" class="mt-40 w-14 h-14 bg-[#FF6B00] rounded-full shadow-[0_4px_15px_rgba(255,107,0,0.5)] flex items-center justify-center text-white hover:bg-[#FF8500] hover:scale-110 active:scale-95 transition-all pointer-events-auto flex-shrink-0 ${isSceneAudioPlaying ? 'ring-4 ring-orange-300' : ''}">
+                                <i data-lucide="play" class="w-8 h-8 ${isSceneAudioPlaying ? 'fill-current' : ''}"></i>
+                            </button>
+
+                            <div class="flex-1 pointer-events-auto">
+                                <p class="text-white text-4xl md:text-5xl lg:text-6xl font-black font-fredoka leading-[1.3] drop-shadow-[0_8px_16px_rgba(0,0,0,0.9)] whitespace-pre-line ${positionClass.includes('text-right') ? 'text-right' : 'text-left'}">
+                                    ${sentencesHtml}
+                                </p>
+                            </div>
+                        </div>
+
+                        ${isScenePickerOpen ? `<div class="absolute inset-0 z-[60] pointer-events-auto" onclick="isScenePickerOpen = false; renderReadPhase();"></div>` : ''}
+
+                        <button onclick="isScenePickerOpen = true; renderReadPhase();" class="absolute bottom-12 left-1/2 -translate-x-1/2 flex items-center gap-4 px-6 py-3 bg-black/40 backdrop-blur-xl rounded-full border border-white/20 z-30 hover:scale-105 active:scale-95 transition-all group ${isScenePickerOpen ? 'translate-y-20 opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'}">
+                            <div class="text-white group-hover:text-[#FF6B00] transition-colors"><i data-lucide="chevron-up" class="w-6 h-6"></i></div>
+                            <div class="flex items-center gap-2">${dotsHtml}</div>
+                        </button>
+
+                        <div id="scenePicker" class="absolute bottom-0 inset-x-0 bg-black/80 backdrop-blur-2xl border-t border-white/10 transition-all duration-500 ease-out z-[70] pb-12 pt-8 ${isScenePickerOpen ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0 pointer-events-none'}" onclick="event.stopPropagation()">
+                            <div class="px-12">
+                                <button onclick="isScenePickerOpen = false; renderReadPhase();" class="w-full flex justify-center mb-6 py-2 group">
+                                    <div class="bg-black/80 backdrop-blur-md rounded-full px-8 py-2 border border-white/20 flex items-center gap-4 shadow-lg group-hover:scale-105 transition-all">
+                                        <div class="text-white group-hover:text-[#FF6B00] transition-colors"><i data-lucide="chevron-down" class="w-5 h-5"></i></div>
+                                        <div class="flex items-center gap-2">
+                                            ${filteredScenes.map((_, index) => `<div class="w-2 h-2 rounded-full transition-all duration-300 ${index === currentSceneIndex ? 'bg-[#FF6B00]' : 'bg-white/30'}"></div>`).join('')}
+                                        </div>
+                                    </div>
+                                </button>
+                                <div class="flex items-center justify-between mb-6">
+                                    <h3 class="text-white/60 font-black text-xl font-fredoka uppercase tracking-widest flex items-center gap-3"><i data-lucide="sparkles" class="w-5 h-5 text-[#FF6B00]"></i>Jump to Scene</h3>
+                                    <span class="text-white/30 font-bold font-jua text-lg bg-white/5 px-4 py-1 rounded-full border border-white/5">${currentSceneIndex + 1} / ${filteredScenes.length}</span>
+                                </div>
+                                <div class="flex gap-4 overflow-x-auto pb-12 pt-4 scrollbar-hide snap-x no-scrollbar">
+                                    ${filteredScenes.map((s, index) => {
+                    const isUnlocked = index <= maxReachedSceneIndex;
+                    const isActive = index === currentSceneIndex;
+                    return `<button ${!isUnlocked ? 'disabled' : `onclick="jumpToScene(${index})"`} class="relative flex-shrink-0 w-48 aspect-video rounded-2xl overflow-hidden snap-start transition-all duration-300 ${isActive ? 'ring-4 ring-[#FF6B00] scale-105 shadow-[0_0_30px_rgba(255,107,0,0.3)] z-10' : 'ring-2 ring-white/5 hover:ring-white/20'} ${!isUnlocked ? 'opacity-40 grayscale pointer-events-none' : ''}">
+                                            <img src="${s.image_url}" class="w-full h-full object-cover" onerror="this.src='https://img.icons8.com/color/144/image.png'" />
+                                            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+                                            <div class="absolute bottom-3 left-4 text-white font-black text-sm font-fredoka flex items-center gap-2"><span class="opacity-60 text-[10px] uppercase">SC</span><span>${String(index + 1).padStart(2, '0')}</span></div>
+                                            ${!isUnlocked ? `<div class="absolute inset-0 flex items-center justify-center bg-black/50 backdrop-blur-[1px]"><div class="w-10 h-10 bg-black/40 rounded-full flex items-center justify-center border border-white/10 shadow-xl"><i data-lucide="lock" class="w-5 h-5 text-white/90"></i></div></div>` : ''}
+                                            ${isActive ? `<div class="absolute top-3 right-3 w-4 h-4 bg-[#FF6B00] rounded-full shadow-[0_0_10px_#FF6B00] flex items-center justify-center"><div class="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></div></div>` : ''}
+                                        </button>`;
+                }).join('')}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="absolute inset-y-0 inset-x-8 flex items-center justify-between pointer-events-none">
+                            <button onclick="prevScene()" class="w-24 h-24 rounded-full bg-white/10 hover:bg-white/20 border-4 border-white/20 flex items-center justify-center text-white pointer-events-auto transition-all active:scale-90 ${currentSceneIndex === 0 ? 'opacity-0 pointer-events-none' : ''}">
+                                <i data-lucide="chevron-left" class="w-12 h-12"></i>
+                            </button>
+                            <button onclick="nextScene()" class="w-24 h-24 rounded-full bg-white hover:scale-110 flex items-center justify-center text-slate-900 shadow-2xl pointer-events-auto transition-all active:scale-90">
+                                <i data-lucide="chevron-right" class="w-12 h-12"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+            lucide.createIcons();
+        }
+
+        window.prevScene = function () {
+            if (currentSceneIndex > 0) {
+                stopAudio();
+                currentSceneIndex--;
+                renderReadPhase();
+            }
+        };
+
+        window.nextScene = function () {
+            const filteredScenes = mockScenes.filter(s => s.id === currentModalBookId);
+
+            if (currentSceneIndex < filteredScenes.length - 1) {
+                stopAudio();
+                currentSceneIndex++;
+                if (currentSceneIndex > maxReachedSceneIndex) {
+                    maxReachedSceneIndex = currentSceneIndex;
+                }
+                renderReadPhase();
+            } else {
+                stopAudio();
+                showReadCompletePraise();
+            }
+        };
+
+        window.exitReadPhase = function () { // lint: New function to exit the read phase and return to home.
+            stopAudio();
+            currentPhase = 'home';
+            location.reload(); // Simple way to restore home state in prototype
+        };
 
         function toggleBookmarkModal() {
             const book = booksData.find(b => b.id === currentModalBookId);
@@ -664,31 +1110,138 @@
             lucide.createIcons();
         }
 
+        function addBookWithAnimation(bookId) {
+            const book = booksData.find(b => b.id === bookId);
+            if (!book) return;
+
+            closeModal();
+            playWhoosh();
+
+            // 1. Create Sucking Overlay & Calculate Target
+            // Detect which visual slot is currently the placeholder (dashed border)
+            const leftPlaceholder = document.querySelector('#hero-left-slot .border-dashed');
+            const centerPlaceholder = document.querySelector('#hero-center-slot .border-dashed');
+            const rightPlaceholder = document.querySelector('#hero-right-slot .border-dashed');
+
+            let targetSlotElement = null;
+            if (leftPlaceholder) targetSlotElement = document.getElementById('hero-left-slot');
+            else if (centerPlaceholder) targetSlotElement = document.getElementById('hero-center-slot');
+            else if (rightPlaceholder) targetSlotElement = document.getElementById('hero-right-slot');
+            else targetSlotElement = document.getElementById('hero-center-slot'); // Replacement logic
+
+            if (targetSlotElement) {
+                targetLogicalIndex = parseInt(targetSlotElement.getAttribute('data-index') || '2', 10);
+            }
+
+            const targetRect = targetSlotElement ? targetSlotElement.getBoundingClientRect() : { left: window.innerWidth * 0.75, top: window.innerHeight * 0.25, width: 0, height: 0 };
+            const targetX = targetRect.left + (targetRect.width / 2);
+            const targetY = targetRect.top + (targetRect.height / 2);
+
+            const overlay = document.createElement('div');
+            overlay.className = 'animate-suck-to-hero rounded-[32px] overflow-hidden shadow-2xl border-4 border-white';
+            overlay.style.width = '240px';
+            overlay.style.height = '320px';
+            overlay.style.setProperty('--target-x', `${targetX}px`);
+            overlay.style.setProperty('--target-y', `${targetY}px`);
+            overlay.innerHTML = `<img src="${book.src}" class="w-full h-full object-cover">`;
+            document.body.appendChild(overlay);
+
+            // 2. Wait for animation
+            setTimeout(() => {
+                if (document.body.contains(overlay)) {
+                    document.body.removeChild(overlay);
+                }
+
+                if (!isHistoryMode) {
+                    // Fresh Mode: Replace the Hero cover
+                    freshHeroBook = { ...book };
+                    isHeroCTAFlashing = true;
+                    renderHero();
+                    setTimeout(() => {
+                        isHeroCTAFlashing = false;
+                        renderHero();
+                    }, 5000);
+                } else {
+                    // History Mode: Fill the placeholder
+                    while (mockHistory.length <= targetLogicalIndex) {
+                        mockHistory.push({ id: '', src: '', title: '', phase: '', completedPhases: [], isPlaceholder: true });
+                    }
+                    mockHistory[targetLogicalIndex] = { ...book, progress: 0, phase: 'watch', completedPhases: [] };
+                    renderHero();
+
+                    // stage 2: Trigger smooth reordering after 200ms pause
+                    setTimeout(() => {
+                        // Final desired order: Left(Silent-Stick), Center(Rainbow-Cloud), Right(Milo)
+                        mockHistory = [
+                            { id: 'silent-stick', title: 'The Silent Stick', src: './public/Image/Cover/The Silent Stick.png', progress: 0, phase: 'watch', completedPhases: [] },
+                            { ...book, progress: 0, phase: 'watch', completedPhases: [] },
+                            { id: 'milo', title: 'Milo and the Lost Color', src: './public/Image/Cover/Milo and the Lost Color.png', progress: 50, phase: 'quiz', completedPhases: ['watch', 'read'] }
+                        ];
+                        currentHeroIndex = 1; // Center the new book
+                        isHeroCTAFlashing = true;
+                        renderHero();
+
+                        setTimeout(() => {
+                            isHeroCTAFlashing = false;
+                            renderHero();
+                        }, 5000);
+                    }, 200);
+                }
+            }, 1000);
+        }
+
         let isGnbVisible = true;
         let gnbTimeout = null;
-        let currentPhase = 'watch';
         let isReadUnlocked = false;
 
-        function startLearning() {
-            const book = booksData.find(b => b.id === currentModalBookId) || booksData[0];
-            document.getElementById('studyBookTitle').innerText = book.title;
-            const video = document.getElementById('studyVideo');
-            video.src = "public/video/Intro.mp4";
-            video.load();
+        // Scene Picker Progress
+        let maxReachedSceneIndex = 0;
+        let isScenePickerOpen = false;
 
-            document.getElementById('learningModeOverlay').classList.remove('hidden');
+        function startLearning() {
+            closeModal();
+            const book = booksData.find(b => b.id === currentModalBookId) || booksData[0];
+
+            // Show the overlay first
+            const overlay = document.getElementById('learningModeOverlay');
+            overlay.classList.remove('hidden');
             setTimeout(() => {
-                document.getElementById('learningModeOverlay').classList.add('active');
+                overlay.classList.add('active');
             }, 10);
             document.body.style.overflow = 'hidden';
-            closeModal();
 
-            // Initial GNB visibility
+            // IMPORTANT: check history to decide phase. 
+            // If progress is low or not in history, always start with Watch phase video.
+            const history = mockHistory.find(h => h.id === book.id);
+            const shouldStartRead = history && (history.phase === 'read' || history.completedPhases.includes('watch'));
+
+            if (shouldStartRead) {
+                const relevantScenes = scenesData.filter(s => s.book_id === book.id);
+                if (relevantScenes.length > 0) {
+                    currentPhase = 'read';
+                    currentSceneIndex = 0;
+                    renderReadPhase();
+                    return;
+                }
+            }
+
+            // Fallback to Watch phase (Default)
+            document.getElementById('studyBookTitle').innerText = book.title;
+            const video = document.getElementById('studyVideo');
+            // Ensure path is correct and call load() to reset the player
+            video.src = book.videoUrl || "./public/Video/The_silent_stick_watch.mp4";
+            video.load();
+
+            setPhase('watch');
             showGnb();
             startGnbTimer();
 
             // Video listeners
             video.addEventListener('timeupdate', updateProgressBar);
+            video.addEventListener('error', (e) => {
+                console.error("Video Error:", video.error);
+                alert("Video Failed to Load: " + video.src + "\nError Code: " + (video.error ? video.error.code : 'unknown'));
+            });
             video.addEventListener('play', () => {
                 document.getElementById('playIcon').setAttribute('data-lucide', 'pause');
                 lucide.createIcons();
@@ -767,9 +1320,31 @@
             tabs.forEach(t => {
                 const btn = document.getElementById(`tab-${t}`);
                 if (btn) {
-                    btn.classList.remove('bg-white', 'text-orange-500', 'shadow-sm');
-                    if (t === phase) {
+                    // Check if this tab is unlocked
+                    const isUnlocked = (t === 'watch') || (t === 'read' && isReadUnlocked);
+
+                    // Reset all tabs to default state
+                    btn.classList.remove('bg-white', 'text-orange-500', 'shadow-sm', 'opacity-50', 'cursor-not-allowed', 'text-slate-400', 'text-slate-700');
+
+                    if (isUnlocked) {
+                        // Unlocked Style (Inactive but clickable)
+                        btn.classList.add('text-slate-700');
+                        btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                        btn.removeAttribute('disabled');
+
+                        // Remove lock icon if present
+                        const lockIcon = btn.querySelector('[data-lucide="lock"]');
+                        if (lockIcon) lockIcon.remove();
+                    } else {
+                        // Locked Style
+                        btn.classList.add('text-slate-400', 'opacity-50', 'cursor-not-allowed');
+                        btn.setAttribute('disabled', 'true');
+                    }
+
+                    if (t === phase && isUnlocked) {
+                        // Highlight active phase in Orange
                         btn.classList.add('bg-white', 'text-orange-500', 'shadow-sm');
+                        btn.classList.remove('text-slate-700');
                     }
                 }
             });
@@ -840,142 +1415,359 @@
         };
 
         const mockScenes = [
-            { scene_no: "#SC01", script: "The frozen lake lay still under the cold winter moon. Everything was silent, until Leo found the stick.", image_url: "https://images.unsplash.com/photo-1453228200676-e89c628f59d5?q=80&w=2070" },
-            { scene_no: "#SC02", script: "It was a long, dark branch that seemed to pulse with a faint golden light. When Leo touched it, he felt a warm tingle.", image_url: "https://images.unsplash.com/photo-1542385151-efd9000785a0?q=80&w=1978" },
-            { scene_no: "#SC03", script: "Suddenly, the forest around him began to glow. The Silent Stick was guiding him to something hidden deep within the trees.", image_url: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?q=80&w=2071" }
+            { id: 'silent-stick', scene_no: "SC01", script: "The frozen lake lay still, \na big area of gray ice \nbeneath a heavy winter sky.", image_url: "./public/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC01.png", full_audio: "./public/Audio/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC01.mp3" },
+            { id: 'silent-stick', scene_no: "SC02", script: "He hit the puck with force, \nbut his old stick broke \nsuddenly upon impact.", image_url: "./public/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC02.png", full_audio: "./public/Audio/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC02.mp3" },
+            { id: 'silent-stick', scene_no: "SC03", script: "Two pieces of wood lay on the ice, \nshowing the end of his practice.", image_url: "./public/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC03.png", full_audio: "./public/Audio/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC03.mp3" },
+            { id: 'silent-stick', scene_no: "SC04", script: "Ren worked for hours, \ncutting the skin to show \nthe hard wood under.", image_url: "./public/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC04.png", full_audio: "./public/Audio/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC04.mp3" },
+            { id: 'silent-stick', scene_no: "SC05", script: "When he tested it, \nthe puck flew in strange circles \ndue to the wood’s natural shape.", image_url: "./public/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC05.png", full_audio: "./public/Audio/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC05.mp3" },
+            { id: 'silent-stick', scene_no: "SC06", script: "Jax glanced at Ren’s rough branch \nand offered a cold smile, saying nothing.", image_url: "./public/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC06.png", full_audio: "./public/Audio/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC06.mp3" },
+            { id: 'silent-stick', scene_no: "SC07", script: "Jax controlled the ice, \nhis speed pushing Ren \nback toward his own goal.", image_url: "./public/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC07.png", full_audio: "./public/Audio/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC07.mp3" },
+            { id: 'silent-stick', scene_no: "SC08", script: "The puck turned around the confused player, \ngoing quietly into the net as the whistle blew.", image_url: "./public/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC08.png", full_audio: "./public/Audio/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC08.mp3" },
+            { id: 'silent-stick', scene_no: "SC09", script: "Ren smiled at his rough stick \nand skated away silently.", image_url: "./public/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC09.png", full_audio: "./public/Audio/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC09.mp3" }
         ];
 
-        let selectedReadingMode = null;
+        // [NEW] Helper for text positioning
+        function getTextPositionClass(index) {
+            switch (index) {
+                case 0: // SC01
+                    return "top-8 left-8 md:top-16 md:left-16 text-left items-start";
+                case 1: // SC02
+                case 2: // SC03
+                case 4: // SC05
+                    return "top-8 right-8 md:top-16 md:right-16 text-left items-start";
+                case 3: // SC04
+                    return "bottom-24 right-8 md:bottom-32 md:right-16 text-left items-start";
+                case 5: // SC06
+                case 6: // SC07
+                case 7: // SC08
+                    return "bottom-24 left-8 md:bottom-32 md:left-16 text-left items-start";
+                case 8: // SC09
+                    return "top-1/2 -translate-y-1/2 left-24 md:left-32 text-left items-start";
+                default:
+                    return "top-8 left-8 md:top-16 md:left-16 text-left items-start";
+            }
+        }
+
+        // [NEW] Async Text Fetcher
+        let currentAudio = null;
+        let playingSentenceIndex = null;
+        let isSceneAudioPlaying = false;
+
+        function playFullSceneAudio() {
+            const scenes = mockScenes.filter(s => s.id === currentModalBookId);
+            const scene = scenes[currentSceneIndex];
+            if (!scene || !scene.full_audio) return;
+
+            if (currentAudio) currentAudio.pause();
+
+            currentAudio = new Audio(scene.full_audio);
+            isSceneAudioPlaying = true;
+            playingSentenceIndex = null;
+
+            currentAudio.play().catch(err => console.error("Audio play failed:", err));
+            currentAudio.onended = () => {
+                isSceneAudioPlaying = false;
+                renderReadPhase();
+            };
+            renderReadPhase();
+        }
+
+        function playSentenceAudio(index) {
+            const scenes = mockScenes.filter(s => s.id === currentModalBookId);
+            const scene = scenes[currentSceneIndex];
+            if (!scene || !scene.full_audio) return;
+
+            if (currentAudio) currentAudio.pause();
+
+            currentAudio = new Audio(scene.full_audio);
+            playingSentenceIndex = index;
+            isSceneAudioPlaying = false;
+
+            currentAudio.play().catch(err => console.error("Sentence audio play failed:", err));
+            currentAudio.onended = () => {
+                playingSentenceIndex = null;
+                renderReadPhase();
+            };
+            renderReadPhase();
+        }
+
+        function stopAudio() {
+            if (currentAudio) {
+                currentAudio.pause();
+                currentAudio = null;
+            }
+            playingSentenceIndex = null;
+            isSceneAudioPlaying = false;
+        }
+
+        async function fetchSceneScript(scene) {
+            if (scene.fetchedScript) return scene.fetchedScript;
+
+            // Derive path: ./public/Image/.../SC01.png -> ./public/Data/.../SC01.txt
+            // Note: prototype.html is at root, so ./public is correct.
+            const textUrl = scene.image_url.replace('/Image/', '/Data/').replace('.png', '.txt').replace('.jpg', '.txt');
+            try {
+                const res = await fetch(textUrl);
+                if (res.ok) {
+                    const text = await res.text();
+                    if (text && !text.includes('<!DOCTYPE html>')) {
+                        scene.fetchedScript = text;
+                        return text;
+                    }
+                }
+            } catch (e) {
+                console.error("Fetch failed", e);
+            }
+            return scene.script; // Fallback
+        }
+
         let currentReadStep = 'selection';
-        let currentSceneIndex = 0;
+
+        function goToReadStep(step) {
+            currentReadStep = step;
+            renderReadPhase();
+        }
 
         function selectReadingMode(mode) {
             selectedReadingMode = mode;
-            const ebook = document.getElementById('card-ebook');
-            const interactive = document.getElementById('card-interactive');
-            const okBtn = document.getElementById('modeOkBtn');
+            renderReadPhase();
+        }
 
-            ebook.classList.remove('bg-white', 'border-sky-400', 'scale-105', 'shadow-2xl');
-            ebook.classList.add('bg-white/10', 'border-white/20');
-            ebook.querySelector('div').classList.remove('bg-sky-500');
-            ebook.querySelector('div').classList.add('bg-white/20');
-            ebook.querySelector('h3').classList.remove('text-slate-800');
-            ebook.querySelector('h3').classList.add('text-white');
-            ebook.querySelector('p').classList.remove('text-slate-600');
-            ebook.querySelector('p').classList.add('text-slate-300');
+        // [NEW] Read Complete Praise Overlay
+        function showReadCompletePraise() {
+            const overlay = document.createElement('div');
+            overlay.id = 'readCompletePraise';
+            overlay.className = 'fixed inset-0 z-[110] bg-black/80 backdrop-blur-sm flex items-center justify-center animate-in fade-in duration-500 cursor-pointer';
+            overlay.onclick = () => {
+                overlay.remove();
+                showSpeakSelectionModal();
+            };
+            overlay.innerHTML = `
+                <div class="relative flex flex-col items-center justify-center animate-in zoom-in-50 duration-500">
+                    <!-- Glow Effect -->
+                    <div class="absolute inset-0 bg-yellow-400/30 blur-[100px] rounded-full"></div>
+                    
+                    <!-- Praise Badge Image -->
+                    <img src="./public/UI/praise_badge.png" alt="Great! Let's speak" class="w-[600px] h-auto object-contain drop-shadow-2xl relative z-10 hover:scale-105 transition-transform duration-300" />
+                    
+                    <p class="mt-8 text-white text-2xl font-fredoka font-bold animate-pulse">Click to continue</p>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+        }
 
-            interactive.classList.remove('bg-white', 'border-orange-400', 'scale-105', 'shadow-2xl');
-            interactive.classList.add('bg-white/10', 'border-white/20');
-            interactive.querySelector('div').classList.remove('bg-orange-500');
-            interactive.querySelector('div').classList.add('bg-white/20');
-            interactive.querySelector('h3').classList.remove('text-slate-800');
-            interactive.querySelector('h3').classList.add('text-white');
-            interactive.querySelector('p').classList.remove('text-slate-600');
-            interactive.querySelector('p').classList.add('text-slate-300');
+        // [NEW] Scene Selection Modal
+        function showSpeakSelectionModal() {
+            const overlay = document.createElement('div');
+            overlay.id = 'speakSelectionModal';
+            overlay.className = 'fixed inset-0 z-[120] bg-black/60 backdrop-blur-md flex items-center justify-center animate-in fade-in duration-300';
 
-            if (mode === 'ebook') {
-                ebook.classList.add('bg-white', 'border-sky-400', 'scale-105', 'shadow-2xl');
-                ebook.classList.remove('bg-white/10', 'border-white/20');
-                ebook.querySelector('div').classList.add('bg-sky-500');
-                ebook.querySelector('div').classList.remove('bg-white/20');
-                ebook.querySelector('h3').classList.add('text-slate-800');
-                ebook.querySelector('h3').classList.remove('text-white');
-                ebook.querySelector('p').classList.add('text-slate-600');
-                ebook.querySelector('p').classList.remove('text-slate-300');
+            // Generate Scene Checkboxes
+            const sceneGridHtml = mockScenes.map((scene, idx) => `
+                <div class="relative group cursor-pointer" onclick="toggleSceneSelection(${idx})">
+                    <div class="aspect-video bg-slate-100 rounded-xl overflow-hidden border-4 transition-all duration-200 ${idx === 0 ? 'border-orange-500 ring-4 ring-orange-200' : 'border-slate-200 group-hover:border-orange-300'}" id="scene-card-${idx}">
+                        <img src="${scene.image_url}" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                        
+                        <!-- Checkbox Overlay -->
+                        <div class="absolute top-2 right-2 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-lg border-2 ${idx === 0 ? 'border-orange-500 bg-orange-500 text-white' : 'border-slate-300 text-transparent'}" id="scene-check-${idx}">
+                            <i data-lucide="check" class="w-5 h-5 font-bold"></i>
+                        </div>
+                        
+                        <!-- Scene Label -->
+                        <div class="absolute bottom-0 inset-x-0 bg-black/50 text-white text-center py-1 text-sm font-bold backdrop-blur-sm">
+                            Scene ${idx + 1}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            overlay.innerHTML = `
+                <div class="bg-white rounded-[40px] p-8 w-[90%] max-w-5xl shadow-2xl animate-in slide-in-from-bottom-10 duration-500 relative">
+                    <!-- Close Button -->
+                    <button onclick="document.getElementById('speakSelectionModal').remove()" class="absolute top-6 right-6 p-2 rounded-full hover:bg-slate-100 transition-colors">
+                        <i data-lucide="x" class="w-8 h-8 text-slate-400"></i>
+                    </button>
+
+                    <!-- Header -->
+                    <div class="text-center mb-8">
+                        <h2 class="text-4xl font-black text-slate-800 font-fredoka mb-2">Scenes you want to Read Aloud</h2>
+                        <div class="flex items-center justify-center gap-2">
+                             <label class="flex items-center gap-2 cursor-pointer select-none">
+                                <div class="w-6 h-6 border-2 border-slate-300 rounded-md flex items-center justify-center transition-colors text-white" id="selectAllCheck" onclick="toggleSelectAll()">
+                                    <i data-lucide="check" class="w-4 h-4"></i>
+                                </div>
+                                <span class="text-slate-500 font-bold text-lg">All</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Scene Grid -->
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-6 max-h-[60vh] overflow-y-auto p-2">
+                        ${sceneGridHtml}
+                    </div>
+
+                    <!-- Footer Action -->
+                    <div class="mt-8 flex justify-center">
+                        <button onclick="confirmSpeakSelection()" class="px-16 py-4 bg-white border-4 border-slate-200 text-slate-700 rounded-full text-2xl font-black font-fredoka hover:bg-orange-500 hover:text-white hover:border-orange-500 transition-all shadow-xl hover:shadow-orange-200 active:scale-95">
+                            OK
+                        </button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+            lucide.createIcons();
+        }
+
+        // [NEW] Selection Logic
+        let selectedScenes = [0]; // Default first scene selected
+
+        function toggleSceneSelection(idx) {
+            const index = selectedScenes.indexOf(idx);
+            const card = document.getElementById(`scene-card-${idx}`);
+            const check = document.getElementById(`scene-check-${idx}`);
+
+            if (index > -1) {
+                selectedScenes.splice(index, 1);
+                // Visual Uncheck
+                card.classList.remove('border-orange-500', 'ring-4', 'ring-orange-200');
+                card.classList.add('border-slate-200');
+                check.classList.remove('border-orange-500', 'bg-orange-500', 'text-white');
+                check.classList.add('border-slate-300', 'text-transparent');
             } else {
-                interactive.classList.add('bg-white', 'border-orange-400', 'scale-105', 'shadow-2xl');
-                interactive.classList.remove('bg-white/10', 'border-white/20');
-                interactive.querySelector('div').classList.add('bg-orange-500');
-                interactive.querySelector('div').classList.remove('bg-white/20');
-                interactive.querySelector('h3').classList.add('text-slate-800');
-                interactive.querySelector('h3').classList.remove('text-white');
-                interactive.querySelector('p').classList.add('text-slate-600');
-                interactive.querySelector('p').classList.remove('text-slate-300');
+                selectedScenes.push(idx);
+                // Visual Check
+                card.classList.add('border-orange-500', 'ring-4', 'ring-orange-200');
+                card.classList.remove('border-slate-200');
+                check.classList.add('border-orange-500', 'bg-orange-500', 'text-white');
+                check.classList.remove('border-slate-300', 'text-transparent');
+            }
+            updateSelectAllState();
+        }
+
+        function toggleSelectAll() {
+            const isAll = selectedScenes.length === mockScenes.length;
+            const selectAllCheck = document.getElementById('selectAllCheck');
+
+            if (isAll) {
+                selectedScenes = [];
+                // Uncheck all UI
+                mockScenes.forEach((_, i) => {
+                    const card = document.getElementById(`scene-card-${i}`);
+                    const check = document.getElementById(`scene-check-${i}`);
+                    card.classList.remove('border-orange-500', 'ring-4', 'ring-orange-200');
+                    card.classList.add('border-slate-200');
+                    check.classList.remove('border-orange-500', 'bg-orange-500', 'text-white');
+                    check.classList.add('border-slate-300', 'text-transparent');
+                });
+                selectAllCheck.classList.remove('bg-orange-500', 'border-orange-500');
+                selectAllCheck.classList.add('border-slate-300');
+            } else {
+                selectedScenes = mockScenes.map((_, i) => i);
+                // Check all UI
+                mockScenes.forEach((_, i) => {
+                    const card = document.getElementById(`scene-card-${i}`);
+                    const check = document.getElementById(`scene-check-${i}`);
+                    card.classList.add('border-orange-500', 'ring-4', 'ring-orange-200');
+                    card.classList.remove('border-slate-200');
+                    check.classList.add('border-orange-500', 'bg-orange-500', 'text-white');
+                    check.classList.remove('border-slate-300', 'text-transparent');
+                });
+                selectAllCheck.classList.add('bg-orange-500', 'border-orange-500');
+                selectAllCheck.classList.remove('border-slate-300');
+            }
+        }
+
+        function updateSelectAllState() {
+            const isAll = selectedScenes.length === mockScenes.length;
+            const selectAllCheck = document.getElementById('selectAllCheck');
+            if (isAll) {
+                selectAllCheck.classList.add('bg-orange-500', 'border-orange-500');
+                selectAllCheck.classList.remove('border-slate-300');
+            } else {
+                selectAllCheck.classList.remove('bg-orange-500', 'border-orange-500');
+                selectAllCheck.classList.add('border-slate-300');
+            }
+        }
+
+        function confirmSpeakSelection() {
+            if (selectedScenes.length === 0) {
+                alert("Please select at least one scene!");
+                return;
+            }
+            document.getElementById('speakSelectionModal').remove();
+
+            // Unlock and Switch to Speak Mode
+            if (!unlockedPhases.includes('speak')) {
+                unlockedPhases.push('speak');
             }
 
-            okBtn.disabled = false;
-            okBtn.classList.remove('bg-slate-700', 'text-slate-500', 'cursor-not-allowed');
-            okBtn.classList.add('bg-[#FF6B00]', 'text-white', 'shadow-2xl', 'animate-pulse', 'cursor-pointer', 'hover:scale-110');
+            // Since Speak logic isn't fully implemented in this prototype, 
+            // we'll simulate the switch by unlocking and updating the UI
+            isReadUnlocked = true; // Ensure Read remains unlocked
+
+            // Visual update for GNB
+            const speakBtn = document.querySelector('button[onclick="setPhase(\'speak\')"]');
+            if (speakBtn) {
+                speakBtn.removeAttribute('disabled');
+                speakBtn.classList.remove('opacity-50', 'cursor-not-allowed', 'text-slate-400');
+                speakBtn.classList.add('text-slate-700');
+                speakBtn.click(); // Trigger phase switch
+            } else {
+                setPhase('speak'); // Fallback
+            }
         }
 
         function goToReadStep(step) {
             currentReadStep = step;
-            document.getElementById('read-step-selection').classList.add('hidden');
-            document.getElementById('read-step-intro').classList.add('hidden');
-            document.getElementById('read-step-viewing').classList.add('hidden');
-            document.getElementById(`read-step-${step}`).classList.remove('hidden');
+            renderReadPhase();
+        }
 
-            if (step === 'intro') {
-                document.getElementById('intro-title').innerText = mockBookMeta.title;
-                document.getElementById('intro-lexile').innerText = mockBookMeta.lexile;
-                document.getElementById('intro-words').innerText = mockBookMeta.word_count;
-                document.getElementById('intro-summary').innerText = mockBookMeta.summary;
-                document.getElementById('intro-keywords').innerHTML = mockBookMeta.keywords.map(kw => `
-                    <span class="px-4 py-2 bg-white/10 rounded-xl text-sky-200 font-bold border border-white/10">#${kw}</span>
-                `).join('');
-            } else if (step === 'viewing') {
-                renderScene();
+
+        function prevScene() {
+            if (currentSceneIndex > 0) {
+                currentSceneIndex--;
+                isScenePickerOpen = false;
+                renderReadPhase();
             }
         }
 
-        function renderScene() {
-            const scene = mockScenes[currentSceneIndex];
-            document.getElementById('viewing-img').src = scene.image_url;
-            document.getElementById('viewing-scene-no').innerText = scene.scene_no;
-            document.getElementById('viewing-script').innerText = scene.script;
-            document.getElementById('viewing-progress').style.width = `${((currentSceneIndex + 1) / mockScenes.length) * 100}%`;
-
-            const prevBtn = document.getElementById('prevBtn');
-            const nextBtnText = document.getElementById('nextBtnText');
-
-            if (currentSceneIndex === 0) {
-                prevBtn.classList.add('opacity-20');
-                prevBtn.disabled = true;
-            } else {
-                prevBtn.classList.remove('opacity-20');
-                prevBtn.disabled = false;
-            }
-
-            if (currentSceneIndex === mockScenes.length - 1) {
-                nextBtnText.innerHTML = 'Finish & Quiz <i data-lucide="sparkles" class="w-8 h-8"></i>';
-                nextBtnText.classList.add('text-orange-600');
-            } else {
-                nextBtnText.innerHTML = 'Next Scene <i data-lucide="chevron-right" class="w-8 h-8"></i>';
-                nextBtnText.classList.remove('text-orange-600');
-            }
-            lucide.createIcons();
+        function toggleScenePicker() {
+            isScenePickerOpen = !isScenePickerOpen;
+            renderReadPhase();
         }
 
-        function changeScene(delta) {
-            if (delta === 1 && currentSceneIndex === mockScenes.length - 1) {
-                // Finish reading - Placeholder for Quiz
-                alert("Reading Finished! Transitioning to Quiz...");
-                exitLearningMode();
-                return;
+        function jumpToScene(index) {
+            if (index <= maxReachedSceneIndex) {
+                stopAudio();
+                currentSceneIndex = index;
+                isScenePickerOpen = false;
+                renderReadPhase();
             }
-            currentSceneIndex = Math.max(0, Math.min(mockScenes.length - 1, currentSceneIndex + delta));
-            renderScene();
         }
 
         function onVideoEnded() {
-            isReadUnlocked = true;
-            document.getElementById('tab-read').classList.remove('opacity-50', 'cursor-not-allowed');
-            document.getElementById('tab-read').innerHTML = '<i data-lucide="book-open" class="w-4 h-4"></i> Read';
+            // isReadUnlocked = true; // Don't unlock automatically yet
             document.getElementById('nextPhaseContainer').classList.remove('opacity-0', 'translate-y-10', 'pointer-events-none');
+            document.getElementById('nextPhaseContainer').innerHTML = `
+                <button onclick="isReadUnlocked=true; currentReadStep='selection'; setPhase('read'); renderReadPhase();"
+                    class="px-12 py-6 bg-white rounded-full font-black text-slate-900 text-3xl shadow-[0_20px_50px_rgba(0,0,0,0.3)] hover:scale-110 active:scale-95 transition-all flex items-center gap-4 border-8 border-white group">
+                    <div class="flex flex-col items-start leading-none">
+                        <span class="text-slate-400 text-xs font-black uppercase tracking-widest mb-1">Great Watching!</span>
+                        <span class="font-fredoka uppercase text-4xl">Read Next</span>
+                    </div>
+                    <div class="w-14 h-14 bg-[#FF6B00] rounded-2xl flex items-center justify-center text-white group-hover:rotate-12 transition-transform shadow-lg">
+                        <i data-lucide="chevron-right" class="w-10 h-10"></i>
+                    </div>
+                </button>
+            `;
+            lucide.createIcons();
 
-            // Reset central button and bottom icon to play
+            // Reset icons
             document.getElementById('centralPlayIcon').setAttribute('data-lucide', 'play');
             document.getElementById('playIcon').setAttribute('data-lucide', 'play');
-
-            // Make overlay always visible again
-            document.getElementById('videoCentralOverlay').classList.remove('opacity-0', 'group-hover:opacity-100');
-
-            // Set background for Read phase
-            document.getElementById('read-bg').style.backgroundImage = `url(${mockBookMeta.cover_url})`;
-
-            showGnb();
             lucide.createIcons();
         }
+
 
         const bookContainer = document.getElementById('bookContainer');
         const scrollLeftBtn = document.getElementById('scrollLeftBtn');
@@ -1027,6 +1819,8 @@
         });
 
         renderBooks();
+        renderHero();
+        lucide.createIcons();
     </script>
 </body>
 

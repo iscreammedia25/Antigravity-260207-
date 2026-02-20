@@ -19,5 +19,19 @@ export interface SceneData {
     sent_audios?: string[];
 }
 
+export type LearningPhase = 'watch' | 'read' | 'quiz' | 'speak';
+
+export interface ReadingHistory {
+    bookId: string;
+    completedPhases: LearningPhase[];
+    currentPhase: LearningPhase;
+    lastUpdateTime: number;
+}
+
+export interface ReadingModeState {
+    mode: ReadingMode;
+    sceneIndex: number;
+}
+
 export type ReadingMode = 'ebook' | 'interactive';
 export type ReadStep = 'selection' | 'intro' | 'viewing';

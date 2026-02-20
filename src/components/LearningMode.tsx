@@ -1,33 +1,45 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { X, ChevronDown, ChevronUp, Play, Square, SkipBack, SkipForward, Settings, Volume2, Lock, CheckCircle2, Video, BookOpen, HelpCircle, MessageCircle, ChevronLeft, ChevronRight, Book as BookIcon, Sparkles } from 'lucide-react';
+import { X, ChevronDown, ChevronUp, Play, Square, SkipBack, SkipForward, Settings, Volume2, Lock, CheckCircle2, Video, BookOpen, HelpCircle, MessageCircle, ChevronLeft, ChevronRight, Book as BookIcon, Sparkles, Bell, Menu, Check } from 'lucide-react';
 import { Book } from '../data/books';
-import { ReadingMode, ReadStep, SceneData, BookMeta } from '../types/learning';
+import { ReadingMode, ReadStep, SceneData, BookMeta, LearningPhase } from '../types/learning';
 import { MOCK_BOOK_META, MOCK_SCENES_DATA } from '../data/mockData';
+import { convertDriveLink } from '../utils/googleDrive';
+import { updateReadingProgress } from '../utils/storage';
 
-type Phase = 'watch' | 'read' | 'quiz' | 'talk';
+type Phase = LearningPhase;
 
 interface LearningModeProps {
     book: Book;
     onClose: () => void;
+    initialPhase?: Phase;
+    initialUnlockedPhases?: Phase[];
 }
 
-const ChevronRight = ({ size }: { size: number }) => (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-        <path d="m9 18 6-6-6-6" />
-    </svg>
-);
-
-const LearningMode: React.FC<LearningModeProps> = ({ book, onClose }) => {
-    const [currentPhase, setCurrentPhase] = useState<Phase>('watch');
+const LearningMode: React.FC<LearningModeProps> = ({
+    book,
+    onClose,
+    initialPhase = 'watch',
+    initialUnlockedPhases = ['watch']
+}) => {
+    const [currentPhase, setCurrentPhase] = useState<Phase>(initialPhase);
     const [isGnbVisible, setIsGnbVisible] = useState(true);
     const [isPhaseMenuOpen, setIsPhaseMenuOpen] = useState(false);
-    const [unlockedPhases, setUnlockedPhases] = useState<Phase[]>(['watch']);
+    const [unlockedPhases, setUnlockedPhases] = useState<Phase[]>(initialUnlockedPhases);
     const [isActive, setIsActive] = useState(false);
 
     // Reading Phase State
     const [readStep, setReadStep] = useState<ReadStep>('selection');
     const [readingMode, setReadingMode] = useState<ReadingMode | null>(null);
     const [currentSceneIndex, setCurrentSceneIndex] = useState(0);
+    const [maxReachedSceneIndex, setMaxReachedSceneIndex] = useState(0);
+    const [isScenePickerOpen, setIsScenePickerOpen] = useState(false);
+    const [showSelectionPopup, setShowSelectionPopup] = useState(false);
+    const [filteredScenes, setFilteredScenes] = useState<SceneData[]>([]);
+
+    // [NEW] Praise & Selection State
+    const [showPraise, setShowPraise] = useState(false);
+    const [showSceneSelect, setShowSceneSelect] = useState(false);
+    const [selectedScenes, setSelectedScenes] = useState<number[]>([0]);
 
     // Video Player State
     const videoRef = useRef<HTMLVideoElement>(null);
@@ -35,13 +47,110 @@ const LearningMode: React.FC<LearningModeProps> = ({ book, onClose }) => {
     const [playbackSpeed, setPlaybackSpeed] = useState(1);
     const [showNextButton, setShowNextButton] = useState(false);
 
+    // [NEW] Audio System
+    const audioRef = useRef<HTMLAudioElement | null>(null);
+    const [playingSentenceIndex, setPlayingSentenceIndex] = useState<number | null>(null);
+    const [isSceneAudioPlaying, setIsSceneAudioPlaying] = useState(false);
+
+    const playFullSceneAudio = () => {
+        const scene = filteredScenes[currentSceneIndex];
+        if (!scene || !scene.full_audio) return;
+
+        if (audioRef.current) {
+            audioRef.current.pause();
+        }
+
+        const audio = new Audio(scene.full_audio);
+        audioRef.current = audio;
+        setIsSceneAudioPlaying(true);
+        setPlayingSentenceIndex(null);
+
+        audio.play().catch(err => console.error("Audio play failed:", err));
+        audio.onended = () => setIsSceneAudioPlaying(false);
+    };
+
+    const playSentenceAudio = (index: number) => {
+        const scene = filteredScenes[currentSceneIndex];
+        if (!scene) return;
+
+        // Note: For Silent Stick, each scene has one sentence. 
+        // We'll use the full_audio for now as there are no separate sentence files.
+        // If they existed, we'd use a naming pattern like _01, _02 etc.
+        const audioUrl = scene.full_audio;
+
+        if (!audioUrl) return;
+
+        if (audioRef.current) {
+            audioRef.current.pause();
+        }
+
+        const audio = new Audio(audioUrl);
+        audioRef.current = audio;
+        setPlayingSentenceIndex(index);
+        setIsSceneAudioPlaying(false);
+
+        audio.play().catch(err => console.error("Sentence audio play failed:", err));
+        audio.onended = () => setPlayingSentenceIndex(null);
+    };
+
+    const stopAudio = () => {
+        if (audioRef.current) {
+            audioRef.current.pause();
+            audioRef.current = null;
+        }
+        setPlayingSentenceIndex(null);
+        setIsSceneAudioPlaying(false);
+    };
+
+    // Stop audio when changing scenes
+    useEffect(() => {
+        stopAudio();
+    }, [currentSceneIndex]);
+
+    // Auto-unlock scenes when reaching them
+    useEffect(() => {
+        if (currentSceneIndex > maxReachedSceneIndex) {
+            setMaxReachedSceneIndex(currentSceneIndex);
+        }
+    }, [currentSceneIndex, maxReachedSceneIndex]);
+
     const gnbTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+    useEffect(() => {
+        if (videoRef.current) {
+            console.log(`[VideoLoad] Book: ${book.id}, URL: ${book.videoUrl}`);
+            videoRef.current.load();
+        }
+    }, [book.videoUrl, book.id]);
 
     useEffect(() => {
         // Trigger slide-up animation
         const timer = setTimeout(() => setIsActive(true), 10);
         return () => clearTimeout(timer);
     }, []);
+
+
+    const getTextPositionClass = (index: number) => {
+        console.log(`[DEBUG] Scene Index: ${index}`);
+        switch (index) {
+            case 0: // SC01
+                return "top-8 left-8 md:top-16 md:left-16 text-left items-start";
+            case 1: // SC02
+            case 2: // SC03
+            case 4: // SC05
+                return "top-8 right-8 md:top-16 md:right-16 text-left items-start";
+            case 3: // SC04
+                return "bottom-24 right-8 md:bottom-32 md:right-16 text-left items-start";
+            case 5: // SC06
+            case 6: // SC07
+            case 7: // SC08
+                return "bottom-24 left-8 md:bottom-32 md:left-16 text-left items-start";
+            case 8: // SC09
+                return "top-1/2 -translate-y-1/2 left-24 md:left-32 text-left items-start";
+            default:
+                return "top-8 left-8 md:top-16 md:left-16 text-left items-start";
+        }
+    };
 
     const handleClose = () => {
         setIsActive(false);
@@ -100,19 +209,90 @@ const LearningMode: React.FC<LearningModeProps> = ({ book, onClose }) => {
         if (!unlockedPhases.includes('read')) {
             setUnlockedPhases(prev => [...prev, 'read']);
         }
+        updateReadingProgress(book.id, 'watch', true);
+        // Auto-show selection popup as requested
+        setShowSelectionPopup(true);
     };
+
+    // Prepare data for reading
+    useEffect(() => {
+        if (currentPhase === 'read') {
+            // Filter by current book id (or sample id for testing)
+            const targetId = book.id === 'rainbow-cloud' ? '0001_lv4' : book.id;
+            const scenes = MOCK_SCENES_DATA
+                .filter(s => s.book_id === targetId)
+                .sort((a, b) => {
+                    if (a.scene_no === '#Cover') return -1;
+                    if (b.scene_no === '#Cover') return 1;
+                    return a.scene_no.localeCompare(b.scene_no);
+                });
+            setFilteredScenes(scenes);
+            setCurrentSceneIndex(0);
+            setMaxReachedSceneIndex(0); // Reset for new book
+        }
+    }, [currentPhase, book.id]);
+
+    useEffect(() => {
+        if (currentPhase === 'read' && readStep === 'viewing') {
+            if (currentSceneIndex > maxReachedSceneIndex) {
+                setMaxReachedSceneIndex(currentSceneIndex);
+            }
+        }
+    }, [currentSceneIndex, currentPhase, readStep, maxReachedSceneIndex]);
+
+    // [NEW] Fetch Text from File (Data Folder)
+    const [fetchedScript, setFetchedScript] = useState<string>('');
+
+    useEffect(() => {
+        if (readStep === 'viewing' && filteredScenes[currentSceneIndex]) {
+            const scene = filteredScenes[currentSceneIndex];
+            // Derive Fetch URL from Image URL: /Image/... -> /Data/... .png -> .txt
+            // Example: /Image/Book/OG_0001.../SC01.png -> /Data/Book/OG_0001.../SC01.txt
+            const textUrl = scene.image_url
+                .replace('/Image/', '/Data/')
+                .replace('.png', '.txt')
+                .replace('.jpg', '.txt');
+
+            console.log(`[DEBUG] Fetching script from: ${textUrl}`);
+
+            fetch(textUrl)
+                .then(res => res.text())
+                .then(text => {
+                    if (text && !text.includes('<!DOCTYPE html>')) { // Avoid HTML error pages
+                        console.log(`[DEBUG] Fetched text: ${text.substring(0, 20)}...`);
+                        setFetchedScript(text);
+                    } else {
+                        console.warn('[DEBUG] Failed to fetch text or got HTML');
+                        setFetchedScript(scene.script || ''); // Fallback
+                    }
+                })
+                .catch(err => {
+                    console.error('[DEBUG] Fetch error:', err);
+                    setFetchedScript(scene.script || '');
+                });
+        }
+    }, [currentSceneIndex, readStep, filteredScenes]);
 
     return (
         <div
             className={`fixed inset-0 z-[100] bg-black flex flex-col select-none overflow-hidden transition-all duration-[600ms] cubic-bezier(0.16, 1, 0.3, 1) ${isActive ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'}`}
         >
+            {/* DEBUG OVERLAY */}
+            <div style={{ position: 'fixed', top: 0, left: 0, width: 200, height: 100, background: 'red', zIndex: 9999, color: 'white', fontWeight: 'bold', padding: 10 }}>
+                DEBUG MODE ACTIVE<br />
+                Phase: {currentPhase}<br />
+                Step: {readStep}<br />
+                Scene: {currentSceneIndex}<br />
+                Fetched: {fetchedScript ? 'YES' : 'NO'}
+            </div>
+
             {/* Layer 2: GNB & Controls (z-50) */}
             <div className={`fixed top-0 inset-x-0 z-50 transition-transform duration-300 ease-in-out ${isGnbVisible ? 'translate-y-0' : '-translate-y-full'}`}>
                 <nav
                     className="h-24 bg-white/95 backdrop-blur-md border-b-2 border-slate-100 flex items-center justify-between px-8 shadow-xl relative"
                 >
                     <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-sky-100 rounded-2xl flex items-center justify-center text-sky-500 shadow-inner">
+                        <div className="w-12 h-12 bg-orange-100 rounded-2xl flex items-center justify-center text-[#FF6B00] shadow-inner">
                             <Video size={28} fill="currentColor" />
                         </div>
                         <h1 className="text-2xl font-black text-slate-700 font-jua truncate max-w-[300px]">
@@ -125,7 +305,7 @@ const LearningMode: React.FC<LearningModeProps> = ({ book, onClose }) => {
                         <div className="relative">
                             <button
                                 onClick={(e: React.MouseEvent) => { e.stopPropagation(); setIsPhaseMenuOpen(!isPhaseMenuOpen); }}
-                                className="flex items-center gap-3 px-6 py-2.5 bg-slate-50 rounded-2xl border-2 border-slate-100 hover:bg-slate-100 transition-colors font-fredoka font-bold text-slate-600"
+                                className={`flex items-center gap-3 px-6 py-2.5 rounded-2xl border-2 transition-colors font-fredoka font-bold bg-orange-50 border-orange-100 text-[#FF6B00]`}
                             >
                                 <span className="capitalize">{currentPhase}</span>
                                 {isPhaseMenuOpen ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
@@ -141,14 +321,14 @@ const LearningMode: React.FC<LearningModeProps> = ({ book, onClose }) => {
                                                 key={phase}
                                                 disabled={!isUnlocked}
                                                 onClick={() => { setCurrentPhase(phase); setIsPhaseMenuOpen(false); }}
-                                                className={`w-full flex items-center justify-between px-4 py-4 rounded-2xl transition-all ${isActivePhase ? 'bg-sky-50 text-sky-500' : 'hover:bg-slate-50'} ${!isUnlocked ? 'opacity-40 grayscale pointer-events-none' : ''}`}
+                                                className={`w-full flex items-center justify-between px-4 py-4 rounded-2xl transition-all ${isActivePhase ? 'bg-orange-50 text-[#FF6B00]' : 'hover:bg-slate-50'} ${!isUnlocked ? 'opacity-40 grayscale pointer-events-none' : ''}`}
                                             >
                                                 <div className="flex items-center gap-4">
-                                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isActivePhase ? 'bg-sky-500 text-white' : 'bg-slate-100 text-slate-400'}`}>
+                                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isActivePhase ? 'bg-[#FF6B00] text-white' : 'bg-slate-100 text-slate-400'}`}>
                                                         {phase === 'watch' && <Video size={20} />}
                                                         {phase === 'read' && <BookOpen size={20} />}
                                                         {phase === 'quiz' && <HelpCircle size={20} />}
-                                                        {phase === 'talk' && <MessageCircle size={20} />}
+                                                        {phase === 'speak' && <MessageCircle size={20} />}
                                                     </div>
                                                     <span className="font-black text-lg capitalize">{phase}</span>
                                                 </div>
@@ -172,7 +352,7 @@ const LearningMode: React.FC<LearningModeProps> = ({ book, onClose }) => {
                     {/* Toggle Handle Button (Sticky when Nav hides) */}
                     <button
                         onClick={(e: React.MouseEvent) => { e.stopPropagation(); setIsGnbVisible(!isGnbVisible); }}
-                        className="absolute -bottom-10 left-1/2 -translate-x-1/2 w-24 h-10 bg-white border-b-4 border-x-4 border-slate-50 rounded-b-[32px] flex items-center justify-center text-slate-300 hover:text-sky-400 shadow-lg transition-all active:h-12 pointer-events-auto"
+                        className="absolute -bottom-10 left-1/2 -translate-x-1/2 w-24 h-10 bg-white border-b-4 border-x-4 border-slate-50 rounded-b-[32px] flex items-center justify-center text-slate-300 hover:text-orange-400 shadow-lg transition-all active:h-12 pointer-events-auto"
                     >
                         {isGnbVisible ? <ChevronUp size={32} /> : <ChevronDown size={32} />}
                     </button>
@@ -188,14 +368,40 @@ const LearningMode: React.FC<LearningModeProps> = ({ book, onClose }) => {
                         {/* Video Player Container */}
                         <div className="relative flex-1 bg-black rounded-[24px] overflow-hidden group/player min-h-[60vh]">
                             <video
+                                key={book.videoUrl}
                                 ref={videoRef}
-                                src={book.videoUrl}
                                 className="w-full h-full object-contain"
+                                src={book.videoUrl}
                                 autoPlay
+                                playsInline
                                 onPlay={handlePlay}
                                 onEnded={handleVideoEnd}
                                 onClick={(e: React.MouseEvent) => e.stopPropagation()}
-                            />
+                            >
+                                Your browser does not support the video tag.
+                            </video>
+
+                            {/* [NEW] Read Next Action Button (After Video Ends) */}
+                            {showNextButton && (
+                                <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/40 backdrop-blur-sm animate-in fade-in duration-500">
+                                    <button
+                                        onClick={() => {
+                                            setCurrentPhase('read');
+                                            setShowSelectionPopup(true);
+                                            setReadStep('selection');
+                                        }}
+                                        className="group relative px-12 py-5 bg-white rounded-[32px] shadow-[0_20px_50px_rgba(0,0,0,0.3)] hover:scale-110 active:scale-95 transition-all duration-300 flex items-center gap-4 border-4 border-orange-400"
+                                    >
+                                        <div className="flex flex-col items-start">
+                                            <span className="text-slate-400 text-sm font-black uppercase tracking-widest">Great Watching!</span>
+                                            <span className="text-slate-900 text-3xl font-black font-fredoka uppercase">Read Next</span>
+                                        </div>
+                                        <div className="w-14 h-14 bg-sky-400 rounded-2xl flex items-center justify-center text-white group-hover:rotate-12 transition-transform shadow-lg">
+                                            <ChevronRight size={40} strokeWidth={3} />
+                                        </div>
+                                    </button>
+                                </div>
+                            )}
 
                             {/* YouTube Style Central Play/Pause Overlay */}
                             <div className={`absolute inset-0 bg-black/20 flex items-center justify-center z-20 transition-all duration-300 pointer-events-none ${isPlaying ? 'opacity-0 group-hover/player:opacity-100' : 'opacity-100'}`}>
@@ -259,187 +465,381 @@ const LearningMode: React.FC<LearningModeProps> = ({ book, onClose }) => {
                     </div>
                 )}
 
-                {/* Read Phase - 3 Steps Flow */}
-                {currentPhase === 'read' && (
-                    <div className="w-full h-full flex flex-col relative overflow-hidden">
-                        {/* Background Layer: Cover Image (Darkened) */}
-                        <div
-                            className="absolute inset-0 bg-cover bg-center transition-all duration-1000"
-                            style={{
-                                backgroundImage: `url(${MOCK_BOOK_META.cover_url})`,
-                                filter: 'brightness(0.3) blur(8px)'
-                            }}
-                        />
+                {/* Read Phase - Logic-driven Flow */}
+                {
+                    currentPhase === 'read' && (
+                        <div className="w-full h-full flex flex-col relative overflow-hidden">
+                            {/* Background Layer: E-Book Image or Intro BG */}
+                            {readStep === 'viewing' && filteredScenes[currentSceneIndex] ? (
+                                <img
+                                    src={filteredScenes[currentSceneIndex].image_url.startsWith('http') ? convertDriveLink(filteredScenes[currentSceneIndex].image_url) : filteredScenes[currentSceneIndex].image_url}
+                                    alt="scene"
+                                    referrerPolicy="no-referrer"
+                                    className="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000"
+                                />
+                            ) : (
+                                <div
+                                    className="absolute inset-0 bg-cover bg-center transition-all duration-1000"
+                                    style={{
+                                        backgroundImage: `url(${convertDriveLink(MOCK_BOOK_META.cover_url)})`,
+                                        filter: 'brightness(0.3) blur(8px)'
+                                    }}
+                                />
+                            )}
 
-                        {/* Step 1: Mode Selection */}
-                        {readStep === 'selection' && (
-                            <div className="relative z-10 flex-1 flex flex-col items-center justify-center p-8 animate-in fade-in zoom-in duration-500">
-                                <h2 className="text-5xl font-black text-white mb-12 font-jua text-center drop-shadow-2xl">
-                                    How would you like to read?
-                                </h2>
-                                <div className="flex gap-8 max-w-5xl w-full">
-                                    {/* E-Book Card */}
-                                    <button
-                                        onClick={() => setReadingMode('ebook')}
-                                        className={`flex-1 group relative p-10 rounded-[40px] border-4 transition-all duration-300 ${readingMode === 'ebook' ? 'bg-white border-sky-400 scale-105 shadow-2xl' : 'bg-white/10 border-white/20 hover:bg-white/20'}`}
-                                    >
-                                        <div className={`w-24 h-24 rounded-3xl flex items-center justify-center mb-8 mx-auto transition-colors ${readingMode === 'ebook' ? 'bg-sky-500 text-white' : 'bg-white/20 text-white'}`}>
-                                            <BookIcon size={48} />
-                                        </div>
-                                        <h3 className={`text-3xl font-black mb-4 ${readingMode === 'ebook' ? 'text-slate-800' : 'text-white'}`}>E-Book</h3>
-                                        <p className={`text-lg font-medium opacity-80 ${readingMode === 'ebook' ? 'text-slate-600' : 'text-slate-300'}`}>Classic reading experience with clean text.</p>
-                                    </button>
+                            {/* Step 1: Mode Selection Popup (Thematic Backdrop) */}
+                            {readStep === 'selection' && (
+                                <div className="relative z-10 flex-1 flex flex-col items-center justify-center animate-in fade-in duration-500">
+                                    <div className="absolute inset-0">
+                                        <img
+                                            src="/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC01.png"
+                                            alt="scene-bg"
+                                            className="w-full h-full object-cover opacity-60 brightness-75"
+                                        />
+                                        <div className="absolute inset-0 bg-black/40" />
+                                    </div>
 
-                                    {/* Interactive Card */}
-                                    <button
-                                        onClick={() => setReadingMode('interactive')}
-                                        className={`flex-1 group relative p-10 rounded-[40px] border-4 transition-all duration-300 ${readingMode === 'interactive' ? 'bg-white border-orange-400 scale-105 shadow-2xl' : 'bg-white/10 border-white/20 hover:bg-white/20'}`}
-                                    >
-                                        <div className={`w-24 h-24 rounded-3xl flex items-center justify-center mb-8 mx-auto transition-colors ${readingMode === 'interactive' ? 'bg-orange-500 text-white' : 'bg-white/20 text-white'}`}>
-                                            <Sparkles size={48} />
+                                    <div className="relative z-20 w-full max-w-4xl bg-white rounded-[48px] shadow-2xl p-12 flex flex-col items-center gap-12">
+                                        <div className="flex gap-8 w-full">
+                                            <button
+                                                onClick={() => setReadingMode('ebook')}
+                                                className={`flex-1 group transition-all duration-300`}
+                                            >
+                                                <div className={`aspect-[4/3] bg-slate-50 rounded-[32px] p-8 border-4 transition-all flex flex-col items-center justify-center gap-6 group-hover:bg-sky-50 outline-none
+                                                ${readingMode === 'ebook' ? 'border-sky-400 bg-sky-50 shadow-[0_0_30px_rgba(56,189,248,0.3)]' : 'border-slate-100 group-hover:border-sky-200'}`}>
+                                                    <div className="w-full h-48 bg-white rounded-2xl shadow-lg flex items-center justify-center group-hover:scale-110 transition-transform overflow-hidden relative border-4 border-white px-4">
+                                                        <img
+                                                            src="/UI/Ebook.png"
+                                                            alt="E-book"
+                                                            className="w-full h-full object-contain"
+                                                            onError={(e) => {
+                                                                (e.target as HTMLImageElement).src = 'https://img.icons8.com/color/144/storybook.png';
+                                                            }}
+                                                        />
+                                                    </div>
+                                                    <h3 className="text-3xl font-black text-slate-800 font-fredoka">E-book</h3>
+                                                </div>
+                                            </button>
+
+                                            <button
+                                                onClick={() => setReadingMode('interactive')}
+                                                className={`flex-1 group transition-all duration-300`}
+                                            >
+                                                <div className={`aspect-[4/3] bg-slate-50 rounded-[32px] p-8 border-4 transition-all flex flex-col items-center justify-center gap-6 group-hover:bg-sky-50 outline-none
+                                                ${readingMode === 'interactive' ? 'border-sky-400 bg-sky-50 shadow-[0_0_30px_rgba(56,189,248,0.3)]' : 'border-slate-100 group-hover:border-sky-200'}`}>
+                                                    <div className="w-full h-48 bg-white rounded-2xl shadow-lg flex items-center justify-center group-hover:rotate-12 transition-transform overflow-hidden relative border-4 border-white px-4">
+                                                        <img
+                                                            src="/UI/Anibook.png"
+                                                            alt="Ani-book"
+                                                            className="w-full h-full object-contain"
+                                                            onError={(e) => {
+                                                                (e.target as HTMLImageElement).src = 'https://img.icons8.com/color/144/dragon.png';
+                                                            }}
+                                                        />
+                                                    </div>
+                                                    <h3 className="text-3xl font-black text-slate-800 font-fredoka">Ani-book</h3>
+                                                </div>
+                                            </button>
                                         </div>
-                                        <h3 className={`text-3xl font-black mb-4 ${readingMode === 'interactive' ? 'text-slate-800' : 'text-white'}`}>Interactive</h3>
-                                        <p className={`text-lg font-medium opacity-80 ${readingMode === 'interactive' ? 'text-slate-600' : 'text-slate-300'}`}>Read along with voice, images, and fun effects!</p>
-                                    </button>
+
+                                        <button
+                                            onClick={() => setReadStep('intro')}
+                                            disabled={!readingMode}
+                                            className="w-full h-20 bg-slate-900 text-white rounded-[24px] text-2xl font-black shadow-xl hover:bg-slate-800 active:scale-95 transition-all disabled:opacity-30 disabled:pointer-events-none"
+                                        >
+                                            OK
+                                        </button>
+                                        <p className="text-slate-400 font-bold">* You <span className="underline decoration-slate-300">can't change the mode</span> while reading.</p>
+                                    </div>
                                 </div>
+                            )}
 
-                                <button
-                                    disabled={!readingMode}
-                                    onClick={() => setReadStep('intro')}
-                                    className={`mt-16 px-16 py-6 rounded-3xl font-black text-3xl transition-all ${readingMode ? 'bg-[#FF6B00] text-white shadow-2xl animate-pulse cursor-pointer hover:scale-110 active:scale-95' : 'bg-slate-700 text-slate-500 cursor-not-allowed'}`}
-                                >
-                                    OK
-                                </button>
-                            </div>
-                        )}
+                            {/* Step 2: Intro Preview Screen */}
+                            {readStep === 'intro' && (
+                                <div className="relative z-10 flex-1 flex flex-col animate-in fade-in duration-500">
+                                    <div className="absolute inset-0">
+                                        <img src="/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC01.png" alt="scene-bg" className="w-full h-full object-cover" />
+                                    </div>
 
-                        {/* Step 2: Book Intro */}
-                        {readStep === 'intro' && (
-                            <div className="relative z-10 flex-1 flex flex-col items-center justify-between p-16 animate-in slide-in-from-bottom-10 duration-700">
-                                <div className="w-full max-w-6xl flex flex-col items-center gap-6">
-                                    <div className="px-6 py-2 bg-sky-500 text-white rounded-full font-black text-xl shadow-lg">Level {MOCK_BOOK_META.level}</div>
-                                    <h2 className="text-7xl font-black text-white text-center font-jua drop-shadow-2xl">{MOCK_BOOK_META.title}</h2>
-                                </div>
+                                    <div className="absolute top-20 left-1/2 -translate-x-1/2 px-16 py-6 bg-white/70 backdrop-blur-md rounded-[32px] shadow-2xl border-4 border-white/20">
+                                        <h1 className="text-7xl font-black text-slate-900 font-fredoka tracking-tight">{book.title}</h1>
+                                    </div>
 
-                                <div className="w-full max-w-7xl flex items-end justify-between gap-12">
-                                    <div className="flex-1 bg-black/60 backdrop-blur-xl p-12 rounded-[48px] border-2 border-white/10 flex flex-col gap-8 shadow-2xl">
-                                        <div className="flex gap-12 text-white">
-                                            <div className="flex flex-col gap-1">
-                                                <span className="text-sky-300 text-sm font-bold uppercase tracking-widest">Lexile</span>
-                                                <span className="text-3xl font-black tracking-tight">{MOCK_BOOK_META.lexile}</span>
-                                            </div>
-                                            <div className="w-px h-12 bg-white/20" />
-                                            <div className="flex flex-col gap-1">
-                                                <span className="text-sky-300 text-sm font-bold uppercase tracking-widest">Words</span>
-                                                <span className="text-3xl font-black tracking-tight">{MOCK_BOOK_META.word_count}</span>
-                                            </div>
+                                    <div className="absolute bottom-12 left-12 w-[580px] bg-white/70 backdrop-blur-md rounded-[48px] shadow-2xl p-12 flex flex-col gap-6 border-4 border-white/30">
+                                        <div className="flex gap-4">
+                                            <span className="px-5 py-2 bg-white rounded-2xl text-slate-900 font-black text-xl border-2 border-slate-200 uppercase tracking-tight">{readingMode}</span>
+                                            <span className="px-5 py-2 bg-white rounded-2xl text-slate-900 font-black text-xl border-2 border-slate-200 uppercase tracking-tight">Lexile {book.lexile}</span>
                                         </div>
-                                        <p className="text-2xl text-slate-100 font-medium leading-[1.6]">
-                                            {MOCK_BOOK_META.summary}
-                                        </p>
-                                        <div className="flex flex-wrap gap-3">
-                                            {MOCK_BOOK_META.keywords.map(kw => (
-                                                <span key={kw} className="px-4 py-2 bg-white/10 rounded-xl text-sky-200 font-bold border border-white/10">#{kw}</span>
-                                            ))}
+                                        <div className="flex flex-col gap-2">
+                                            <p className="text-slate-900 text-[2.2rem] font-black leading-tight">
+                                                "{filteredScenes[0]?.script?.substring(0, 100)}..."
+                                            </p>
+                                        </div>
+                                        <div className="flex flex-col gap-3 mt-2">
+                                            <div className="flex items-center gap-3">
+                                                <span className="px-4 py-1.5 bg-sky-100 text-sky-600 rounded-xl font-black text-sm uppercase">Keywords</span>
+                                            </div>
+                                            <p className="text-slate-600 font-black text-xl leading-relaxed">
+                                                {book.keywords.join(', ')}
+                                            </p>
                                         </div>
                                     </div>
 
                                     <button
                                         onClick={() => setReadStep('viewing')}
-                                        className="w-48 h-48 bg-white text-slate-900 rounded-full flex items-center justify-center font-black text-4xl shadow-2xl hover:scale-110 active:scale-95 transition-all animate-twinkle"
+                                        className="absolute bottom-12 right-12 px-24 h-28 bg-white rounded-[40px] flex items-center justify-center text-slate-900 text-5xl font-black font-fredoka shadow-[0_30px_60px_rgba(0,0,0,0.3)] hover:scale-110 active:scale-95 transition-all border-8 border-white group"
                                     >
                                         START
                                     </button>
                                 </div>
-                            </div>
-                        )}
+                            )}
 
-                        {/* Step 3: Reading Viewer */}
-                        {readStep === 'viewing' && (
-                            <div className="relative z-10 flex-1 flex flex-col p-8 animate-in fade-in duration-500">
-                                <div className="flex-1 flex gap-8 max-w-[1600px] mx-auto w-full">
-                                    {/* Left: Image Panel */}
-                                    <div className="flex-[1.2] rounded-[48px] overflow-hidden shadow-2xl bg-white/5 border border-white/10 relative group/view">
-                                        <img
-                                            src={MOCK_SCENES_DATA[currentSceneIndex].image_url}
-                                            alt="scene"
-                                            className="w-full h-full object-cover"
-                                        />
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
-                                        <div className="absolute bottom-8 left-8 px-6 py-2 bg-black/40 backdrop-blur-md rounded-2xl text-white font-black">
-                                            {MOCK_SCENES_DATA[currentSceneIndex].scene_no}
-                                        </div>
-                                    </div>
+                            {/* Step 3: Viewing Viewer (Shared Overlay) */}
+                            {readStep === 'viewing' && (
+                                <div className="relative flex-1 flex flex-col">
+                                    {/* Shared Text Overlay */}
+                                    {filteredScenes[currentSceneIndex] && (
+                                        <div className={`absolute z-50 p-12 max-w-[1400px] transition-all duration-500 ease-in-out flex items-start gap-8 pointer-events-none ${getTextPositionClass(currentSceneIndex).replace('items-start', '').replace('items-end', '')} ${getTextPositionClass(currentSceneIndex).includes('left-') ? 'ml-32' : ''} ${getTextPositionClass(currentSceneIndex).includes('right-') ? 'mr-32' : ''}`}>
+                                            {/* Play Button - Scene-wide */}
+                                            {/* Play Button - Scene-wide (Redesigned) */}
+                                            {/* Play Button - Scene-wide (Redesigned) */}
+                                            <button
+                                                onClick={(e) => { e.stopPropagation(); playFullSceneAudio(); }}
+                                                className={`mt-40 w-14 h-14 bg-[#FF6B00] rounded-full shadow-[0_4px_15px_rgba(255,107,0,0.5)] flex items-center justify-center text-white hover:bg-[#FF8500] hover:scale-110 active:scale-95 transition-all pointer-events-auto flex-shrink-0 ${isSceneAudioPlaying ? 'ring-4 ring-orange-300' : ''}`}
+                                            >
+                                                <Play size={28} fill="currentColor" className="ml-1" />
+                                            </button>
 
-                                    {/* Right: Text Panel */}
-                                    <div className="flex-1 flex flex-col gap-6">
-                                        <div className="flex-1 bg-white rounded-[48px] shadow-2xl p-16 flex flex-col justify-center gap-12">
-                                            <p className="text-5xl font-bold text-slate-800 leading-[1.4] tracking-tight">
-                                                {MOCK_SCENES_DATA[currentSceneIndex].script}
-                                            </p>
-                                            <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
-                                                <div
-                                                    className="h-full bg-sky-500 transition-all duration-500"
-                                                    style={{ width: `${((currentSceneIndex + 1) / MOCK_SCENES_DATA.length) * 100}%` }}
-                                                />
+                                            <div className="flex-1 pointer-events-auto">
+                                                <p className={`text-4xl md:text-5xl lg:text-6xl font-black text-white leading-[1.3] drop-shadow-[0_8px_16px_rgba(0,0,0,0.9)] font-fredoka whitespace-pre-line ${getTextPositionClass(currentSceneIndex).includes('text-right') ? 'text-right' : 'text-left'}`}>
+                                                    {(fetchedScript || filteredScenes[currentSceneIndex].script).split(/(?<=[.!?]) +/).map((sentence, idx) => (
+                                                        <span
+                                                            key={idx}
+                                                            onClick={(e) => { e.stopPropagation(); playSentenceAudio(idx); }}
+                                                            className={`cursor-pointer hover:text-orange-300 transition-all inline-block mr-4 mb-3 ${playingSentenceIndex === idx ? 'text-orange-400 drop-shadow-[0_0_20px_rgba(251,146,60,0.9)] scale-105' : ''}`}
+                                                        >
+                                                            {sentence}
+                                                        </span>
+                                                    ))}
+                                                </p>
                                             </div>
                                         </div>
+                                    )}
 
-                                        {/* Navigation Buttons */}
-                                        <div className="flex gap-4">
-                                            <button
-                                                disabled={currentSceneIndex === 0}
-                                                onClick={() => setCurrentSceneIndex((prev: number) => prev - 1)}
-                                                className={`flex-1 h-32 rounded-[32px] border-4 flex items-center justify-center transition-all ${currentSceneIndex === 0 ? 'border-white/5 opacity-20' : 'bg-white/10 border-white/20 text-white hover:bg-white/20 active:scale-95'}`}
-                                            >
-                                                <ChevronLeft size={48} />
-                                            </button>
-                                            <button
-                                                onClick={() => {
-                                                    if (currentSceneIndex < MOCK_SCENES_DATA.length - 1) {
-                                                        setCurrentSceneIndex((prev: number) => prev + 1);
-                                                    } else {
-                                                        // End of reading - maybe go to Quiz?
-                                                        if (!unlockedPhases.includes('quiz')) {
-                                                            setUnlockedPhases((prev: Phase[]) => [...prev, 'quiz']);
-                                                        }
-                                                        setCurrentPhase('quiz');
-                                                    }
-                                                }}
-                                                className="flex-[2] h-32 bg-white text-slate-900 rounded-[32px] flex items-center justify-center font-black text-3xl shadow-xl hover:scale-105 active:scale-95 transition-all"
-                                            >
-                                                {currentSceneIndex < MOCK_SCENES_DATA.length - 1 ? (
-                                                    <span className="flex items-center gap-4">Next Scene <ChevronRight size={32} /></span>
-                                                ) : (
-                                                    <span className="flex items-center gap-4 text-orange-600">Finish & Quiz <Sparkles size={32} /></span>
-                                                )}
-                                            </button>
-                                        </div>
+                                    {/* Bottom-Center Dot Pagination Button */}
+                                    {!isScenePickerOpen && (
+                                        <button
+                                            onClick={() => setIsScenePickerOpen(true)}
+                                            className="absolute bottom-12 left-1/2 -translate-x-1/2 flex items-center gap-4 px-8 py-4 bg-black/40 backdrop-blur-3xl rounded-full border border-white/20 z-40 hover:scale-105 active:scale-95 transition-all group"
+                                        >
+                                            <div className="text-white group-hover:text-[#FF6B00] transition-colors">
+                                                <ChevronUp size={24} />
+                                            </div>
+                                            <div className="flex items-center gap-3">
+                                                {filteredScenes.map((_, index) => (
+                                                    <div
+                                                        key={index}
+                                                        className={`w-3 h-3 rounded-full transition-all duration-300 ${index === currentSceneIndex ? 'bg-[#FF6B00] scale-150 shadow-[0_0_12px_#FF6B00]' : 'bg-white/40 group-hover:bg-white/60'}`}
+                                                    />
+                                                ))}
+                                            </div>
+                                        </button>
+                                    )}
+
+                                    {/* Navigation Buttons (Floating) */}
+                                    <div className="absolute inset-y-0 inset-x-8 flex items-center justify-between pointer-events-none">
+                                        <button
+                                            disabled={currentSceneIndex === 0}
+                                            onClick={() => {
+                                                setCurrentSceneIndex(prev => prev - 1);
+                                                setIsScenePickerOpen(false);
+                                            }}
+                                            className={`w-24 h-24 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md flex items-center justify-center text-white border-2 border-white/20 pointer-events-auto transition-all active:scale-90 ${currentSceneIndex === 0 ? 'opacity-0' : 'opacity-100'}`}
+                                        >
+                                            <ChevronLeft size={64} />
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                if (currentSceneIndex < filteredScenes.length - 1) {
+                                                    setCurrentSceneIndex(prev => prev + 1);
+                                                    setIsScenePickerOpen(false);
+                                                } else {
+                                                    setShowPraise(true);
+                                                }
+                                            }}
+                                            className="w-24 h-24 rounded-full bg-white/90 hover:bg-white flex items-center justify-center text-slate-900 border-2 border-white pointer-events-auto transition-all active:scale-90 shadow-2xl"
+                                        >
+                                            <ChevronRight size={64} />
+                                        </button>
                                     </div>
                                 </div>
+                            )}
+
+                            {/* Shared Scene Picker Overlay */}
+                            {isScenePickerOpen && (
+                                <>
+                                    <div className="fixed inset-0 z-[60] bg-black/40 backdrop-blur-sm" onClick={() => setIsScenePickerOpen(false)} />
+                                    <div className="absolute bottom-0 inset-x-0 bg-black/95 backdrop-blur-3xl border-t-2 border-white/10 z-[70] p-12 transition-all duration-500 animate-in slide-in-from-bottom flex flex-col gap-8">
+                                        <button
+                                            onClick={() => setIsScenePickerOpen(false)}
+                                            className="w-full flex justify-center group"
+                                        >
+                                            <div className="bg-white/10 rounded-full px-12 py-3 border border-white/20 flex items-center gap-4 hover:bg-white/20 transition-all">
+                                                <ChevronDown size={32} className="text-white" />
+                                                <span className="text-white font-black uppercase tracking-widest text-xl">Close Picker</span>
+                                            </div>
+                                        </button>
+                                        <div className="flex gap-6 overflow-x-auto pb-10 scrollbar-hide snap-x pt-4">
+                                            {filteredScenes.map((scene, idx) => (
+                                                <button
+                                                    key={idx}
+                                                    onClick={() => {
+                                                        setCurrentSceneIndex(idx);
+                                                        setIsScenePickerOpen(false);
+                                                    }}
+                                                    className={`relative flex-shrink-0 w-72 aspect-video rounded-3xl overflow-hidden snap-start transition-all duration-300 ${idx === currentSceneIndex ? 'ring-6 ring-orange-500 scale-105 shadow-[0_0_50px_rgba(255,107,0,0.6)] z-10' : 'opacity-50 hover:opacity-100 ring-2 ring-white/10'}`}
+                                                >
+                                                    <img src={scene.image_url} className="w-full h-full object-cover" />
+                                                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
+                                                    <div className="absolute bottom-4 left-6 text-white font-black text-xl">Scene {String(idx + 1).padStart(2, '0')}</div>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </>
+                            )}
+                        </div>
+                    )
+                }
+
+                {
+                    currentPhase !== 'watch' && currentPhase !== 'read' && (
+                        <div className="flex flex-col items-center gap-8 animate-in fade-in zoom-in duration-500">
+                            <div className="w-32 h-32 bg-slate-100 rounded-[40px] flex items-center justify-center text-slate-300">
+                                {currentPhase === 'quiz' && <HelpCircle size={64} />}
+                                {currentPhase === 'speak' && <MessageCircle size={64} />}
                             </div>
-                        )}
+                            <h2 className="text-4xl font-black text-slate-300 font-jua">Coming Soon!</h2>
+                            <button
+                                onClick={(e: React.MouseEvent) => { e.stopPropagation(); setCurrentPhase('watch'); }}
+                                className="text-sky-400 font-bold flex items-center gap-2 hover:underline"
+                            >
+                                <Video size={20} /> Back to Watch
+                            </button>
+                        </div>
+                    )
+                }
+                {/* [NEW] Praise Overlay (Read Complete) */}
+                {showPraise && (
+                    <div
+                        className="fixed inset-0 z-[110] bg-black/80 backdrop-blur-sm flex items-center justify-center animate-in fade-in duration-500 cursor-pointer"
+                        onClick={() => {
+                            setShowPraise(false);
+                            setShowSceneSelect(true);
+                        }}
+                    >
+                        <div className="relative flex flex-col items-center justify-center animate-in zoom-in-50 duration-500">
+                            {/* Glow Effect */}
+                            <div className="absolute inset-0 bg-yellow-400/30 blur-[100px] rounded-full"></div>
+
+                            {/* Praise Badge Image */}
+                            <img src="/UI/praise_badge.png" alt="Great! Let's speak" className="w-[600px] h-auto object-contain drop-shadow-2xl relative z-10 hover:scale-105 transition-transform duration-300" />
+
+                            <p className="mt-8 text-white text-2xl font-fredoka font-bold animate-pulse">Click to continue</p>
+                        </div>
                     </div>
                 )}
 
-                {currentPhase !== 'watch' && currentPhase !== 'read' && (
-                    <div className="flex flex-col items-center gap-8 animate-in fade-in zoom-in duration-500">
-                        <div className="w-32 h-32 bg-slate-100 rounded-[40px] flex items-center justify-center text-slate-300">
-                            {currentPhase === 'read' && <BookOpen size={64} />}
-                            {currentPhase === 'quiz' && <HelpCircle size={64} />}
-                            {currentPhase === 'talk' && <MessageCircle size={64} />}
+                {/* [NEW] Scene Selection Modal (Speak) */}
+                {showSceneSelect && (
+                    <div className="fixed inset-0 z-[120] bg-black/60 backdrop-blur-md flex items-center justify-center animate-in fade-in duration-300">
+                        <div className="bg-white rounded-[40px] p-8 w-[90%] max-w-5xl shadow-2xl animate-in slide-in-from-bottom-10 duration-500 relative">
+                            {/* Close Button */}
+                            <button
+                                onClick={() => setShowSceneSelect(false)}
+                                className="absolute top-6 right-6 p-2 rounded-full hover:bg-slate-100 transition-colors"
+                            >
+                                <X size={32} className="text-slate-400" />
+                            </button>
+
+                            {/* Header */}
+                            <div className="text-center mb-8">
+                                <h2 className="text-4xl font-black text-slate-800 font-fredoka mb-2">Scenes you want to Read Aloud</h2>
+                                <div className="flex items-center justify-center gap-2">
+                                    <label className="flex items-center gap-2 cursor-pointer select-none">
+                                        <div
+                                            className={`w-6 h-6 border-2 rounded-md flex items-center justify-center transition-colors ${selectedScenes.length === filteredScenes.length ? 'bg-orange-500 border-orange-500 text-white' : 'border-slate-300 text-transparent'}`}
+                                            onClick={() => {
+                                                if (selectedScenes.length === filteredScenes.length) {
+                                                    setSelectedScenes([]);
+                                                } else {
+                                                    setSelectedScenes(filteredScenes.map((_, i) => i));
+                                                }
+                                            }}
+                                        >
+                                            <Check size={16} />
+                                        </div>
+                                        <span className="text-slate-500 font-bold text-lg">All</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            {/* Scene Grid */}
+                            <div className="grid grid-cols-2 md:grid-cols-3 gap-6 max-h-[60vh] overflow-y-auto p-2">
+                                {filteredScenes.map((scene, idx) => {
+                                    const isSelected = selectedScenes.includes(idx);
+                                    return (
+                                        <div key={idx} className="relative group cursor-pointer" onClick={() => {
+                                            if (isSelected) {
+                                                setSelectedScenes(prev => prev.filter(i => i !== idx));
+                                            } else {
+                                                setSelectedScenes(prev => [...prev, idx]);
+                                            }
+                                        }}>
+                                            <div className={`aspect-video bg-slate-100 rounded-xl overflow-hidden border-4 transition-all duration-200 ${isSelected ? 'border-orange-500 ring-4 ring-orange-200' : 'border-slate-200 group-hover:border-orange-300'}`}>
+                                                <img src={scene.image_url} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+
+                                                {/* Checkbox Overlay */}
+                                                <div className={`absolute top-2 right-2 w-8 h-8 rounded-full flex items-center justify-center shadow-lg border-2 ${isSelected ? 'border-orange-500 bg-orange-500 text-white' : 'border-slate-300 bg-white text-transparent'}`}>
+                                                    <Check size={20} strokeWidth={3} />
+                                                </div>
+
+                                                {/* Scene Label */}
+                                                <div className="absolute bottom-0 inset-x-0 bg-black/50 text-white text-center py-1 text-sm font-bold backdrop-blur-sm">
+                                                    Scene {idx + 1}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+
+                            {/* Footer Action */}
+                            <div className="mt-8 flex justify-center">
+                                <button
+                                    onClick={() => {
+                                        if (selectedScenes.length === 0) {
+                                            alert("Please select at least one scene!");
+                                            return;
+                                        }
+                                        setShowSceneSelect(false);
+                                        // Set phase to 'speak' instead of 'quiz'
+                                        setCurrentPhase('speak');
+                                        if (!unlockedPhases.includes('speak')) {
+                                            setUnlockedPhases(prev => [...prev, 'speak']);
+                                            updateReadingProgress(book.id, 'read', true);
+                                        }
+                                    }}
+                                    className="px-16 py-4 bg-white border-4 border-slate-200 text-slate-700 rounded-full text-2xl font-black font-fredoka hover:bg-orange-500 hover:text-white hover:border-orange-500 transition-all shadow-xl hover:shadow-orange-200 active:scale-95"
+                                >
+                                    OK
+                                </button>
+                            </div>
                         </div>
-                        <h2 className="text-4xl font-black text-slate-300 font-jua">Coming Soon!</h2>
-                        <button
-                            onClick={(e: React.MouseEvent) => { e.stopPropagation(); setCurrentPhase('watch'); }}
-                            className="text-sky-400 font-bold flex items-center gap-2 hover:underline"
-                        >
-                            <Video size={20} /> Back to Watch
-                        </button>
                     </div>
                 )}
-            </div>
-        </div>
+            </div >
+        </div >
     );
 };
 

@@ -172,6 +172,127 @@
         .animate-flash-yellow {
             animation: flash-yellow 1s infinite;
         }
+
+        /* Settings Toggle Styles */
+        .toggle-btn {
+            width: 100px;
+            height: 48px;
+            background-color: #000;
+            /* Strict Black for OFF */
+            border-radius: 24px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            padding: 0 6px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .toggle-btn.on {
+            background-color: #fff;
+            /* Strict White for ON */
+            border-color: #fff;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+        }
+
+        .toggle-circle {
+            width: 36px;
+            height: 36px;
+            background-color: #fff;
+            /* White circle on Black background (OFF) */
+            border-radius: 50%;
+            position: absolute;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            right: 6px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+            z-index: 2;
+        }
+
+        .toggle-btn.on .toggle-circle {
+            background-color: #000;
+            /* Black circle on White background (ON) */
+            transform: translateX(0);
+            /* Circle stays Right in 'ON' position */
+        }
+
+        .toggle-btn.off .toggle-circle {
+            transform: translateX(-52px);
+            /* Circle moves Left in 'OFF' position */
+        }
+
+        .toggle-text {
+            color: #fff;
+            /* White text on Black background (OFF) */
+            font-weight: 900;
+            font-size: 18px;
+            margin-left: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            z-index: 1;
+            transition: color 0.3s;
+        }
+
+        .toggle-btn.on .toggle-text {
+            color: #000;
+            /* Black text on White background (ON) */
+        }
+
+        .toggle-btn.off .toggle-text {
+            margin-left: 50px;
+        }
+
+        .settings-btn-group button {
+            background-color: #000;
+            /* Strict Black for Inactive */
+            color: #fff;
+            padding: 14px 28px;
+            border-radius: 16px;
+            font-weight: 900;
+            font-size: 20px;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .settings-btn-group button.active {
+            background-color: #fff;
+            /* Strict White for Active */
+            color: #000;
+            box-shadow: 0 8px 16px rgba(255, 255, 255, 0.4);
+            border-color: #fff;
+        }
+
+        .settings-btn-group button:disabled {
+            opacity: 0.2;
+            cursor: not-allowed;
+        }
+
+        /* Glassmorphism Popup Style */
+        .glass-popup {
+            background-color: rgba(0, 0, 0, 0.25) !important;
+            /* Further increased transparency: 0.4 -> 0.25 */
+            backdrop-filter: blur(8px) !important;
+            /* Further reduced blur: 12px -> 8px */
+            -webkit-backdrop-filter: blur(8px) !important;
+            border: 4px solid rgba(255, 255, 255, 0.15) !important;
+            box-shadow: 0 32px 80px rgba(0, 0, 0, 0.9) !important;
+        }
+
+        .settings-label {
+            font-size: 30px !important;
+            /* Slightly larger (+2pt from prev 28) */
+            font-weight: bold !important;
+            color: #fff !important;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .settings-title {
+            font-size: 42px !important;
+            /* Slightly larger (+2pt from prev 40) */
+            font-weight: 900 !important;
+            color: #fff !important;
+            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+        }
     </style>
 </head>
 
@@ -323,9 +444,73 @@
         </div>
     </div>
 
+    <!-- Settings Overlay -->
+    <div id="settingsOverlay" class="fixed inset-0 z-[200] flex items-center justify-center hidden pointer-events-none">
+        <div
+            class="glass-popup w-[560px] rounded-[60px] p-16 relative z-10 text-white font-fredoka pointer-events-auto animate-in fade-in zoom-in-95 duration-300">
+            <div class="flex items-center mb-12 relative h-12">
+                <h2 class="settings-title w-full text-center">Setting</h2>
+                <button onclick="toggleSettings()"
+                    class="absolute right-0 w-10 h-10 bg-black/20 rounded-full flex items-center justify-center hover:bg-black/40">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+
+            <div class="space-y-10">
+                <!-- Narration -->
+                <div class="flex justify-between items-center">
+                    <span class="settings-label">Narration</span>
+                    <div id="toggle-narration" onclick="setNarration(!isNarrationOn)" class="toggle-btn">
+                        <span class="toggle-text">on</span>
+                        <div class="toggle-circle"></div>
+                    </div>
+                </div>
+
+                <!-- Page Turn -->
+                <div class="flex justify-between items-center">
+                    <span class="settings-label">Page Turn</span>
+                    <div id="toggle-pageturn" onclick="setPageTurn(!isPageTurnOn)" class="toggle-btn">
+                        <span class="toggle-text">on</span>
+                        <div class="toggle-circle"></div>
+                    </div>
+                </div>
+
+                <!-- Narration Speed -->
+                <div class="space-y-6">
+                    <span class="settings-label block text-left">Narration Speed</span>
+                    <div class="flex gap-4 settings-btn-group" id="speed-group">
+                        <button onclick="setNarrationSpeed('slow')" id="speed-slow" class="flex-1">Slow</button>
+                        <button onclick="setNarrationSpeed('normal')" id="speed-normal"
+                            class="flex-1 active">Normal</button>
+                        <button onclick="setNarrationSpeed('fast')" id="speed-fast" class="flex-1">Fast</button>
+                    </div>
+                </div>
+
+                <!-- Text Size -->
+                <div class="space-y-6">
+                    <span class="settings-label block text-left">Text Size</span>
+                    <div class="flex gap-4 settings-btn-group">
+                        <button onclick="setTextSize('small')" id="text-small" class="flex-1 text-sm">Text</button>
+                        <button onclick="setTextSize('medium')" id="text-medium"
+                            class="flex-1 text-xl active">Text</button>
+                        <button onclick="setTextSize('large')" id="text-large"
+                            class="flex-1 text-4xl font-black">Text</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Learning Mode Overlay -->
     <div id="learningModeOverlay"
         class="fixed inset-0 z-[100] bg-black hidden overflow-hidden shadow-[0_-20px_50px_rgba(0,0,0,0.3)]">
+
+        <!-- Fixed Settings Button (Global in Reading) -->
+        <button id="fixedSettingsBtn" onclick="toggleSettings()"
+            class="fixed bottom-12 left-12 w-16 h-16 bg-black/40 backdrop-blur-md rounded-2xl flex items-center justify-center text-white hover:bg-black/60 transition-all pointer-events-auto shadow-xl z-[120] hidden">
+            <i data-lucide="settings" class="w-10 h-10"></i>
+        </button>
+
         <!-- Floating GNB Wrapper -->
         <div id="gnbWrapper" class="fixed top-0 inset-x-0 z-[110]">
             <nav id="studyGnb"
@@ -600,6 +785,13 @@
         let currentPhase = 'home'; // 'home' or 'read'
         let currentSceneIndex = 0;
         let selectedReadingMode = 'ebook';
+
+        // Settings State
+        let isSettingsOpen = false;
+        let isNarrationOn = true;
+        let isPageTurnOn = true;
+        let narrationSpeed = 'normal';
+        let textSize = 'medium';
         const scenesData = [
             { book_id: "silent-stick", scene_no: "SC01", script: "The frozen lake lay still, a big area of gray ice beneath a heavy winter sky.", image_url: "./public/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC01.png" },
             { book_id: "silent-stick", scene_no: "SC02", script: "He hit the puck with force, but his old stick broke suddenly upon impact.", image_url: "./public/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC02.png" },
@@ -788,7 +980,7 @@
             currentModalBookId = bookId;
             currentModalOrigin = origin;
 
-            document.getElementById('modalTitle').innerText = book.title;
+            document.getElementById('modalTitle ').innerText = book.title;
             document.getElementById('modalImg').src = book.src;
             document.getElementById('modalLexile').innerText = `Lexile: ${book.lexile}`;
             document.getElementById('modalWords').innerText = `${book.wordCount} Words`;
@@ -910,7 +1102,7 @@
                                     <div class="aspect-[4/3] bg-slate-50 rounded-[32px] p-8 border-4 transition-all flex flex-col items-center justify-center gap-6 group-hover:bg-sky-50 outline-none
                                         ${selectedReadingMode === 'ebook' ? 'border-sky-400 bg-sky-50 shadow-[0_0_30px_rgba(56,189,248,0.3)]' : 'border-slate-100 group-hover:border-sky-200'}">
                                         <div class="w-full h-48 bg-white rounded-2xl shadow-lg flex items-center justify-center group-hover:scale-110 transition-transform overflow-hidden relative border-4 border-white px-4">
-                                            <img src="./public/UI/Ebook.png" alt="ebook" class="w-full h-full object-contain" onerror="this.src='https://img.icons8.com/color/144/storybook.png'"/>
+                                            <img src="./public/UI/Ebook.png" alt="ebook" class="w-full  h-full object-contain" onerror="this.src='https://img.icons8.com/color/144/storybook.png'"/>
                                         </div>
                                         <h3 class="text-3xl font-black text-slate-800 font-fredoka">E-book</h3>
                                     </div>
@@ -1220,6 +1412,7 @@
                 if (relevantScenes.length > 0) {
                     currentPhase = 'read';
                     currentSceneIndex = 0;
+                    setPhase('read');
                     renderReadPhase();
                     return;
                 }
@@ -1267,8 +1460,8 @@
             isReadUnlocked = false;
             currentPhase = 'watch';
             document.getElementById('tab-read').classList.add('opacity-50', 'cursor-not-allowed');
-            document.getElementById('tab-read').innerHTML = '<i data-lucide="book-open" class="w-4 h-4"></i> Read <i data-lucide="lock" class="w-3 h-3"></i>';
-            document.getElementById('nextPhaseContainer').classList.add('opacity-0', 'translate-y-10', 'pointer-events-none');
+            document.getElementById('tab-read').innerHTML = '<i data-lucide="book-open" class="w-4 h-4"></i> Read <i data-lucide="lock" class="w-3 h-3"> </i>';
+            document.getElementById('nextPhaseContainer').classList.add('opacity-0', 'translate-y-10', 'pointer -events-none');
             setPhase('watch');
             lucide.createIcons();
         }
@@ -1349,6 +1542,16 @@
                 }
             });
 
+            // Toggle Fixed Settings Button visibility
+            const fixedSettingsBtn = document.getElementById('fixedSettingsBtn');
+            if (fixedSettingsBtn) {
+                if (phase === 'read') {
+                    fixedSettingsBtn.classList.remove('hidden');
+                } else {
+                    fixedSettingsBtn.classList.add('hidden');
+                }
+            }
+
             if (phase === 'read') {
                 document.getElementById('studyVideo').pause();
             }
@@ -1383,7 +1586,7 @@
         }
 
         function seekVideo(e) {
-            const video = document.getElementById('studyVideo');
+            video = document.getElementById('studyVideo');
             const rect = e.currentTarget.getBoundingClientRect();
             const pos = (e.clientX - rect.left) / rect.width;
             video.currentTime = pos * video.duration;
@@ -1516,7 +1719,7 @@
                     }
                 }
             } catch (e) {
-                console.error("Fetch failed", e);
+                console.error("Fet            d", e);
             }
             return scene.script; // Fallback
         }
@@ -1818,9 +2021,103 @@
             bookContainer.scrollLeft = scrollLeftPos - walk;
         });
 
-        renderBooks();
-        renderHero();
-        lucide.createIcons();
+        // Settings Logic
+        function toggleSettings() {
+            isSettingsOpen = !isSettingsOpen;
+            const overlay = document.getElementById('settingsOverlay');
+            if (isSettingsOpen) {
+                overlay.classList.remove('hidden');
+                updateSettingsUI();
+            } else {
+                overlay.classList.add('hidden');
+            }
+            lucide.createIcons();
+        }
+
+        function setNarration(val) {
+            isNarrationOn = val;
+            if (!isNarrationOn) {
+                stopAudio();
+                isPageTurnOn = false;
+            }
+            updateSettingsUI();
+        }
+
+        function setPageTurn(val) {
+            if (!isNarrationOn) return;
+            isPageTurnOn = val;
+            updateSettingsUI();
+        }
+
+        function setNarrationSpeed(speed) {
+            if (!isNarrationOn) return;
+            narrationSpeed = speed;
+            updateSettingsUI();
+        }
+
+        function setTextSize(size) {
+            textSize = size;
+            updateSettingsUI();
+
+            // Apply text size real-time
+            const scriptEl = document.getElementById('viewing-script');
+            if (scriptEl) {
+                scriptEl.classList.remove('text-3xl', 'text-5xl', 'text-7xl');
+                if (size === 'small') scriptEl.classList.add('text-3xl');
+                else if (size === 'medium') scriptEl.classList.add('text-5xl');
+                else if (size === 'large') scriptEl.classList.add('text-7xl');
+            }
+        }
+
+        function updateSettingsUI() {
+            // Update Toggles
+            const narrBtn = document.getElementById('toggle-narration');
+            const pageBtn = document.getElementById('toggle-pageturn');
+
+            if (isNarrationOn) {
+                narrBtn.classList.remove('off');
+                narrBtn.classList.add('on');
+                narrBtn.querySelector('.toggle-text').innerText = 'on';
+            } else {
+                narrBtn.classList.add('off');
+                narrBtn.classList.remove('on');
+                narrBtn.querySelector('.toggle-text').innerText = 'off';
+            }
+
+            if (isPageTurnOn) {
+                pageBtn.classList.remove('off');
+                pageBtn.classList.add('on');
+                pageBtn.querySelector('.toggle-text').innerText = 'on';
+            } else {
+                pageBtn.classList.add('off');
+                pageBtn.classList.remove('on');
+                pageBtn.querySelector('.toggle-text').innerText = 'off';
+            }
+
+            // Dependence logic
+            if (!isNarrationOn) {
+                pageBtn.classList.add('opacity-30', 'cursor-not-allowed');
+                pageBtn.setAttribute('disabled', 'true');
+                document.querySelectorAll('#speed-group button').forEach(b => b.setAttribute('disabled', 'true'));
+            } else {
+                pageBtn.classList.remove('opacity-30', 'cursor-not-allowed');
+                pageBtn.removeAttribute('disabled');
+                document.querySelectorAll('#speed-group button').forEach(b => b.removeAttribute('disabled'));
+            }
+
+            // Update Active States for Buttons
+            document.querySelectorAll('.settings-btn-group button').forEach(b => b.classList.remove('active'));
+            document.getElementById(`speed-${narrationSpeed}`).classList.add('active');
+            document.getElementById(`text-${textSize}`).classList.add('active');
+        }
+
+        // Home Screen Initializer
+        document.addEventListener('DOMContentLoaded', () => {
+            renderBooks();
+            renderHero();
+            updateSettingsUI(); /* Sync settings UI on load */
+            lucide.createIcons();
+        });
     </script>
 </body>
 

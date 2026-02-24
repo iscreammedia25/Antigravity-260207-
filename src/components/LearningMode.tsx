@@ -39,7 +39,15 @@ const LearningMode: React.FC<LearningModeProps> = ({
     // [NEW] Praise & Selection State
     const [showPraise, setShowPraise] = useState(false);
     const [showSceneSelect, setShowSceneSelect] = useState(false);
-    const [selectedScenes, setSelectedScenes] = useState<number[]>([0]);
+    const [selectedScenes, setSelectedScenes] = useState<number[]>([]);
+
+    // [NEW] Settings State
+    const [showSettings, setShowSettings] = useState(false);
+    const [isNarrationOn, setIsNarrationOn] = useState(true);
+    const [isPageTurnOn, setIsPageTurnOn] = useState(true);
+    const [narrationSpeed, setNarrationSpeed] = useState(1);
+    const [textSize, setTextSize] = useState<'normal' | 'large' | 'xl'>('large');
+
 
     // Video Player State
     const videoRef = useRef<HTMLVideoElement>(null);
@@ -52,7 +60,9 @@ const LearningMode: React.FC<LearningModeProps> = ({
     const [playingSentenceIndex, setPlayingSentenceIndex] = useState<number | null>(null);
     const [isSceneAudioPlaying, setIsSceneAudioPlaying] = useState(false);
 
-    const playFullSceneAudio = () => {
+    const playFullSceneAudio = (force: boolean = false) => {
+        if (!force && !isNarrationOn) return; // Respect narration setting only when not forced
+
         const scene = filteredScenes[currentSceneIndex];
         if (!scene || !scene.full_audio) return;
 
@@ -61,21 +71,31 @@ const LearningMode: React.FC<LearningModeProps> = ({
         }
 
         const audio = new Audio(scene.full_audio);
+        audio.playbackRate = narrationSpeed; // Apply speed
         audioRef.current = audio;
         setIsSceneAudioPlaying(true);
         setPlayingSentenceIndex(null);
 
         audio.play().catch(err => console.error("Audio play failed:", err));
-        audio.onended = () => setIsSceneAudioPlaying(false);
+        audio.onended = () => {
+            setIsSceneAudioPlaying(false);
+            // [NEW] Auto Page Turn Logic
+            if (isPageTurnOn && currentSceneIndex < filteredScenes.length - 1) {
+                setTimeout(() => {
+                    setCurrentSceneIndex(prev => prev + 1);
+                }, 1000);
+            } else if (isPageTurnOn && currentSceneIndex === filteredScenes.length - 1) {
+                setShowPraise(true);
+            }
+        };
     };
 
-    const playSentenceAudio = (index: number) => {
+    const playSentenceAudio = (index: number, force: boolean = false) => {
+        if (!force && !isNarrationOn) return; // Respect narration setting only when not forced
+
         const scene = filteredScenes[currentSceneIndex];
         if (!scene) return;
 
-        // Note: For Silent Stick, each scene has one sentence. 
-        // We'll use the full_audio for now as there are no separate sentence files.
-        // If they existed, we'd use a naming pattern like _01, _02 etc.
         const audioUrl = scene.full_audio;
 
         if (!audioUrl) return;
@@ -85,6 +105,7 @@ const LearningMode: React.FC<LearningModeProps> = ({
         }
 
         const audio = new Audio(audioUrl);
+        audio.playbackRate = narrationSpeed; // Apply speed
         audioRef.current = audio;
         setPlayingSentenceIndex(index);
         setIsSceneAudioPlaying(false);
@@ -101,6 +122,50 @@ const LearningMode: React.FC<LearningModeProps> = ({
         setPlayingSentenceIndex(null);
         setIsSceneAudioPlaying(false);
     };
+
+    useEffect(() => {
+        return () => {
+            stopAudio();
+        };
+    }, []);
+
+    // [NEW] Default Settings based on Reading Mode
+    useEffect(() => {
+        if (readingMode === 'ebook') {
+            setIsNarrationOn(false);
+            setIsPageTurnOn(false);
+        } else if (readingMode === 'interactive') {
+            setIsNarrationOn(true);
+            setIsPageTurnOn(true);
+        }
+    }, [readingMode]);
+
+    // [NEW] Narration Link Logic (Refined)
+    const prevNarrationRef = useRef(isNarrationOn);
+    useEffect(() => {
+        if (prevNarrationRef.current === isNarrationOn) return;
+
+        if (!isNarrationOn) {
+            // ON -> OFF: Force Page Turn OFF and stop audio
+            stopAudio();
+            setIsPageTurnOn(false);
+        } else {
+            // OFF -> ON: Trigger playback, Page Turn remains same (OFF if it was OFF)
+            playFullSceneAudio();
+        }
+        prevNarrationRef.current = isNarrationOn;
+    }, [isNarrationOn]);
+
+    // [NEW] Auto Play on Scene Change
+    useEffect(() => {
+        if (readStep === 'viewing' && isNarrationOn) {
+            // Small delay to ensure text is rendered/ready
+            const timer = setTimeout(() => {
+                playFullSceneAudio();
+            }, 500);
+            return () => clearTimeout(timer);
+        }
+    }, [currentSceneIndex, readStep]);
 
     // Stop audio when changing scenes
     useEffect(() => {
@@ -372,7 +437,6 @@ const LearningMode: React.FC<LearningModeProps> = ({
                                 ref={videoRef}
                                 className="w-full h-full object-contain"
                                 src={book.videoUrl}
-                                autoPlay
                                 playsInline
                                 onPlay={handlePlay}
                                 onEnded={handleVideoEnd}
@@ -472,7 +536,7 @@ const LearningMode: React.FC<LearningModeProps> = ({
                             {/* Background Layer: E-Book Image or Intro BG */}
                             {readStep === 'viewing' && filteredScenes[currentSceneIndex] ? (
                                 <img
-                                    src={filteredScenes[currentSceneIndex].image_url.startsWith('http') ? convertDriveLink(filteredScenes[currentSceneIndex].image_url) : filteredScenes[currentSceneIndex].image_url}
+                                    src={filteredScenes[currentSceneIndex].image_url}
                                     alt="scene"
                                     referrerPolicy="no-referrer"
                                     className="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000"
@@ -481,76 +545,59 @@ const LearningMode: React.FC<LearningModeProps> = ({
                                 <div
                                     className="absolute inset-0 bg-cover bg-center transition-all duration-1000"
                                     style={{
-                                        backgroundImage: `url(${convertDriveLink(MOCK_BOOK_META.cover_url)})`,
-                                        filter: 'brightness(0.3) blur(8px)'
+                                        backgroundImage: `url(${filteredScenes[0]?.image_url || convertDriveLink(book.src)})`,
+                                        filter: readStep === 'selection' ? 'brightness(0.3) blur(8px)' : 'brightness(0.3) blur(8px)'
                                     }}
                                 />
                             )}
 
                             {/* Step 1: Mode Selection Popup (Thematic Backdrop) */}
                             {readStep === 'selection' && (
-                                <div className="relative z-10 flex-1 flex flex-col items-center justify-center animate-in fade-in duration-500">
-                                    <div className="absolute inset-0">
-                                        <img
-                                            src="/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC01.png"
-                                            alt="scene-bg"
-                                            className="w-full h-full object-cover opacity-60 brightness-75"
-                                        />
-                                        <div className="absolute inset-0 bg-black/40" />
-                                    </div>
-
-                                    <div className="relative z-20 w-full max-w-4xl bg-white rounded-[48px] shadow-2xl p-12 flex flex-col items-center gap-12">
-                                        <div className="flex gap-8 w-full">
-                                            <button
-                                                onClick={() => setReadingMode('ebook')}
-                                                className={`flex-1 group transition-all duration-300`}
-                                            >
-                                                <div className={`aspect-[4/3] bg-slate-50 rounded-[32px] p-8 border-4 transition-all flex flex-col items-center justify-center gap-6 group-hover:bg-sky-50 outline-none
-                                                ${readingMode === 'ebook' ? 'border-sky-400 bg-sky-50 shadow-[0_0_30px_rgba(56,189,248,0.3)]' : 'border-slate-100 group-hover:border-sky-200'}`}>
-                                                    <div className="w-full h-48 bg-white rounded-2xl shadow-lg flex items-center justify-center group-hover:scale-110 transition-transform overflow-hidden relative border-4 border-white px-4">
-                                                        <img
-                                                            src="/UI/Ebook.png"
-                                                            alt="E-book"
-                                                            className="w-full h-full object-contain"
-                                                            onError={(e) => {
-                                                                (e.target as HTMLImageElement).src = 'https://img.icons8.com/color/144/storybook.png';
-                                                            }}
-                                                        />
-                                                    </div>
-                                                    <h3 className="text-3xl font-black text-slate-800 font-fredoka">E-book</h3>
+                                <div className="relative z-10 flex-1 flex flex-col items-center justify-center animate-in fade-in zoom-in duration-500 p-8">
+                                    <h2 className="text-6xl font-black text-white mb-16 font-fredoka text-center drop-shadow-2xl">
+                                        How would you like to read?
+                                    </h2>
+                                    <div className="flex gap-8 w-full max-w-5xl mb-16">
+                                        <button
+                                            onClick={() => setReadingMode('ebook')}
+                                            className={`flex-1 group relative p-12 rounded-[48px] border-4 transition-all duration-300 ${readingMode === 'ebook' ? 'bg-sky-500/30 border-sky-400 shadow-[0_0_50px_rgba(56,189,248,0.4)] scale-105' : 'bg-white/10 border-white/20 hover:bg-white/20 hover:border-white/40'}`}
+                                        >
+                                            <div className={`w-28 h-28 rounded-3xl flex items-center justify-center mb-10 mx-auto transition-all ${readingMode === 'ebook' ? 'bg-white text-sky-500 shadow-xl' : 'bg-white/20 text-white group-hover:bg-white/30'} overflow-hidden`}>
+                                                <img src="/UI/Ebook.png" className="w-full h-full object-contain p-4" />
+                                            </div>
+                                            <h3 className="text-4xl font-black mb-4 text-white font-fredoka">E-Book</h3>
+                                            <p className="text-xl font-medium text-slate-300 opacity-90 leading-relaxed">Classic reading experience with clean text.</p>
+                                            {readingMode === 'ebook' && (
+                                                <div className="absolute -top-4 -right-4 w-12 h-12 bg-sky-400 rounded-full flex items-center justify-center text-white shadow-lg border-4 border-white">
+                                                    <Check size={24} />
                                                 </div>
-                                            </button>
-
-                                            <button
-                                                onClick={() => setReadingMode('interactive')}
-                                                className={`flex-1 group transition-all duration-300`}
-                                            >
-                                                <div className={`aspect-[4/3] bg-slate-50 rounded-[32px] p-8 border-4 transition-all flex flex-col items-center justify-center gap-6 group-hover:bg-sky-50 outline-none
-                                                ${readingMode === 'interactive' ? 'border-sky-400 bg-sky-50 shadow-[0_0_30px_rgba(56,189,248,0.3)]' : 'border-slate-100 group-hover:border-sky-200'}`}>
-                                                    <div className="w-full h-48 bg-white rounded-2xl shadow-lg flex items-center justify-center group-hover:rotate-12 transition-transform overflow-hidden relative border-4 border-white px-4">
-                                                        <img
-                                                            src="/UI/Anibook.png"
-                                                            alt="Ani-book"
-                                                            className="w-full h-full object-contain"
-                                                            onError={(e) => {
-                                                                (e.target as HTMLImageElement).src = 'https://img.icons8.com/color/144/dragon.png';
-                                                            }}
-                                                        />
-                                                    </div>
-                                                    <h3 className="text-3xl font-black text-slate-800 font-fredoka">Ani-book</h3>
-                                                </div>
-                                            </button>
-                                        </div>
+                                            )}
+                                        </button>
 
                                         <button
-                                            onClick={() => setReadStep('intro')}
-                                            disabled={!readingMode}
-                                            className="w-full h-20 bg-slate-900 text-white rounded-[24px] text-2xl font-black shadow-xl hover:bg-slate-800 active:scale-95 transition-all disabled:opacity-30 disabled:pointer-events-none"
+                                            onClick={() => setReadingMode('interactive')}
+                                            className={`flex-1 group relative p-12 rounded-[48px] border-4 transition-all duration-300 ${readingMode === 'interactive' ? 'bg-orange-500/30 border-orange-400 shadow-[0_0_50px_rgba(251,146,60,0.4)] scale-105' : 'bg-white/10 border-white/20 hover:bg-white/20 hover:border-white/40'}`}
                                         >
-                                            OK
+                                            <div className={`w-28 h-28 rounded-3xl flex items-center justify-center mb-10 mx-auto transition-all ${readingMode === 'interactive' ? 'bg-white text-orange-500 shadow-xl' : 'bg-white/20 text-white group-hover:bg-white/30'} overflow-hidden`}>
+                                                <img src="/UI/Anibook.png" className="w-full h-full object-contain p-4" />
+                                            </div>
+                                            <h3 className="text-4xl font-black mb-4 text-white font-fredoka">Ani-book</h3>
+                                            <p className="text-xl font-medium text-slate-300 opacity-90 leading-relaxed">Read along with voice, images, and fun effects!</p>
+                                            {readingMode === 'interactive' && (
+                                                <div className="absolute -top-4 -right-4 w-12 h-12 bg-orange-400 rounded-full flex items-center justify-center text-white shadow-lg border-4 border-white">
+                                                    <Check size={24} />
+                                                </div>
+                                            )}
                                         </button>
-                                        <p className="text-slate-400 font-bold">* You <span className="underline decoration-slate-300">can't change the mode</span> while reading.</p>
                                     </div>
+
+                                    <button
+                                        onClick={() => setReadStep('intro')}
+                                        disabled={!readingMode}
+                                        className="w-full max-w-xl h-24 bg-white text-slate-900 rounded-[32px] text-4xl font-black shadow-2xl hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-30 disabled:pointer-events-none"
+                                    >
+                                        OK
+                                    </button>
                                 </div>
                             )}
 
@@ -558,7 +605,7 @@ const LearningMode: React.FC<LearningModeProps> = ({
                             {readStep === 'intro' && (
                                 <div className="relative z-10 flex-1 flex flex-col animate-in fade-in duration-500">
                                     <div className="absolute inset-0">
-                                        <img src="/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC01.png" alt="scene-bg" className="w-full h-full object-cover" />
+                                        <img src={filteredScenes[0]?.image_url || "/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC01.png"} alt="scene-bg" className="w-full h-full object-cover" />
                                     </div>
 
                                     <div className="absolute top-20 left-1/2 -translate-x-1/2 px-16 py-6 bg-white/70 backdrop-blur-md rounded-[32px] shadow-2xl border-4 border-white/20">
@@ -604,19 +651,23 @@ const LearningMode: React.FC<LearningModeProps> = ({
                                             {/* Play Button - Scene-wide (Redesigned) */}
                                             {/* Play Button - Scene-wide (Redesigned) */}
                                             <button
-                                                onClick={(e) => { e.stopPropagation(); playFullSceneAudio(); }}
+                                                onClick={(e) => { e.stopPropagation(); playFullSceneAudio(true); }}
                                                 className={`mt-40 w-14 h-14 bg-[#FF6B00] rounded-full shadow-[0_4px_15px_rgba(255,107,0,0.5)] flex items-center justify-center text-white hover:bg-[#FF8500] hover:scale-110 active:scale-95 transition-all pointer-events-auto flex-shrink-0 ${isSceneAudioPlaying ? 'ring-4 ring-orange-300' : ''}`}
                                             >
                                                 <Play size={28} fill="currentColor" className="ml-1" />
                                             </button>
 
                                             <div className="flex-1 pointer-events-auto">
-                                                <p className={`text-4xl md:text-5xl lg:text-6xl font-black text-white leading-[1.3] drop-shadow-[0_8px_16px_rgba(0,0,0,0.9)] font-fredoka whitespace-pre-line ${getTextPositionClass(currentSceneIndex).includes('text-right') ? 'text-right' : 'text-left'}`}>
+                                                <p className={`font-black text-white leading-[1.3] drop-shadow-[0_8px_16px_rgba(0,0,0,0.9)] font-fredoka whitespace-pre-line 
+                                                    ${getTextPositionClass(currentSceneIndex).includes('text-right') ? 'text-right' : 'text-left'}
+                                                    ${textSize === 'normal' ? 'text-4xl md:text-5xl lg:text-6xl' :
+                                                        textSize === 'large' ? 'text-5xl md:text-6xl lg:text-7xl' :
+                                                            'text-6xl md:text-7xl lg:text-8xl'}`}>
                                                     {(fetchedScript || filteredScenes[currentSceneIndex].script).split(/(?<=[.!?]) +/).map((sentence, idx) => (
                                                         <span
                                                             key={idx}
-                                                            onClick={(e) => { e.stopPropagation(); playSentenceAudio(idx); }}
-                                                            className={`cursor-pointer hover:text-orange-300 transition-all inline-block mr-4 mb-3 ${playingSentenceIndex === idx ? 'text-orange-400 drop-shadow-[0_0_20px_rgba(251,146,60,0.9)] scale-105' : ''}`}
+                                                            onClick={(e) => { e.stopPropagation(); playSentenceAudio(idx, true); }}
+                                                            className={`cursor-pointer hover:text-orange-300 transition-all inline-block mr-4 mb-3 ${(playingSentenceIndex === idx || isSceneAudioPlaying) ? 'text-orange-400 drop-shadow-[0_0_20px_rgba(251,146,60,0.9)] scale-105' : ''}`}
                                                         >
                                                             {sentence}
                                                         </span>
@@ -628,35 +679,42 @@ const LearningMode: React.FC<LearningModeProps> = ({
 
                                     {/* Bottom-Center Dot Pagination Button */}
                                     {!isScenePickerOpen && (
-                                        <button
-                                            onClick={() => setIsScenePickerOpen(true)}
-                                            className="absolute bottom-12 left-1/2 -translate-x-1/2 flex items-center gap-4 px-8 py-4 bg-black/40 backdrop-blur-3xl rounded-full border border-white/20 z-40 hover:scale-105 active:scale-95 transition-all group"
-                                        >
-                                            <div className="text-white group-hover:text-[#FF6B00] transition-colors">
-                                                <ChevronUp size={24} />
-                                            </div>
-                                            <div className="flex items-center gap-3">
-                                                {filteredScenes.map((_, index) => (
-                                                    <div
-                                                        key={index}
-                                                        className={`w-3 h-3 rounded-full transition-all duration-300 ${index === currentSceneIndex ? 'bg-[#FF6B00] scale-150 shadow-[0_0_12px_#FF6B00]' : 'bg-white/40 group-hover:bg-white/60'}`}
-                                                    />
-                                                ))}
-                                            </div>
-                                        </button>
+                                        <div className="absolute bottom-12 inset-x-12 flex items-center justify-between z-40">
+                                            {/* Settings Button (Bottom-Left) */}
+                                            <button
+                                                onClick={() => setShowSettings(true)}
+                                                className="w-16 h-16 bg-black/40 backdrop-blur-3xl rounded-full border border-white/20 flex items-center justify-center text-white hover:bg-white/20 hover:scale-110 active:scale-95 transition-all shadow-xl"
+                                            >
+                                                <Settings size={32} />
+                                            </button>
+
+                                            {/* SCENES Button (Center-Bottom) */}
+                                            <button
+                                                onClick={() => setIsScenePickerOpen(true)}
+                                                className="flex items-center gap-4 px-10 py-5 bg-black/50 backdrop-blur-3xl rounded-full border-2 border-white/30 hover:bg-black/70 hover:scale-105 active:scale-95 transition-all shadow-2xl group"
+                                            >
+                                                <Menu size={28} className="text-white group-hover:text-orange-400 transition-colors" />
+                                                <span className="text-white font-black text-2xl font-fredoka tracking-widest">
+                                                    SCENES <span className="text-orange-400 ml-2">{currentSceneIndex + 1}/{filteredScenes.length}</span>
+                                                </span>
+                                            </button>
+
+                                            {/* Spacer for symmetry */}
+                                            <div className="w-16 h-16" />
+                                        </div>
                                     )}
 
-                                    {/* Navigation Buttons (Floating) */}
-                                    <div className="absolute inset-y-0 inset-x-8 flex items-center justify-between pointer-events-none">
+                                    {/* Navigation Buttons (Floating - Centered Vertically) */}
+                                    <div className="absolute inset-y-0 inset-x-12 flex items-center justify-between pointer-events-none">
                                         <button
                                             disabled={currentSceneIndex === 0}
                                             onClick={() => {
                                                 setCurrentSceneIndex(prev => prev - 1);
                                                 setIsScenePickerOpen(false);
                                             }}
-                                            className={`w-24 h-24 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md flex items-center justify-center text-white border-2 border-white/20 pointer-events-auto transition-all active:scale-90 ${currentSceneIndex === 0 ? 'opacity-0' : 'opacity-100'}`}
+                                            className={`w-28 h-28 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-xl flex items-center justify-center text-white border-4 border-white/20 pointer-events-auto transition-all active:scale-90 shadow-2xl ${currentSceneIndex === 0 ? 'opacity-0' : 'opacity-100'}`}
                                         >
-                                            <ChevronLeft size={64} />
+                                            <ChevronLeft size={80} strokeWidth={2.5} />
                                         </button>
                                         <button
                                             onClick={() => {
@@ -667,9 +725,9 @@ const LearningMode: React.FC<LearningModeProps> = ({
                                                     setShowPraise(true);
                                                 }
                                             }}
-                                            className="w-24 h-24 rounded-full bg-white/90 hover:bg-white flex items-center justify-center text-slate-900 border-2 border-white pointer-events-auto transition-all active:scale-90 shadow-2xl"
+                                            className="w-28 h-28 rounded-full bg-white/95 hover:bg-white flex items-center justify-center text-slate-900 border-4 border-white pointer-events-auto transition-all active:scale-90 shadow-[0_20px_60px_rgba(0,0,0,0.5)]"
                                         >
-                                            <ChevronRight size={64} />
+                                            <ChevronRight size={80} strokeWidth={2.5} />
                                         </button>
                                     </div>
                                 </div>
@@ -708,6 +766,86 @@ const LearningMode: React.FC<LearningModeProps> = ({
                                     </div>
                                 </>
                             )}
+
+                            {/* [NEW] Settings Popup Overlay */}
+                            {showSettings && (
+                                <>
+                                    <div className="fixed inset-0 z-[130] bg-black/40 backdrop-blur-sm" onClick={() => setShowSettings(false)} />
+                                    <div className="fixed inset-0 z-[140] flex items-center justify-center pointer-events-none">
+                                        <div className="bg-slate-800/90 backdrop-blur-2xl rounded-[40px] p-10 w-[600px] shadow-2xl border-2 border-white/10 animate-in zoom-in-95 duration-300 pointer-events-auto relative">
+                                            {/* Close Button */}
+                                            <button
+                                                onClick={() => setShowSettings(false)}
+                                                className="absolute top-6 right-6 text-white/40 hover:text-white transition-colors"
+                                            >
+                                                <X size={32} />
+                                            </button>
+
+                                            <h2 className="text-4xl font-black text-white font-fredoka mb-10 text-center">Setting</h2>
+
+                                            <div className="flex flex-col gap-8">
+                                                {/* Narration Toggle */}
+                                                <div className="flex items-center justify-between">
+                                                    <span className="text-2xl font-bold text-white font-fredoka">Narration</span>
+                                                    <div
+                                                        className={`w-24 h-12 rounded-full p-1 cursor-pointer transition-colors flex items-center ${isNarrationOn ? 'bg-orange-500' : 'bg-slate-600'}`}
+                                                        onClick={() => setIsNarrationOn(!isNarrationOn)}
+                                                    >
+                                                        <div className={`w-10 h-10 bg-white rounded-full shadow-lg transition-transform duration-300 flex items-center justify-center font-black text-xs text-slate-800 ${isNarrationOn ? 'translate-x-12' : 'translate-x-0'}`}>
+                                                            {isNarrationOn ? 'on' : 'off'}
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                {/* Page Turn Toggle */}
+                                                <div className={`flex items-center justify-between transition-opacity ${!isNarrationOn ? 'opacity-30 pointer-events-none' : ''}`}>
+                                                    <span className="text-2xl font-bold text-white font-fredoka">Page Turn</span>
+                                                    <div
+                                                        className={`w-24 h-12 rounded-full p-1 cursor-pointer transition-colors flex items-center ${isPageTurnOn ? 'bg-orange-500' : 'bg-slate-600'}`}
+                                                        onClick={() => isNarrationOn && setIsPageTurnOn(!isPageTurnOn)}
+                                                    >
+                                                        <div className={`w-10 h-10 bg-white rounded-full shadow-lg transition-transform duration-300 flex items-center justify-center font-black text-xs text-slate-800 ${isPageTurnOn ? 'translate-x-12' : 'translate-x-0'}`}>
+                                                            {isPageTurnOn ? 'on' : 'off'}
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                {/* Narration Speed */}
+                                                <div className={`flex flex-col gap-4 transition-opacity ${!isNarrationOn ? 'opacity-30 pointer-events-none' : ''}`}>
+                                                    <span className="text-lg font-bold text-white/60 font-fredoka">Narration Speed</span>
+                                                    <div className="flex gap-4">
+                                                        {[0.8, 1.0, 1.2].map((speed) => (
+                                                            <button
+                                                                key={speed}
+                                                                onClick={() => setNarrationSpeed(speed)}
+                                                                className={`flex-1 py-3 rounded-2xl font-black text-xl transition-all ${narrationSpeed === speed ? 'bg-white text-slate-900 scale-105 shadow-xl' : 'bg-slate-700 text-white/60 hover:bg-slate-600'}`}
+                                                            >
+                                                                {speed === 0.8 ? 'Slow' : speed === 1.0 ? 'Normal' : 'Fast'}
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                </div>
+
+                                                {/* Text Size */}
+                                                <div className="flex flex-col gap-4">
+                                                    <span className="text-lg font-bold text-white/60 font-fredoka">Text Size</span>
+                                                    <div className="flex gap-4">
+                                                        {(['normal', 'large', 'xl'] as const).map((size) => (
+                                                            <button
+                                                                key={size}
+                                                                onClick={() => setTextSize(size)}
+                                                                className={`flex-1 py-3 rounded-2xl font-black transition-all ${textSize === size ? 'bg-white text-slate-900 scale-105 shadow-xl' : 'bg-slate-700 text-white/60 hover:bg-slate-600'}`}
+                                                            >
+                                                                <span className={size === 'normal' ? 'text-lg' : size === 'large' ? 'text-xl' : 'text-2xl'}>Text</span>
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </>
+                            )}
                         </div>
                     )
                 }
@@ -735,6 +873,27 @@ const LearningMode: React.FC<LearningModeProps> = ({
                         className="fixed inset-0 z-[110] bg-black/80 backdrop-blur-sm flex items-center justify-center animate-in fade-in duration-500 cursor-pointer"
                         onClick={() => {
                             setShowPraise(false);
+
+                            // [NEW] Policy: Default select SC01 and SC Last-1
+                            const defaults: number[] = [];
+                            if (filteredScenes.length > 0) {
+                                // 1. Find SC01 (skip cover if necessary)
+                                const sc01Index = filteredScenes.findIndex(s => s.scene_no.includes('SC01'));
+                                if (sc01Index !== -1) {
+                                    defaults.push(sc01Index);
+                                } else {
+                                    defaults.push(0);
+                                }
+
+                                // 2. Find SC Last-1 (second to last)
+                                if (filteredScenes.length >= 2) {
+                                    const lastMinusOneIndex = filteredScenes.length - 2;
+                                    if (!defaults.includes(lastMinusOneIndex)) {
+                                        defaults.push(lastMinusOneIndex);
+                                    }
+                                }
+                            }
+                            setSelectedScenes(defaults);
                             setShowSceneSelect(true);
                         }}
                     >
@@ -818,10 +977,7 @@ const LearningMode: React.FC<LearningModeProps> = ({
                             <div className="mt-8 flex justify-center">
                                 <button
                                     onClick={() => {
-                                        if (selectedScenes.length === 0) {
-                                            alert("Please select at least one scene!");
-                                            return;
-                                        }
+                                        if (selectedScenes.length < 2) return;
                                         setShowSceneSelect(false);
                                         // Set phase to 'speak' instead of 'quiz'
                                         setCurrentPhase('speak');
@@ -830,7 +986,10 @@ const LearningMode: React.FC<LearningModeProps> = ({
                                             updateReadingProgress(book.id, 'read', true);
                                         }
                                     }}
-                                    className="px-16 py-4 bg-white border-4 border-slate-200 text-slate-700 rounded-full text-2xl font-black font-fredoka hover:bg-orange-500 hover:text-white hover:border-orange-500 transition-all shadow-xl hover:shadow-orange-200 active:scale-95"
+                                    disabled={selectedScenes.length < 2}
+                                    className={`px-16 py-4 rounded-full text-2xl font-black font-fredoka transition-all shadow-xl active:scale-95 ${selectedScenes.length < 2
+                                        ? 'bg-slate-100 border-4 border-slate-200 text-slate-300 cursor-not-allowed opacity-50'
+                                        : 'bg-white border-4 border-slate-200 text-slate-700 hover:bg-orange-500 hover:text-white hover:border-orange-500 hover:shadow-orange-200'}`}
                                 >
                                     OK
                                 </button>

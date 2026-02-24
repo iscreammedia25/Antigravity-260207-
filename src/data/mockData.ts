@@ -99,10 +99,17 @@ export const MOCK_SCENES_DATA: SceneData[] = [
         full_audio: "/Audio/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC08.mp3"
     },
     {
-        book_id: "silent-stick",
-        scene_no: "SC09",
-        script: "Ren smiled at his rough stick \nand skated away silently.",
-        image_url: "/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC09.png",
-        full_audio: "/Audio/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC09.mp3"
+        book_id: "milo",
+        scene_no: "SC01",
+        script: "Milo is a dog with a very big imagination.",
+        image_url: "/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC01.png",
+        full_audio: "/Audio/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC01.mp3"
+    },
+    {
+        book_id: "milo",
+        scene_no: "SC02",
+        script: "Every time he goes for a walk, \nhe sees a world full of dragons.",
+        image_url: "/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC02.png",
+        full_audio: "/Audio/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC01.mp3"
     }
 ];

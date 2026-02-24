@@ -255,7 +255,7 @@
     </div>
 
     <!-- Modal Container -->
-    <div id="bookModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden">
+    <div id="bookModal" class="fixed inset-0 z-60 flex items-center justify-center p-4 hidden">
         <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="closeModal()"></div>
         <div class="card-bubble w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col relative z-10 scale-95 opacity-0 transition-all duration-300"
             id="modalContent">
@@ -384,7 +384,7 @@
                     class="w-full h-full max-w-screen-2xl min-h-[60vh] bg-black rounded-[24px] overflow-hidden relative group">
                     <video id="studyVideo" class="w-full h-full object-contain pointer-events-auto"
                         onplay="document.getElementById('nextPhaseContainer').classList.add('opacity-0', 'translate-y-10', 'pointer-events-none');"
-                        onended="onVideoEnded()" src="public/video/Intro.mp4"></video>
+                        onended="onVideoEnded()" playsinline src="./public/Video/the_silent_stick_watch.mp4"></video>
 
                     <!-- Custom Video Controls -->
                     <div id="videoControls"
@@ -418,7 +418,7 @@
 
                     <!-- Next Button (hidden initially) -->
                     <div id="nextPhaseContainer"
-                        class="absolute bottom-12 right-12 transition-all duration-500 transform translate-y-10 opacity-0 pointer-events-none z-30">
+                        class="absolute bottom-12 right-12 transition-all duration-500 transform translate-y-10 opacity-0 pointer-events-none z-60">
                         <button onclick="setPhase('read')"
                             class="px-10 py-5 bg-[#FF6B00] text-white rounded-3xl font-black text-xl flex items-center gap-3 shadow-2xl animate-twinkle hover:scale-105 active:scale-95 transition-all">
                             Read Next <i data-lucide="chevron-right" class="w-6 h-6"></i>
@@ -437,129 +437,89 @@
             </div>
 
             <!-- Read Phase - 3 Steps Flow -->
-            <div id="phase-read" class="w-full h-full flex flex-col relative overflow-hidden hidden">
+            <div id="phase-read" class="w-full h-full flex flex-col relative z-30 overflow-hidden hidden">
                 <!-- Background Layer: Cover Image (Darkened) -->
                 <div id="read-bg" class="absolute inset-0 bg-cover bg-center transition-all duration-1000"
                     style="filter: brightness(0.3) blur(8px)">
                 </div>
-
-                <!-- Step 1: Mode Selection -->
-                <div id="read-step-selection"
-                    class="relative z-10 flex-1 flex flex-col items-center justify-center p-8 animate-in fade-in zoom-in duration-500">
-                    <h2 class="text-5xl font-black text-white mb-12 font-jua text-center drop-shadow-2xl">
-                        How would you like to read?
-                    </h2>
-                    <div class="flex gap-8 max-w-5xl w-full">
-                        <!-- E-Book Card -->
-                        <button onclick="selectReadingMode('ebook')" id="card-ebook"
-                            class="flex-1 group relative p-10 rounded-[40px] border-4 transition-all duration-300 bg-white/10 border-white/20 hover:bg-white/20">
-                            <div
-                                class="w-24 h-24 rounded-3xl flex items-center justify-center mb-8 mx-auto transition-colors bg-white/20 text-white">
-                                <i data-lucide="book" class="w-12 h-12"></i>
-                            </div>
-                            <h3 class="text-3xl font-black mb-4 text-white">E-Book</h3>
-                            <p class="text-lg font-medium opacity-80 text-slate-300">Classic reading experience with
-                                clean text.</p>
-                        </button>
-
-                        <!-- Interactive Card -->
-                        <button onclick="selectReadingMode('interactive')" id="card-interactive"
-                            class="flex-1 group relative p-10 rounded-[40px] border-4 transition-all duration-300 bg-white/10 border-white/20 hover:bg-white/20">
-                            <div
-                                class="w-24 h-24 rounded-3xl flex items-center justify-center mb-8 mx-auto transition-colors bg-white/20 text-white">
-                                <i data-lucide="sparkles" class="w-12 h-12"></i>
-                            </div>
-                            <h3 class="text-3xl font-black mb-4 text-white">Interactive</h3>
-                            <p class="text-lg font-medium opacity-80 text-slate-300">Read along with voice, images, and
-                                fun effects!</p>
-                        </button>
-                    </div>
-
-                    <button id="modeOkBtn" disabled onclick="goToReadStep('intro')"
-                        class="mt-16 px-16 py-6 rounded-3xl font-black text-3xl transition-all bg-slate-700 text-slate-500 cursor-not-allowed">
-                        OK
-                    </button>
+                <!-- Dynamic Content Container -->
+                <div id="phaseContainer" class="flex-1 flex flex-col relative z-40 overflow-hidden">
+                    <!-- renderReadPhase() will inject content here -->
                 </div>
 
-                <!-- Step 2: Book Intro -->
-                <div id="read-step-intro"
-                    class="relative z-10 flex-1 flex flex-col items-center justify-between p-16 hidden">
-                    <div class="w-full max-w-6xl flex flex-col items-center gap-6">
-                        <div id="intro-level"
-                            class="px-6 py-2 bg-sky-500 text-white rounded-full font-black text-xl shadow-lg">Level 4
-                        </div>
-                        <h2 id="intro-title"
-                            class="text-7xl font-black text-white text-center font-jua drop-shadow-2xl">Book Title</h2>
-                    </div>
-
-                    <div class="w-full max-w-7xl flex items-end justify-between gap-12">
-                        <div
-                            class="flex-1 bg-black/60 backdrop-blur-xl p-12 rounded-[48px] border-2 border-white/10 flex flex-col gap-8 shadow-2xl text-left">
-                            <div class="flex gap-12 text-white">
-                                <div class="flex flex-col gap-1">
-                                    <span class="text-sky-300 text-sm font-bold uppercase tracking-widest">Lexile</span>
-                                    <span id="intro-lexile" class="text-3xl font-black tracking-tight">300~350</span>
+                <!-- [NEW] Settings Popup Overlay -->
+                <div id="settingsOverlay" class="fixed inset-0 z-[140] bg-black/40 backdrop-blur-sm hidden"
+                    onclick="toggleSettings()">
+                    <div class="fixed inset-0 z-[140] flex items-center justify-center pointer-events-none">
+                        <div class="bg-slate-800/90 backdrop-blur-2xl rounded-[40px] p-10 w-[600px] shadow-2xl border-2 border-white/10 pointer-events-auto relative"
+                            onclick="event.stopPropagation()">
+                            <button onclick="toggleSettings()"
+                                class="absolute top-6 right-6 text-white/40 hover:text-white transition-colors">
+                                <i data-lucide="x" class="w-8 h-8"></i>
+                            </button>
+                            <h2 class="text-4xl font-black text-white font-fredoka mb-10 text-center">Setting</h2>
+                            <div class="flex flex-col gap-8">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-2xl font-bold text-white font-fredoka">Narration</span>
+                                    <div id="narrationToggle" onclick="setNarration(!isNarrationOn)"
+                                        class="w-24 h-12 rounded-full p-1 cursor-pointer transition-colors flex items-center bg-slate-600">
+                                        <div
+                                            class="toggle-knob w-10 h-10 bg-white rounded-full shadow-lg transition-transform duration-300 flex items-center justify-center font-black text-xs text-slate-800">
+                                            off</div>
+                                    </div>
                                 </div>
-                                <div class="w-px h-12 bg-white/20"></div>
-                                <div class="flex flex-col gap-1">
-                                    <span class="text-sky-300 text-sm font-bold uppercase tracking-widest">Words</span>
-                                    <span id="intro-words" class="text-3xl font-black tracking-tight">140</span>
+                                <div id="pageTurnRow"
+                                    class="flex items-center justify-between opacity-30 pointer-events-none">
+                                    <span class="text-2xl font-bold text-white font-fredoka">Page Turn</span>
+                                    <div id="pageTurnToggle" onclick="setPageTurn(!isPageTurnOn)"
+                                        class="w-24 h-12 rounded-full p-1 cursor-pointer transition-colors flex items-center bg-slate-600">
+                                        <div
+                                            class="toggle-knob w-10 h-10 bg-white rounded-full shadow-lg transition-transform duration-300 flex items-center justify-center font-black text-xs text-slate-800">
+                                            off</div>
+                                    </div>
+                                </div>
+                                <div id="narrationSpeedRow" class="flex flex-col gap-4 opacity-30 pointer-events-none">
+                                    <span class="text-lg font-bold text-white/60 font-fredoka">Narration Speed</span>
+                                    <div class="flex gap-4">
+                                        <button onclick="setNarrationSpeed(0.8)" id="speed-0.8"
+                                            class="flex-1 py-3 rounded-2xl font-black text-xl bg-slate-700 text-white/60">Slow</button>
+                                        <button onclick="setNarrationSpeed(1.0)" id="speed-1.0"
+                                            class="flex-1 py-3 rounded-2xl font-black text-xl bg-white text-slate-900 shadow-xl scale-105">Normal</button>
+                                        <button onclick="setNarrationSpeed(1.2)" id="speed-1.2"
+                                            class="flex-1 py-3 rounded-2xl font-black text-xl bg-slate-700 text-white/60">Fast</button>
+                                    </div>
+                                </div>
+                                <div class="flex flex-col gap-4">
+                                    <span class="text-lg font-bold text-white/60 font-fredoka">Text Size</span>
+                                    <div class="flex gap-4">
+                                        <button onclick="setTextSize('normal')" id="size-normal"
+                                            class="flex-1 py-3 rounded-2xl font-black bg-slate-700 text-white/60 text-lg">Text</button>
+                                        <button onclick="setTextSize('large')" id="size-large"
+                                            class="flex-1 py-3 rounded-2xl font-black bg-white text-slate-900 shadow-xl scale-105 text-xl">Text</button>
+                                        <button onclick="setTextSize('medium')" id="size-medium"
+                                            class="flex-1 py-3 rounded-2xl font-black bg-slate-700 text-white/60 text-2xl">Text</button>
+                                    </div>
                                 </div>
                             </div>
-                            <p id="intro-summary" class="text-2xl text-slate-100 font-medium leading-[1.6]">
-                                Summary...
-                            </p>
-                            <div id="intro-keywords" class="flex flex-wrap gap-3"></div>
                         </div>
-
-                        <button onclick="goToReadStep('viewing')"
-                            class="w-48 h-48 bg-white text-slate-900 rounded-full flex items-center justify-center font-black text-4xl shadow-2xl hover:scale-110 active:scale-95 transition-all animate-twinkle">
-                            START
-                        </button>
                     </div>
                 </div>
 
-                <!-- Step 3: Reading Viewer -->
-                <div id="read-step-viewing" class="relative z-10 flex-1 flex flex-col p-8 hidden">
-                    <div class="flex-1 flex gap-8 max-w-[1600px] mx-auto w-full">
-                        <!-- Left: Image Panel -->
-                        <div
-                            class="flex-[1.2] rounded-[48px] overflow-hidden shadow-2xl bg-white/5 border border-white/10 relative">
-                            <img id="viewing-img" src="" alt="scene" class="w-full h-full object-cover">
-                            <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent">
-                            </div>
-                            <div id="viewing-scene-no"
-                                class="absolute bottom-8 left-8 px-6 py-2 bg-black/40 backdrop-blur-md rounded-2xl text-white font-black">
-                                #SC01
-                            </div>
-                        </div>
-
-                        <!-- Right: Text Panel -->
-                        <div class="flex-1 flex flex-col gap-6">
+                <!-- [NEW] Shared Scene Picker Overlay -->
+                <div id="scenePickerOverlay" class="fixed inset-0 z-[70] bg-black/40 backdrop-blur-sm hidden"
+                    onclick="toggleScenePicker()">
+                    <div class="absolute bottom-0 inset-x-0 bg-black/95 backdrop-blur-3xl border-t-2 border-white/10 z-[70] p-12 transition-all duration-500 flex flex-col gap-8"
+                        onclick="event.stopPropagation()">
+                        <button onclick="toggleScenePicker()" class="w-full flex justify-center group">
                             <div
-                                class="flex-1 bg-white rounded-[48px] shadow-2xl p-16 flex flex-col justify-center gap-12 text-left">
-                                <p id="viewing-script"
-                                    class="text-5xl font-bold text-slate-800 leading-[1.4] tracking-tight">
-                                    Script...
-                                </p>
-                                <div class="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
-                                    <div id="viewing-progress" class="h-full bg-sky-500 transition-all duration-500"
-                                        style="width: 33%"></div>
-                                </div>
+                                class="bg-white/10 rounded-full px-12 py-3 border border-white/20 flex items-center gap-4 hover:bg-white/20 transition-all">
+                                <i data-lucide="chevron-down" class="text-white w-8 h-8"></i>
+                                <span class="text-white font-black uppercase tracking-widest text-xl">Close
+                                    Picker</span>
                             </div>
-
-                            <!-- Navigation Buttons -->
-                            <div class="flex gap-4">
-                                <button id="prevBtn" onclick="changeScene(-1)"
-                                    class="flex-1 h-32 rounded-[32px] border-4 flex items-center justify-center transition-all bg-white/10 border-white/20 text-white hover:bg-white/20 active:scale-95">
-                                    <i data-lucide="chevron-left" class="w-12 h-12"></i>
-                                </button>
-                                <button id="nextBtn" onclick="changeScene(1)"
-                                    class="flex-[2] h-32 bg-white text-slate-900 rounded-[32px] flex items-center justify-center font-black text-3xl shadow-xl hover:scale-105 active:scale-95 transition-all">
-                                    <span id="nextBtnText" class="flex items-center gap-4">Next Scene <i
-                                            data-lucide="chevron-right" class="w-8 h-8"></i></span>
-                                </button>
-                            </div>
+                        </button>
+                        <div id="sceneThumbnails" class="flex gap-6 overflow-x-auto pb-10 scrollbar-hide snap-x pt-4">
+                            <!-- JS will inject thumbnails here -->
                         </div>
                     </div>
                 </div>
@@ -568,6 +528,35 @@
     </div>
 
     <script>
+        // --- 1. State Variables & Initial Data ---
+        let unlockedPhases = ['watch'];
+        let FreshHero = null;
+        let selectedScenes = [];
+        let currentModalBookId = null;
+        let isHistoryMode = true;
+        let currentHeroIndex = 1;
+        let isHeroCTAFlashing = false;
+        let currentModalOrigin = 'recommendation';
+
+        let currentPhase = 'home';
+        let currentReadStep = 'selection';
+        let currentSceneIndex = 0;
+        let maxReachedSceneIndex = 0;
+        let selectedReadingMode = 'ebook';
+
+        // Settings State
+        let isSettingsOpen = false;
+        let isNarrationOn = false;
+        let isPageTurnOn = false;
+        let narrationSpeed = 1;
+        let textSize = "large";
+
+        // Audio State
+        let currentAudio = null;
+        let playingSentenceIndex = null;
+        let isSceneAudioPlaying = false;
+        let isScenePickerOpen = false;
+
         const booksData = [
             { id: 'missing-planet', title: 'The Missing Planet', src: './public/Image/Cover/The Missing Planet.png', lexile: '250~300', wordCount: 120, category: 'Space 🚀', summary: 'A brave little astronaut goes on a mission to find a planet that disappeared from the star maps. Join the cosmic adventure!', keywords: ['planet', 'space', 'astronaut', 'star'], isBookmarked: false, videoUrl: './public/Video/the_silent_stick_watch.mp4' },
             { id: 'rainbow', title: 'Rainbow', src: './public/Image/Cover/Rainbow.png', lexile: '150~200', wordCount: 85, category: 'Nature 🌈', summary: 'Follow the beautiful colors across the sky after a rainy day. Learn how rainbows are made of light and magic!', keywords: ['color', 'rain', 'sky', 'sun'], isBookmarked: false, videoUrl: './public/Video/the_silent_stick_watch.mp4' },
@@ -584,35 +573,44 @@
             { id: 'ugly-dukling', title: 'The Ugly Dukling', src: './public/Image/Cover/The Ugly Dukling.png', lexile: '300~360', wordCount: 155, category: 'Animals Swan', summary: 'Discover how being different can lead to finding where you truly belong.', keywords: ['different', 'belong', 'lake', 'swan'], isBookmarked: false, videoUrl: './public/Video/the_silent_stick_watch.mp4' },
         ];
 
-        let currentModalBookId = null;
-        let isHistoryMode = true;
-        let freshHeroBook = null;
-        let currentHeroIndex = 1; // Start with Silent Stick in middle
-        let isHeroCTAFlashing = false;
-        let currentModalOrigin = 'recommendation';
-
         let mockHistory = [
             { id: 'milo', title: 'Milo and the Lost Color', src: './public/Image/Cover/Milo and the Lost Color.png', progress: 50, phase: 'quiz', completedPhases: ['watch', 'read'] },
             { id: 'silent-stick', title: 'The Silent Stick', src: './public/Image/Cover/The Silent Stick.png', progress: 0, phase: 'watch', completedPhases: [] },
             { id: 'empty-placeholder', title: '', src: '', progress: 0, phase: '', completedPhases: [], isPlaceholder: true }
         ];
 
-        let currentPhase = 'home'; // 'home' or 'read'
-        let currentSceneIndex = 0;
-        let selectedReadingMode = 'ebook';
-        const scenesData = [
-            { book_id: "silent-stick", scene_no: "SC01", script: "The frozen lake lay still, a big area of gray ice beneath a heavy winter sky.", image_url: "./public/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC01.png" },
-            { book_id: "silent-stick", scene_no: "SC02", script: "He hit the puck with force, but his old stick broke suddenly upon impact.", image_url: "./public/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC02.png" },
-            { book_id: "silent-stick", scene_no: "SC03", script: "Two pieces of wood lay on the ice, showing the end of his practice.", image_url: "./public/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC03.png" },
-            { book_id: "silent-stick", scene_no: "SC04", script: "Ren worked for hours, cutting the skin to show the hard wood under.", image_url: "./public/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC04.png" },
-            { book_id: "silent-stick", scene_no: "SC05", script: "When he tested it, the puck flew in strange circles due to the wood’s natural shape.", image_url: "./public/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC05.png" },
-            { book_id: "silent-stick", scene_no: "SC06", script: "Jax glanced at Ren’s rough branch and offered a cold smile, saying nothing.", image_url: "./public/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC06.png" },
-            { book_id: "silent-stick", scene_no: "SC07", script: "Jax controlled the ice, his speed pushing Ren back toward his own goal.", image_url: "./public/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC07.png" },
-            { book_id: "silent-stick", scene_no: "SC08", script: "The puck turned around the confused player, going quietly into the net as the whistle blew.", image_url: "./public/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC08.png" },
-            { book_id: "silent-stick", scene_no: "SC09", script: "Ren smiled at his rough stick and skated away silently.", image_url: "./public/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC09.png" }
+        const mockScenes = [
+            { id: "silent-stick", scene_no: "SC01", script: "The frozen lake lay still, \na big area of gray ice \nbeneath a heavy winter sky.", image_url: "./public/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC01.png", full_audio: "./public/Audio/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC01.mp3" },
+            { id: "silent-stick", scene_no: "SC02", script: "He hit the puck with force, \nbut his old stick broke \nsuddenly upon impact.", image_url: "./public/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC02.png", full_audio: "./public/Audio/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC02.mp3" },
+            { id: "silent-stick", scene_no: "SC03", script: "Two pieces of wood lay on the ice, \nshowing the end of his practice.", image_url: "./public/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC03.png", full_audio: "./public/Audio/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC03.mp3" },
+            { id: "silent-stick", scene_no: "SC04", script: "Ren worked for hours, \ncutting the skin to show \nthe hard wood under.", image_url: "./public/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC04.png", full_audio: "./public/Audio/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC04.mp3" },
+            { id: "silent-stick", scene_no: "SC05", script: "When he tested it, \nthe puck flew in strange circles \ndue to the wood’s natural shape.", image_url: "./public/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC05.png", full_audio: "./public/Audio/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC05.mp3" },
+            { id: "silent-stick", scene_no: "SC06", script: "Jax glanced at Ren’s rough branch \nand offered a cold smile, saying nothing.", image_url: "./public/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC06.png", full_audio: "./public/Audio/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC06.mp3" },
+            { id: "silent-stick", scene_no: "SC07", script: "Jax controlled the ice, \nhis speed pushing Ren \nback toward his own goal.", image_url: "./public/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC07.png", full_audio: "./public/Audio/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC07.mp3" },
+            { id: "silent-stick", scene_no: "SC08", script: "The puck turned around the confused player, \ngoing quietly into the net as the whistle blew.", image_url: "./public/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC08.png", full_audio: "./public/Audio/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC08.mp3" },
+            { id: "silent-stick", scene_no: "SC09", script: "Ren smiled at his rough stick \nand skated away silently.", image_url: "./public/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC09.png", full_audio: "./public/Audio/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC09.mp3" },
+            { id: "milo", scene_no: "SC01", script: "Milo is a dog with a very big imagination.", image_url: "./public/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC01.png", full_audio: "./public/Audio/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC01.mp3" },
+            { id: "milo", scene_no: "SC02", script: "Every time he goes for a walk, \nhe sees a world full of dragons.", image_url: "./public/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC02.png", full_audio: "./public/Audio/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC01.mp3" }
         ];
 
-        function toggleMode() {
+        // --- 2. Action Functions ---
+
+        function getTextPositionClass(index) {
+            switch (index) {
+                case 0: return "top-8 left-8 md:top-16 md:left-16 text-left items-start";
+                case 1:
+                case 2:
+                case 4: return "top-8 right-8 md:top-16 md:right-16 text-left items-start";
+                case 3: return "bottom-24 right-8 md:bottom-32 md:right-16 text-left items-start";
+                case 5:
+                case 6:
+                case 7: return "bottom-24 left-8 md:bottom-32 md:left-16 text-left items-start";
+                case 8: return "top-1/2 -translate-y-1/2 left-24 md:left-32 text-left items-start";
+                default: return "top-8 left-8 md:top-16 md:left-16 text-left items-start";
+            }
+        }
+
+        window.toggleMode = function () {
             isHistoryMode = !isHistoryMode;
             currentHeroIndex = 0;
             const btn = document.getElementById('modeToggleBtn');
@@ -629,21 +627,23 @@
         }
 
         function renderHero() {
-            const container = document.getElementById('heroContainer');
+              const container = document.getElementById('heroContainer');
             const isHistory = isHistoryMode;
             const items = isHistory ? mockHistory : [
-                freshHeroBook || booksData.find(b => b.id === 'silent-stick')
+                FreshHero || booksData.find(b => b.id === 'silent-stick')
             ];
 
             const userName = "Ami";
             const safeIndex = currentHeroIndex >= items.length ? 0 : currentHeroIndex; // lint: Ensure index is within bounds.
             const item = items[safeIndex];
             if (item) currentModalBookId = item.id; // lint: Safely set currentModalBookId.
-            const prevItem = items[(currentHeroIndex - 1 + items.length) % items.length];
-            const nextItem = items[(currentHeroIndex + 1) % items.length];
+            const prevIdx = (currentHeroIndex - 1 + items.length) % items.length;
+            const nextIdx = (currentHeroIndex + 1) % items.length;
+            const prevItem = items[prevIdx];
+            const nextItem = items[nextIdx];
 
-            const progress = (isHistory && !item.isPlaceholder) ? item.progress : 0;
-            const phasesText = (isHistory && !item.isPlaceholder) ? `
+            const progress = (isHistory && item && !item.isPlaceholder) ? item.progress : 0;
+            const phasesText = (isHistory && item && !item.isPlaceholder) ? `
                 <div class="flex gap-3 mb-1">
                     <span class="text-xs uppercase ${item.completedPhases.includes('watch') ? 'text-green-400' : 'text-yellow-300 font-black'}">watch</span>
                     <span class="text-xs uppercase ${item.phase === 'read' ? 'text-yellow-300 font-black' : item.completedPhases.includes('read') ? 'text-green-400' : 'opacity-40'}">> read</span>
@@ -652,78 +652,93 @@
                 </div>
             ` : '<div class="text-xs uppercase opacity-40">watch > read > quiz > speak</div>';
 
+            let prevSlotHtml = '';
+            if (isHistory && items.length > 1) {
+                const prevContent = prevItem.isPlaceholder ? `
+                    <div class="w-full h-full border-4 border-dashed border-white/30 rounded-[28px] flex flex-col items-center justify-center gap-2">
+                        <div class="w-12 h-12 rounded-full border-2 border-dashed border-white/30 flex items-center justify-center">
+                            <span class="text-white/20 text-3xl font-black">+</span>
+                        </div>
+                    </div>` : `<img src="${prevItem.src}" class="w-full h-full object-cover brightness-90">`;
+
+                prevSlotHtml = `
+                    <div id="hero-left-slot" data-index="${prevIdx}" class="absolute left-[-22%] scale-75 opacity-70 pointer-events-none transform -rotate-6 transition-all duration-500">
+                        <div class="w-48 h-64 bg-slate-900/60 backdrop-blur-md rounded-[28px] shadow-xl overflow-hidden border-2 border-white/20">
+                            ${prevContent}
+                        </div>
+                    </div>`;
+            }
+
+            const mainCardInner = item.isPlaceholder ? `
+                <div class="w-full h-full border-4 border-dashed border-white/20 rounded-[28px] flex flex-col items-center justify-center gap-4 bg-slate-900/20">
+                    <div class="w-20 h-20 rounded-full border-4 border-dashed border-white/20 flex items-center justify-center">
+                        <span class="text-white/20 text-5xl font-black">+</span>
+                    </div>
+                    <p class="text-white/20 font-black text-xl uppercase tracking-widest">Empty</p>
+                </div>` : `
+                <img src="${item.src}" class="w-full h-full object-cover">
+                <div class="absolute top-4 left-4 z-20">
+                    <div class="bg-black/40 backdrop-blur-md px-3 py-1 rounded-full border border-white/20">
+                        <p class="text-white font-black text-[9px] uppercase tracking-widest opacity-90">${isHistory ? 'In Progress' : 'Recommended'}</p>
+                    </div>
+                </div>
+                <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex flex-col justify-end p-5 min-h-[40%]">
+                    <h3 class="text-white font-black leading-tight text-center" style="font-size: ${item.title.length > 20 ? '14px' : '18px'}">${item.title}</h3>
+                </div>`;
+
+            let navButtonsHtml = '';
+            if (isHistory && items.length > 1) {
+                navButtonsHtml = `
+                    <div class="absolute inset-y-0 -left-6 -right-6 flex items-center justify-between pointer-events-none">
+                        <button onclick="event.stopPropagation(); navigateHero(-1)" class="w-10 h-10 bg-white/30 hover:bg-white/50 backdrop-blur-md rounded-full flex items-center justify-center text-white pointer-events-auto border border-white/40 shadow-lg transition-all active:scale-90"><i data-lucide="chevron-left" class="w-6 h-6"></i></button>
+                        <button onclick="event.stopPropagation(); navigateHero(1)" class="w-10 h-10 bg-white/30 hover:bg-white/50 backdrop-blur-md rounded-full flex items-center justify-center text-white pointer-events-auto border border-white/40 shadow-lg transition-all active:scale-90"><i data-lucide="chevron-right" class="w-6 h-6"></i></button>
+                    </div>`;
+            }
+
+            let nextSlotHtml = '';
+            if (isHistory && items.length > 1) {
+                const nextContent = nextItem.isPlaceholder ? `
+                    <div class="w-full h-full border-4 border-dashed border-white/30 rounded-[28px] flex flex-col items-center justify-center gap-2">
+                        <div class="w-12 h-12 rounded-full border-2 border-dashed border-white/30 flex items-center justify-center">
+                            <span class="text-white/20 text-3xl font-black">+</span>
+                        </div>
+                    </div>` : `<img src="${nextItem.src}" class="w-full h-full object-cover brightness-90">`;
+
+                nextSlotHtml = `
+                    <div id="hero-right-slot" data-index="${nextIdx}" class="absolute right-[-22%] scale-75 opacity-70 pointer-events-none transform rotate-6 transition-all duration-500">
+                        <div class="w-48 h-64 bg-slate-900/60 backdrop-blur-md rounded-[28px] shadow-xl overflow-hidden border-2 border-white/20">
+                            ${nextContent}
+                        </div>
+                    </div>`;
+            }
+
+            const titleText = isHistory ? `Continue Your<br>Adventure, ${userName}!` : `Start Your<br>Adventure, ${userName}!`;
+            const progressValue = isHistory ? (progress > 0 ? Math.max(progress, 5) : 0) : 100;
+            const buttonText = isHistory ? 'CONTINUE READING' : 'START READING';
+            const buttonClass = isHistory ? 'bg-[#fbbf24] text-[#0f172a] shadow-amber-900/40' : 'bg-[#0f172a] text-white hover:bg-[#1e293b] shadow-amber-900/20';
+
             container.innerHTML = `
                 <section class="card-bubble relative overflow-hidden p-6 md:p-10 transition-all duration-700 border-none shadow-2xl ${isHistory ? 'bg-[#0f172a]' : 'bg-[#fbbf24]'} min-h-[360px] flex items-center">
-                    
                     <div id="heroContentChunk" class="flex flex-col md:flex-row items-center gap-12 w-full relative z-10 animate-in fade-in slide-in-from-right duration-500">
                         <!-- Book Display Unit -->
                         <div class="relative flex items-center justify-center w-full md:w-[320px] h-[340px] flex-shrink-0">
-                            ${isHistory && items.length > 1 ? `
-                                <div id="hero-left-slot" data-index="${(currentHeroIndex - 1 + items.length) % items.length}" class="absolute left-[-22%] scale-75 opacity-70 pointer-events-none transform -rotate-6 transition-all duration-500">
-                                    <div class="w-48 h-64 bg-slate-900/60 backdrop-blur-md rounded-[28px] shadow-xl overflow-hidden border-2 border-white/20">
-                                        ${prevItem.isPlaceholder ? `
-                                            <div class="w-full h-full border-4 border-dashed border-white/30 rounded-[28px] flex flex-col items-center justify-center gap-2">
-                                                <div class="w-12 h-12 rounded-full border-2 border-dashed border-white/30 flex items-center justify-center">
-                                                    <span class="text-white/20 text-3xl font-black">+</span>
-                                                </div>
-                                            </div>
-                                        ` : `<img src="${prevItem.src}" class="w-full h-full object-cover brightness-90">`}
-                                    </div>
-                                </div>
-                            ` : ''}
-
+                            ${prevSlotHtml}
                             <!-- Main Hero Card -->
                             <div id="hero-center-slot" data-index="${currentHeroIndex}" class="relative z-10 group">
                                 <div class="w-56 h-[280px] rounded-[28px] shadow-2xl overflow-hidden transform border-4 ${isHistory ? 'border-white' : 'border-[#0f172a]/10'} transition-all group-hover:scale-105 cursor-pointer ${item.isPlaceholder ? 'bg-slate-900/60 backdrop-blur-xl' : 'bg-white'}" 
                                      onclick="${item.isPlaceholder ? '' : `openModal('${item.id}', '${isHistory ? 'history' : 'recommendation'}')`}">
-                                    ${item.isPlaceholder ? `
-                                        <div class="w-full h-full border-4 border-dashed border-white/20 rounded-[28px] flex flex-col items-center justify-center gap-4 bg-slate-900/20">
-                                            <div class="w-20 h-20 rounded-full border-4 border-dashed border-white/20 flex items-center justify-center">
-                                                <span class="text-white/20 text-5xl font-black">+</span>
-                                            </div>
-                                            <p class="text-white/20 font-black text-xl uppercase tracking-widest">Empty</p>
-                                        </div>
-                                    ` : `
-                                        <img src="${item.src}" class="w-full h-full object-cover">
-                                        <div class="absolute top-4 left-4 z-20">
-                                            <div class="bg-black/40 backdrop-blur-md px-3 py-1 rounded-full border border-white/20">
-                                                <p class="text-white font-black text-[9px] uppercase tracking-widest opacity-90">${isHistory ? 'In Progress' : 'Recommended'}</p>
-                                            </div>
-                                        </div>
-                                        <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex flex-col justify-end p-5 min-h-[40%]">
-                                            <h3 class="text-white font-black leading-tight text-center" style="font-size: ${item.title.length > 20 ? '14px' : '18px'}">${item.title}</h3>
-                                        </div>
-                                    `}
+                                    ${mainCardInner}
                                 </div>
-
-                                ${isHistory && items.length > 1 ? `
-                                    <div class="absolute inset-y-0 -left-6 -right-6 flex items-center justify-between pointer-events-none">
-                                        <button onclick="event.stopPropagation(); navigateHero(-1)" class="w-10 h-10 bg-white/30 hover:bg-white/50 backdrop-blur-md rounded-full flex items-center justify-center text-white pointer-events-auto border border-white/40 shadow-lg transition-all active:scale-90"><i data-lucide="chevron-left" class="w-6 h-6"></i></button>
-                                        <button onclick="event.stopPropagation(); navigateHero(1)" class="w-10 h-10 bg-white/30 hover:bg-white/50 backdrop-blur-md rounded-full flex items-center justify-center text-white pointer-events-auto border border-white/40 shadow-lg transition-all active:scale-90"><i data-lucide="chevron-right" class="w-6 h-6"></i></button>
-                                    </div>
-                                ` : ''}
+                                ${navButtonsHtml}
                             </div>
-
-                            ${isHistory && items.length > 1 ? `
-                                <div id="hero-right-slot" data-index="${(currentHeroIndex + 1) % items.length}" class="absolute right-[-22%] scale-75 opacity-70 pointer-events-none transform rotate-6 transition-all duration-500">
-                                    <div class="w-48 h-64 bg-slate-900/60 backdrop-blur-md rounded-[28px] shadow-xl overflow-hidden border-2 border-white/20">
-                                        ${nextItem.isPlaceholder ? `
-                                            <div class="w-full h-full border-4 border-dashed border-white/30 rounded-[28px] flex flex-col items-center justify-center gap-2">
-                                                <div class="w-12 h-12 rounded-full border-2 border-dashed border-white/30 flex items-center justify-center">
-                                                    <span class="text-white/20 text-3xl font-black">+</span>
-                                                </div>
-                                            </div>
-                                        ` : `<img src="${nextItem.src}" class="w-full h-full object-cover brightness-90">`}
-                                    </div>
-                                </div>
-                            ` : ''}
+                            ${nextSlotHtml}
                         </div>
 
                         <!-- Right: Text & Actions Unit -->
                         <div class="flex-1 space-y-8 text-center md:text-left transition-all duration-700 md:pl-16 ${isHistory ? 'text-white' : 'text-[#0f172a]'}">
                             <div class="space-y-4">
                                 <h2 class="text-5xl md:text-7xl font-black font-fredoka drop-shadow-md leading-tight whitespace-nowrap">
-                                    ${isHistory ? `Continue Your<br>Adventure, ${userName}!` : `Start Your<br>Adventure, ${userName}!`}
+                                    ${titleText}
                                 </h2>
                             </div>
 
@@ -738,20 +753,19 @@
                                 </div>
 
                                 <div class="h-4 w-full rounded-full overflow-hidden border p-1 shadow-inner ${isHistory ? 'bg-black/20 border-white/10' : 'bg-[#0f172a]/10 border-[#0f172a]/10'}">
-                                    <div class="h-full rounded-full transition-all duration-1000 bg-gradient-to-r ${isHistory ? 'from-sky-400 to-blue-400 shadow-[0_0_20px_rgba(56,189,248,0.4)]' : 'from-orange-500 to-orange-400 shadow-[0_0_20px_rgba(249,115,22,0.2)]'}" style="width: ${isHistory ? (progress > 0 ? Math.max(progress, 5) : 0) : 100}%"></div>
+                                    <div class="h-full rounded-full transition-all duration-1000 bg-gradient-to-r ${isHistory ? 'from-sky-400 to-blue-400 shadow-[0_0_20px_rgba(56,189,248,0.4)]' : 'from-orange-500 to-orange-400 shadow-[0_0_20px_rgba(249,115,22,0.2)]'}" style="width: ${progressValue}%"></div>
                                 </div>
                             </div>
 
                             <div class="pt-4">
-                                <button onclick="startLearning()" class="w-full md:max-w-md py-6 rounded-[28px] font-black text-4xl flex items-center justify-center gap-4 transition-all hover:scale-[1.02] active:scale-[0.98] shadow-2xl ${isHistory ? 'bg-[#fbbf24] text-[#0f172a] shadow-amber-900/40' : 'bg-[#0f172a] text-white hover:bg-[#1e293b] shadow-amber-900/20'} ${isHeroCTAFlashing ? 'animate-flash-yellow' : ''}">
-                                    ${isHistory ? 'CONTINUE READING' : 'START READING'} <i data-lucide="play" class="w-10 h-10 fill-current ml-2"></i>
+                                <button onclick="startLearning()" class="w-full md:max-w-md py-6 rounded-[28px] font-black text-4xl flex items-center justify-center gap-4 transition-all hover:scale-[1.02] active:scale-[0.98] shadow-2xl ${buttonClass} ${isHeroCTAFlashing ? 'animate-flash-yellow' : ''}">
+                                    ${buttonText} <i data-lucide="play" class="w-10 h-10 fill-current ml-2"></i>
                                 </button>
                             </div>
                         </div>
                     </div>
-                </section>
-            `;
-            lucide.createIcons(); // lint: Initialize icons after rendering hero.
+                </section>`;
+            lucide.createIcons();
         }
 
         function navigateHero(dir) {
@@ -760,25 +774,24 @@
         }
 
         function renderBooks() {
-            const container = document.getElementById('bookContainer');
+             const container = document.getElementById('bookContainer');
             container.innerHTML = booksData.map(book => `
                 <div key="${book.id}" onclick="openModal('${book.id}', 'recommendation')" class="w-36 md:w-40 flex-shrink-0 group cursor-pointer space-y-3 relative select-none">
                     <div class="aspect-[3/4] bg-slate-50 rounded-[32px] shadow-sm border-[4px] border-white group-hover:border-sky-300 transition-all group-hover:-translate-y-3 group-hover:shadow-2xl group-hover:shadow-sky-100 overflow-hidden relative">
                         <img src="${book.src}" class="w-full h-full object-cover pointer-events-none">
                         <div class="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                         
-                        <!-- Card Bookmark Ribbon - Only show when bookmarked -->
+                        <!-- Card Bookmark Ribbon -->
                         ${book.isBookmarked ? `
                         <div class="absolute top-0 left-4 z-10 transition-transform group-hover:scale-110">
                             <div class="w-10 h-12 flex items-center justify-center pt-1 pb-4 rounded-b-xl border-2 border-t-0 border-white shadow-md transition-all bg-[#FF6B00] text-white">
                                 <i data-lucide="bookmark" class="w-6 h-6 fill-current"></i>
                             </div>
-                        </div>
-                        ` : ''}
+                        </div>` : ''}
                     </div>
                     <p class="text-[10px] font-black text-center text-slate-400 truncate px-4 uppercase tracking-[0.15em] group-hover:text-sky-400 transition-colors font-fredoka">${book.title}</p>
                 </div>
-            `).join('');
+                `).join('');
             lucide.createIcons();
         }
 
@@ -790,13 +803,13 @@
 
             document.getElementById('modalTitle').innerText = book.title;
             document.getElementById('modalImg').src = book.src;
-            document.getElementById('modalLexile').innerText = `Lexile: ${book.lexile}`;
+            document.getElementById('modalLexile').innerText = `Lexile: ${book.lexile} `;
             document.getElementById('modalWords').innerText = `${book.wordCount} Words`;
             document.getElementById('modalCategory').innerText = book.category;
             document.getElementById('modalSummary').innerText = book.summary;
             document.getElementById('modalKeywords').innerHTML = book.keywords.map(kw => `
                 <span class="px-4 py-1.5 bg-slate-100 text-slate-500 rounded-xl font-bold text-sm">#${kw}</span>
-            `).join('');
+                    `).join('');
 
             updateBookmarkIcon(book.isBookmarked);
 
@@ -812,7 +825,7 @@
                 startBtn.className = "w-full py-6 rounded-[28px] font-black text-4xl flex items-center justify-center gap-4 transition-all hover:scale-[1.02] active:scale-[0.98] shadow-2xl bg-[#0f172a] text-white hover:bg-[#1e293b] shadow-amber-900/20";
                 startBtn.onclick = () => {
                     const isInHistory = isHistoryMode ? mockHistory.some(h => h.id === bookId) : false;
-                    const currentHeroId = freshHeroBook ? freshHeroBook.id : 'silent-stick';
+                    const currentHeroId = FreshHero ? FreshHero.id : 'silent-stick';
                     const isCurrentHero = !isHistoryMode && bookId === currentHeroId;
 
                     if (!isInHistory && !isCurrentHero) {
@@ -889,205 +902,182 @@
 
 
         function renderReadPhase() {
-            const phaseContainer = document.getElementById('phase-read');
-            const book = booksData.find(b => b.id === currentModalBookId);
-            const filteredScenes = mockScenes.filter(s => s.id === currentModalBookId);
-            setPhase('read');
-            currentPhase = 'read';
+            const pha seContainer = document.getElementById('phaseContainer');
+            if (!phaseContainer) return;
+
+            // Set background cover from current book
+            const book = booksData.find(b => b.id === currentModalBookId) || booksData.find(b => b.id === 'silent-stick') || booksData[0];
+            const bgElement = document.getElementById('read-bg');
+            if (bgElement && book) {
+                bgElement.style.backgroundImage = `url('${book.src}')`;
+            }
+
             if (currentReadStep === 'selection') {
+                // [FIX] Background to SC01 for selection screen as per user request
+                const filteredScenes = mockScenes.filter(s => s.id === currentModalBookId);
+                const sc01 = filteredScenes.find(s => s.scene_no === 'SC01') || filteredScenes[0];
+                if (bgElement && sc01) {
+                    bgElement.style.backgroundImage = `url('${sc01.image_url}')`;
+                }
+
                 phaseContainer.innerHTML = `
-                    <div class="relative z-10 flex-1 flex flex-col items-center justify-center animate-in fade-in duration-500 min-h-screen">
-                        <!-- Backdrop -->
-                        <div class="absolute inset-0">
-                            <img src="./public/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC01.png" class="w-full h-full object-cover opacity-60 brightness-75" />
-                            <div class="absolute inset-0 bg-black/40"></div>
+                    <div class="flex-1 flex flex-col items-center justify-center p-8 animate-in fade-in zoom-in duration-500">
+                        <h2 class="text-6xl font-black text-white mb-16 font-fredoka text-center drop-shadow-2xl">
+                            How would you like to read?
+                        </h2>
+                        <div class="flex gap-12 max-w-6xl w-full mb-16 px-8">
+                            <!-- E-Book Card -->
+                            <button onclick="selectReadingMode('ebook')" id="card-ebook"
+                                class="flex-1 group relative p-12 rounded-[48px] border-4 transition-all duration-300 ${selectedReadingMode === 'ebook' ? 'bg-sky-500/30 border-sky-400 shadow-[0_0_50px_rgba(56,189,248,0.4)] scale-105' : 'bg-white/10 border-white/20 hover:bg-white/20 hover:border-white/40'}">
+                                <div class="w-28 h-28 rounded-3xl flex items-center justify-center mb-10 mx-auto transition-all ${selectedReadingMode === 'ebook' ? 'bg-white text-sky-500 shadow-xl' : 'bg-white/20 text-white group-hover:bg-white/30'} overflow-hidden">
+                                    <img src="./public/UI/Ebook.png" class="w-full h-full object-contain p-4" />
+                                </div>
+                                <h3 class="text-4xl font-black mb-4 text-white font-fredoka">E-Book</h3>
+                                <p class="text-xl font-medium text-slate-300 opacity-90 leading-relaxed">Classic reading experience with clean text.</p>
+                                ${selectedReadingMode === 'ebook' ? '<div class="absolute -top-4 -right-4 w-12 h-12 bg-sky-400 rounded-full flex items-center justify-center text-white shadow-lg border-4 border-white"><i data-lucide="check" class="w-6 h-6"></i></div>' : ''}
+                            </button>
+
+                            <!-- Ani-book Card -->
+                            <button onclick="selectReadingMode('interactive')" id="card-interactive"
+                                class="flex-1 group relative p-12 rounded-[48px] border-4 transition-all duration-300 ${selectedReadingMode === 'interactive' ? 'bg-orange-500/30 border-orange-400 shadow-[0_0_50px_rgba(251,146,60,0.4)] scale-105' : 'bg-white/10 border-white/20 hover:bg-white/20 hover:border-white/40'}">
+                                <div class="w-28 h-28 rounded-3xl flex items-center justify-center mb-10 mx-auto transition-all ${selectedReadingMode === 'interactive' ? 'bg-white text-orange-500 shadow-xl' : 'bg-white/20 text-white group-hover:bg-white/30'} overflow-hidden">
+                                    <img src="./public/UI/Anibook.png" class="w-full h-full object-contain p-4" />
+                                </div>
+                                <h3 class="text-4xl font-black mb-4 text-white font-fredoka">Ani-book</h3>
+                                <p class="text-xl font-medium text-slate-300 opacity-90 leading-relaxed">Read along with voice, images, and fun effects!</p>
+                                ${selectedReadingMode === 'interactive' ? '<div class="absolute -top-4 -right-4 w-12 h-12 bg-orange-400 rounded-full flex items-center justify-center text-white shadow-lg border-4 border-white"><i data-lucide="check" class="w-6 h-6"></i></div>' : ''}
+                            </button>
                         </div>
 
-                        <!-- Selection Modal -->
-                        <div class="relative z-20 w-full max-w-4xl bg-white rounded-[48px] shadow-2xl p-12 flex flex-col items-center gap-12">
-                            <div class="flex gap-8 w-full">
-                                <button onclick="selectReadingMode('ebook')" id="card-ebook" class="flex-1 group transition-all duration-300">
-                                    <div class="aspect-[4/3] bg-slate-50 rounded-[32px] p-8 border-4 transition-all flex flex-col items-center justify-center gap-6 group-hover:bg-sky-50 outline-none
-                                        ${selectedReadingMode === 'ebook' ? 'border-sky-400 bg-sky-50 shadow-[0_0_30px_rgba(56,189,248,0.3)]' : 'border-slate-100 group-hover:border-sky-200'}">
-                                        <div class="w-full h-48 bg-white rounded-2xl shadow-lg flex items-center justify-center group-hover:scale-110 transition-transform overflow-hidden relative border-4 border-white px-4">
-                                            <img src="./public/UI/Ebook.png" alt="ebook" class="w-full h-full object-contain" onerror="this.src='https://img.icons8.com/color/144/storybook.png'"/>
-                                        </div>
-                                        <h3 class="text-3xl font-black text-slate-800 font-fredoka">E-book</h3>
-                                    </div>
-                                </button>
-                                <button onclick="selectReadingMode('interactive')" id="card-interactive" class="flex-1 group transition-all duration-300">
-                                    <div class="aspect-[4/3] bg-slate-50 rounded-[32px] p-8 border-4 transition-all flex flex-col items-center justify-center gap-6 group-hover:bg-sky-50 outline-none
-                                        ${selectedReadingMode === 'interactive' ? 'border-sky-400 bg-sky-50 shadow-[0_0_30px_rgba(56,189,248,0.3)]' : 'border-slate-100 group-hover:border-sky-200'}">
-                                        <div class="w-full h-48 bg-white rounded-2xl shadow-lg flex items-center justify-center group-hover:rotate-12 transition-transform overflow-hidden relative border-4 border-white px-4">
-                                            <img src="./public/UI/Anibook.png" alt="anibook" class="w-full h-full object-contain" onerror="this.src='https://img.icons8.com/color/144/dragon.png'"/>
-                                        </div>
-                                        <h3 class="text-3xl font-black text-slate-800 font-fredoka">Ani-book</h3>
-                                    </div>
-                                </button>
-                            </div>
-                            <button id="modeOkBtn" onclick="goToReadStep('intro')" ${!selectedReadingMode ? 'disabled' : ''} class="w-full h-20 bg-slate-900 text-white rounded-[24px] text-2xl font-black shadow-xl hover:bg-slate-800 active:scale-95 transition-all disabled:opacity-30 disabled:pointer-events-none">OK</button>
-                            <p class="text-slate-400 font-bold">* You <span class="underline decoration-slate-300">can't change the mode</span> while reading.</p>
-                        </div>
+                        <button onclick="goToReadStep('intro')" ${!selectedReadingMode ? 'disabled' : ''} 
+                            class="w-full max-w-xl h-24 bg-white text-slate-900 rounded-[32px] text-4xl font-black shadow-2xl hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-30 disabled:pointer-events-none drop-shadow-2xl">
+                            OK
+                        </button>
                     </div>
                 `;
+                lucide.createIcons();
             } else if (currentReadStep === 'intro') {
+                const filteredScenes = mockScenes.filter(s => s.id === currentModalBookId);
+                const scene = filteredScenes[0] || mockScenes[0];
+
                 phaseContainer.innerHTML = `
-                    <div class="relative z-10 flex-1 flex flex-col animate-in fade-in duration-500 min-h-screen">
+                    <div class="relative flex-1 flex flex-col animate-in fade-in duration-500 overflow-hidden">
                         <div class="absolute inset-0">
-                            <img src="./public/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC01.png" class="w-full h-full object-cover" />
+                            <img src="${scene.image_url}" alt="scene-bg" class="w-full h-full object-cover" />
                         </div>
                         <div class="absolute top-20 left-1/2 -translate-x-1/2 px-16 py-6 bg-white/70 backdrop-blur-md rounded-[32px] shadow-2xl border-4 border-white/20">
                             <h1 class="text-7xl font-black text-slate-900 font-fredoka tracking-tight">${book.title}</h1>
                         </div>
-                        <div class="absolute bottom-12 left-12 w-[580px] bg-white/70 backdrop-blur-md rounded-[48px] shadow-2xl p-12 flex flex-col gap-6 border-4 border-white/30 text-left">
+                        <div class="absolute bottom-12 left-12 w-[580px] bg-white/70 backdrop-blur-md rounded-[48px] shadow-2xl p-12 flex flex-col gap-6 border-4 border-white/30">
                             <div class="flex gap-4">
-                                <span class="px-5 py-2 bg-white rounded-2xl text-slate-900 font-black text-xl border-2 border-slate-200 tracking-tight text-center uppercase">${selectedReadingMode}</span>
-                                <span class="px-5 py-2 bg-white rounded-2xl text-slate-900 font-black text-xl border-2 border-slate-200 tracking-tight text-center uppercase">LEXILE ${book.lexile}</span>
+                                <span class="px-5 py-2 bg-white rounded-2xl text-slate-900 font-black text-xl border-2 border-slate-200 uppercase tracking-tight">${selectedReadingMode}</span>
+                                <span class="px-5 py-2 bg-white rounded-2xl text-slate-900 font-black text-xl border-2 border-slate-200 uppercase tracking-tight">Lexile ${book.lexile}</span>
                             </div>
-                            <p class="text-slate-900 text-[2.2rem] font-black leading-tight text-left">
-                                "${filteredScenes[0]?.script?.substring(0, 100)}..."
-                            </p>
+                            <p class="text-slate-900 text-[2.2rem] font-black leading-tight line-clamp-2">"${scene.script.split('\n')[0].replace('"', '')}..."</p>
                             <div class="flex flex-col gap-3 mt-2">
-                                <span class="px-4 py-1.5 bg-sky-100 text-sky-600 rounded-xl font-black text-sm uppercase self-start">Keywords</span>
-                                <p class="text-slate-600 font-black text-xl leading-relaxed text-left">${book.keywords.join(', ')}</p>
+                                <div class="flex items-center gap-3"><span class="px-4 py-1.5 bg-sky-100 text-sky-600 rounded-xl font-black text-sm uppercase">Keywords</span></div>
+                                <p class="text-slate-600 font-black text-xl leading-relaxed">${book.keywords.join(', ')}</p>
                             </div>
                         </div>
-                        <button onclick="goToReadStep('viewing')" class="absolute bottom-12 right-12 px-24 h-28 bg-white rounded-[40px] flex items-center justify-center text-slate-900 text-5xl font-black font-fredoka shadow-2xl hover:scale-110 active:scale-95 transition-all border-8 border-white animate-twinkle">START</button>
+                        <button onclick="goToReadStep('viewing')" class="absolute bottom-12 right-12 px-24 h-28 bg-white rounded-[40px] flex items-center justify-center text-slate-900 text-5xl font-black font-fredoka shadow-[0_30px_60px_rgba(0,0,0,0.3)] hover:scale-110 active:scale-95 transition-all border-8 border-white group">
+                            START
+                        </button>
                     </div>
                 `;
-            } else {
-                if (currentSceneIndex > maxReachedSceneIndex) {
-                    maxReachedSceneIndex = currentSceneIndex;
+            } else if (currentReadStep === 'viewing') {
+                const filteredScenes = mockScenes.filter(s => s.id === currentModalBookId);
+                const scene = filteredScenes[currentSceneIndex];
+                if (!scene) return;
+
+                // Sync background to current scene image
+                if (bgElement) {
+                    bgElement.style.backgroundImage = `url('${scene.image_url}')`;
+                    bgElement.style.filter = 'brightness(1.0) blur(0px)';
                 }
 
-                const scene = filteredScenes[currentSceneIndex];
+                let viewingHtml = `
+                    <div class="relative flex-1 flex flex-col animate-in fade-in duration-500 overflow-hidden">
+                        <!-- Scene Text Overlays -->
+                        <div class="absolute inset-x-0 top-0 bottom-0 pointer-events-none z-50">
+                            <div class="relative w-full h-full p-12">
+                                <div class="absolute flex items-start gap-8 max-w-5xl ${getTextPositionClass(currentSceneIndex)}">
+                                    <!-- Play Button (Top Left of Text) -->
+                                    <button onclick="playFullSceneAudio(true)" 
+                                        class="w-24 h-24 rounded-[32px] bg-[#FF6B00] text-white shadow-[0_10px_30px_rgba(255,107,0,0.4)] flex items-center justify-center hover:scale-110 active:scale-95 transition-all pointer-events-auto border-4 border-white group/play mt-2">
+                                        <i data-lucide="${isSceneAudioPlaying ? 'pause' : 'play'}" class="w-12 h-12 group-hover/play:rotate-12 transition-transform fill-current"></i>
+                                    </button>
 
+                                    <div class="flex flex-col gap-4">
+                                    ` + scene.script.split('\n').filter(s => s.trim()).map((sentence, sIdx) => {
+                    const pClass = (textSize === 'large' ? 'text-6xl' : textSize === 'medium' ? 'text-5xl' : 'text-4xl') +
+                        (playingSentenceIndex === sIdx ? ' text-orange-400' : ' text-white');
+
+                    return `
+                                        <button onclick="playSentenceAudio(${sIdx}, true)" 
+                                            class="text-left font-fredoka font-black drop-shadow-2xl leading-tight transition-all hover:scale-[1.01] active:scale-95 pointer-events-auto ${pClass}">
+                                            ${sentence.trim()}
+                                        </button>`;
+                }).join('') + `
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Scene Interaction Layer -->
+                        <div class="absolute inset-x-0 bottom-0 p-8 flex justify-between items-center z-60">
+                            <div class="flex gap-4">
+                                <button onclick="toggleSettings()" class="w-16 h-16 bg-black/40 backdrop-blur-md rounded-[24px] border-2 border-white/20 flex items-center justify-center text-white hover:bg-black/60 transition-all active:scale-95 shadow-xl">
+                                    <i data-lucide="settings" class="w-8 h-8"></i>
+                                </button>
+                            </div>
+
+                            <!-- Integrated SCENES Button -->
+                            <button onclick="toggleScenePicker()" class="flex items-center gap-4 px-10 py-5 bg-black/50 backdrop-blur-3xl rounded-full border-2 border-white/30 hover:bg-black/70 hover:scale-105 active:scale-95 transition-all shadow-2xl group">
+                                <i data-lucide="layout-grid" class="w-8 h-8 text-white group-hover:text-orange-400 transition-colors"></i>
+                                <span class="text-white font-black text-2xl font-fredoka tracking-widest">
+                                    SCENES <span class="text-orange-400 ml-2">${currentSceneIndex + 1} / ${filteredScenes.length}</span>
+                                </span>
+                            </button>
+
+                            <div class="w-16 h-16"></div>
+                        </div>
+
+                        <!-- Navigation Buttons (Floating - Centered Vertically) -->
+                        <div class="absolute inset-y-0 inset-x-12 flex items-center justify-between pointer-events-none z-60">
+                            <button onclick="prevScene()" ${currentSceneIndex === 0 ? 'disabled' : ''}
+                                class="w-28 h-28 bg-white/10 hover:bg-white/20 backdrop-blur-xl rounded-full border-4 border-white/20 flex items-center justify-center text-white pointer-events-auto transition-all active:scale-90 shadow-2xl ${currentSceneIndex === 0 ? 'opacity-0' : 'opacity-100'}">
+                                <i data-lucide="chevron-left" class="w-16 h-16" style="stroke-width: 3"></i>
+                            </button>
+                            <button onclick="nextScene()"
+                                class="w-28 h-28 bg-white/95 hover:bg-white rounded-full flex items-center justify-center text-slate-900 border-4 border-white pointer-events-auto transition-all active:scale-90 shadow-[0_20px_60px_rgba(0,0,0,0.5)]">
+                                <i data-lucide="chevron-right" class="w-16 h-16" style="stroke-width: 3"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                phaseContainer.innerHTML = viewingHtml;
+                lucide.createIcons();
                 if (!scene.fetchedScript && !scene.isFetching) {
                     scene.isFetching = true;
-                    fetchSceneScript(scene).then(text => {
-                        scene.fetchedScript = text;
+                    fetchSceneScript(scene).then(() => {
                         scene.isFetching = false;
                         if (currentSceneIndex === filteredScenes.indexOf(scene)) {
                             renderReadPhase();
                         }
                     });
                 }
+            } // end else if (currentReadStep === 'viewing')
+        } // end renderReadPhase
 
-                const script = scene.fetchedScript || scene.script;
-                const sentences = script.split(/(?<=[.!?]) +/);
-                const sentencesHtml = sentences.map((sentence, idx) => `
-                    <span onclick="event.stopPropagation(); playSentenceAudio(${idx})" class="cursor-pointer hover:text-orange-300 transition-colors pointer-events-auto inline-block mr-3 mb-2 ${playingSentenceIndex === idx ? 'text-orange-400 drop-shadow-[0_0_15px_rgba(251,146,60,0.8)] scale-105' : ''}">
-                        ${sentence}
-                    </span>
-                `).join('');
 
-                const dotsHtml = filteredScenes.map((_, index) => `
-                    <div class="w-3 h-3 rounded-full transition-all duration-300 ${index === currentSceneIndex ? 'bg-[#FF6B00] scale-125 shadow-[0_0_10px_#FF6B00]' : 'bg-white/40'}"></div>
-                `).join('');
-
-                const positionClass = getTextPositionClass(currentSceneIndex);
-
-                phaseContainer.innerHTML = `
-                    <div class="absolute inset-0 bg-black z-0 flex flex-col overflow-hidden animate-in fade-in duration-500">
-                        <img src="${scene.image_url}" class="absolute inset-0 w-full h-full object-cover" />
-                        
-                        <!-- Shared Text Overlay -->
-                        <div class="absolute z-50 p-12 max-w-[1400px] transition-all duration-500 ease-in-out flex items-start gap-8 pointer-events-none ${positionClass.replace('items-start', '').replace('items-end', '')} ${positionClass.includes('left-') ? 'ml-32' : ''} ${positionClass.includes('right-') ? 'mr-32' : ''}">
-                            <!-- Play Button -->
-                            <button onclick="event.stopPropagation(); playFullSceneAudio()" class="mt-40 w-14 h-14 bg-[#FF6B00] rounded-full shadow-[0_4px_15px_rgba(255,107,0,0.5)] flex items-center justify-center text-white hover:bg-[#FF8500] hover:scale-110 active:scale-95 transition-all pointer-events-auto flex-shrink-0 ${isSceneAudioPlaying ? 'ring-4 ring-orange-300' : ''}">
-                                <i data-lucide="play" class="w-8 h-8 ${isSceneAudioPlaying ? 'fill-current' : ''}"></i>
-                            </button>
-
-                            <div class="flex-1 pointer-events-auto">
-                                <p class="text-white text-4xl md:text-5xl lg:text-6xl font-black font-fredoka leading-[1.3] drop-shadow-[0_8px_16px_rgba(0,0,0,0.9)] whitespace-pre-line ${positionClass.includes('text-right') ? 'text-right' : 'text-left'}">
-                                    ${sentencesHtml}
-                                </p>
-                            </div>
-                        </div>
-
-                        ${isScenePickerOpen ? `<div class="absolute inset-0 z-[60] pointer-events-auto" onclick="isScenePickerOpen = false; renderReadPhase();"></div>` : ''}
-
-                        <button onclick="isScenePickerOpen = true; renderReadPhase();" class="absolute bottom-12 left-1/2 -translate-x-1/2 flex items-center gap-4 px-6 py-3 bg-black/40 backdrop-blur-xl rounded-full border border-white/20 z-30 hover:scale-105 active:scale-95 transition-all group ${isScenePickerOpen ? 'translate-y-20 opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'}">
-                            <div class="text-white group-hover:text-[#FF6B00] transition-colors"><i data-lucide="chevron-up" class="w-6 h-6"></i></div>
-                            <div class="flex items-center gap-2">${dotsHtml}</div>
-                        </button>
-
-                        <div id="scenePicker" class="absolute bottom-0 inset-x-0 bg-black/80 backdrop-blur-2xl border-t border-white/10 transition-all duration-500 ease-out z-[70] pb-12 pt-8 ${isScenePickerOpen ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0 pointer-events-none'}" onclick="event.stopPropagation()">
-                            <div class="px-12">
-                                <button onclick="isScenePickerOpen = false; renderReadPhase();" class="w-full flex justify-center mb-6 py-2 group">
-                                    <div class="bg-black/80 backdrop-blur-md rounded-full px-8 py-2 border border-white/20 flex items-center gap-4 shadow-lg group-hover:scale-105 transition-all">
-                                        <div class="text-white group-hover:text-[#FF6B00] transition-colors"><i data-lucide="chevron-down" class="w-5 h-5"></i></div>
-                                        <div class="flex items-center gap-2">
-                                            ${filteredScenes.map((_, index) => `<div class="w-2 h-2 rounded-full transition-all duration-300 ${index === currentSceneIndex ? 'bg-[#FF6B00]' : 'bg-white/30'}"></div>`).join('')}
-                                        </div>
-                                    </div>
-                                </button>
-                                <div class="flex items-center justify-between mb-6">
-                                    <h3 class="text-white/60 font-black text-xl font-fredoka uppercase tracking-widest flex items-center gap-3"><i data-lucide="sparkles" class="w-5 h-5 text-[#FF6B00]"></i>Jump to Scene</h3>
-                                    <span class="text-white/30 font-bold font-jua text-lg bg-white/5 px-4 py-1 rounded-full border border-white/5">${currentSceneIndex + 1} / ${filteredScenes.length}</span>
-                                </div>
-                                <div class="flex gap-4 overflow-x-auto pb-12 pt-4 scrollbar-hide snap-x no-scrollbar">
-                                    ${filteredScenes.map((s, index) => {
-                    const isUnlocked = index <= maxReachedSceneIndex;
-                    const isActive = index === currentSceneIndex;
-                    return `<button ${!isUnlocked ? 'disabled' : `onclick="jumpToScene(${index})"`} class="relative flex-shrink-0 w-48 aspect-video rounded-2xl overflow-hidden snap-start transition-all duration-300 ${isActive ? 'ring-4 ring-[#FF6B00] scale-105 shadow-[0_0_30px_rgba(255,107,0,0.3)] z-10' : 'ring-2 ring-white/5 hover:ring-white/20'} ${!isUnlocked ? 'opacity-40 grayscale pointer-events-none' : ''}">
-                                            <img src="${s.image_url}" class="w-full h-full object-cover" onerror="this.src='https://img.icons8.com/color/144/image.png'" />
-                                            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
-                                            <div class="absolute bottom-3 left-4 text-white font-black text-sm font-fredoka flex items-center gap-2"><span class="opacity-60 text-[10px] uppercase">SC</span><span>${String(index + 1).padStart(2, '0')}</span></div>
-                                            ${!isUnlocked ? `<div class="absolute inset-0 flex items-center justify-center bg-black/50 backdrop-blur-[1px]"><div class="w-10 h-10 bg-black/40 rounded-full flex items-center justify-center border border-white/10 shadow-xl"><i data-lucide="lock" class="w-5 h-5 text-white/90"></i></div></div>` : ''}
-                                            ${isActive ? `<div class="absolute top-3 right-3 w-4 h-4 bg-[#FF6B00] rounded-full shadow-[0_0_10px_#FF6B00] flex items-center justify-center"><div class="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></div></div>` : ''}
-                                        </button>`;
-                }).join('')}
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="absolute inset-y-0 inset-x-8 flex items-center justify-between pointer-events-none">
-                            <button onclick="prevScene()" class="w-24 h-24 rounded-full bg-white/10 hover:bg-white/20 border-4 border-white/20 flex items-center justify-center text-white pointer-events-auto transition-all active:scale-90 ${currentSceneIndex === 0 ? 'opacity-0 pointer-events-none' : ''}">
-                                <i data-lucide="chevron-left" class="w-12 h-12"></i>
-                            </button>
-                            <button onclick="nextScene()" class="w-24 h-24 rounded-full bg-white hover:scale-110 flex items-center justify-center text-slate-900 shadow-2xl pointer-events-auto transition-all active:scale-90">
-                                <i data-lucide="chevron-right" class="w-12 h-12"></i>
-                            </button>
-                        </div>
-                    </div>
-                `;
-            }
-            lucide.createIcons();
-        }
-
-        window.prevScene = function () {
-            if (currentSceneIndex > 0) {
-                stopAudio();
-                currentSceneIndex--;
-                renderReadPhase();
-            }
-        };
-
-        window.nextScene = function () {
-            const filteredScenes = mockScenes.filter(s => s.id === currentModalBookId);
-
-            if (currentSceneIndex < filteredScenes.length - 1) {
-                stopAudio();
-                currentSceneIndex++;
-                if (currentSceneIndex > maxReachedSceneIndex) {
-                    maxReachedSceneIndex = currentSceneIndex;
-                }
-                renderReadPhase();
-            } else {
-                stopAudio();
-                showReadCompletePraise();
-            }
-        };
-
-        window.exitReadPhase = function () { // lint: New function to exit the read phase and return to home.
+        function exitReadPhase() {
             stopAudio();
             currentPhase = 'home';
-            location.reload(); // Simple way to restore home state in prototype
+            location.reload();
         };
 
-        function toggleBookmarkModal() {
-            const book = booksData.find(b => b.id === currentModalBookId);
+        window.toggleBookmarkModal = function () {
+            const book = books Data.find(b => b.id === currentModalBookId);
             if (book) {
                 book.isBookmarked = !book.isBookmarked;
                 updateBookmarkIcon(book.isBookmarked);
@@ -1110,6 +1100,8 @@
             lucide.createIcons();
         }
 
+        // --- 4. Navigation & Learning Transition Functions ---
+
         function addBookWithAnimation(bookId) {
             const book = booksData.find(b => b.id === bookId);
             if (!book) return;
@@ -1129,6 +1121,7 @@
             else if (rightPlaceholder) targetSlotElement = document.getElementById('hero-right-slot');
             else targetSlotElement = document.getElementById('hero-center-slot'); // Replacement logic
 
+            let targetLogicalIndex = 0;
             if (targetSlotElement) {
                 targetLogicalIndex = parseInt(targetSlotElement.getAttribute('data-index') || '2', 10);
             }
@@ -1141,6 +1134,10 @@
             overlay.className = 'animate-suck-to-hero rounded-[32px] overflow-hidden shadow-2xl border-4 border-white';
             overlay.style.width = '240px';
             overlay.style.height = '320px';
+            overlay.style.position = 'fixed';
+            overlay.style.left = '50%';
+            overlay.style.top = '50%';
+            overlay.style.transform = 'translate(-50%, -50%)';
             overlay.style.setProperty('--target-x', `${targetX}px`);
             overlay.style.setProperty('--target-y', `${targetY}px`);
             overlay.innerHTML = `<img src="${book.src}" class="w-full h-full object-cover">`;
@@ -1154,7 +1151,7 @@
 
                 if (!isHistoryMode) {
                     // Fresh Mode: Replace the Hero cover
-                    freshHeroBook = { ...book };
+                    FreshHero = { ...book };
                     isHeroCTAFlashing = true;
                     renderHero();
                     setTimeout(() => {
@@ -1194,13 +1191,10 @@
         let gnbTimeout = null;
         let isReadUnlocked = false;
 
-        // Scene Picker Progress
-        let maxReachedSceneIndex = 0;
-        let isScenePickerOpen = false;
 
         function startLearning() {
             closeModal();
-            const book = booksData.find(b => b.id === currentModalBookId) || booksData[0];
+            c onst book = booksData.find(b => b.id === currentModalBookId) || booksData[0];
 
             // Show the overlay first
             const overlay = document.getElementById('learningModeOverlay');
@@ -1216,21 +1210,19 @@
             const shouldStartRead = history && (history.phase === 'read' || history.completedPhases.includes('watch'));
 
             if (shouldStartRead) {
-                const relevantScenes = scenesData.filter(s => s.book_id === book.id);
-                if (relevantScenes.length > 0) {
+                    isReadUnlocked = true;
                     currentPhase = 'read';
                     currentSceneIndex = 0;
-                    renderReadPhase();
-                    return;
+                    setPhase('read');
                 }
-            }
 
             // Fallback to Watch phase (Default)
             document.getElementById('studyBookTitle').innerText = book.title;
             const video = document.getElementById('studyVideo');
             // Ensure path is correct and call load() to reset the player
-            video.src = book.videoUrl || "./public/Video/The_silent_stick_watch.mp4";
+            video.src = book.videoUrl || "./public/Video/the_silent_stick_watch.mp4";
             video.load();
+            // video.play() removed as per user request (manual play required)
 
             setPhase('watch');
             showGnb();
@@ -1253,6 +1245,7 @@
         }
 
         function exitLearningMode() {
+            stopAudio();
             const video = document.getElementById('studyVideo');
             video.pause();
             document.getElementById('learningModeOverlay').classList.remove('active');
@@ -1276,8 +1269,8 @@
         function showGnb() {
             document.getElementById('studyGnb').style.transform = 'translateY(0)';
             document.getElementById('gnbHandleIcon').setAttribute('data-lucide', 'chevron-up');
-            // Show GNB background overlay if it was closed
-            isGnbVisible = true;
+            // Show GNB background overlay if it was cl osed
+             isGnbVisible = true;
             lucide.createIcons();
         }
 
@@ -1286,7 +1279,7 @@
             document.getElementById('gnbHandleIcon').setAttribute('data-lucide', 'chevron-down');
             isGnbVisible = false;
             lucide.createIcons();
-        }
+         }
 
         function toggleGnb(forceToggle = false) {
             if (isGnbVisible) hideGnb();
@@ -1296,53 +1289,49 @@
         function startGnbTimer() {
             clearTimeout(gnbTimeout);
             gnbTimeout = setTimeout(() => {
-                const video = document.getElementById('studyVideo');
+                const video = document.getElemen tById('studyVideo');
                 if (!video.paused) {
                     hideGnb();
                 }
             }, 3000);
-        }
+         }
 
-        function handleMainClick() {
-            // No automatic toggle on background click as requested
-        }
+         function handleMainClick() {
+    if (currentPhase === 'watch') {
+        toggleGnb();
+    }
+}
 
         function setPhase(phase) {
+            stopAudio();
             if (phase === 'read' && !isReadUnlocked) return;
 
             currentPhase = phase;
-            document.getElementById('phase-watch').classList.add('hidden');
+            document.getElementById('phase-watch ').classLi st.add('hidden');
             document.getElementById('phase-read').classList.add('hidden');
-            document.getElementById(`phase-${phase}`).classList.remove('hidden');
+            document.getE lementById(`phase-${phase}`).classList.remove('hidden');
+            if (phase === 'read') renderReadPhase();
 
             // Update Tabs
             const tabs = ['watch', 'read'];
             tabs.forEach(t => {
                 const btn = document.getElementById(`tab-${t}`);
                 if (btn) {
-                    // Check if this tab is unlocked
                     const isUnlocked = (t === 'watch') || (t === 'read' && isReadUnlocked);
-
-                    // Reset all tabs to default state
                     btn.classList.remove('bg-white', 'text-orange-500', 'shadow-sm', 'opacity-50', 'cursor-not-allowed', 'text-slate-400', 'text-slate-700');
 
                     if (isUnlocked) {
-                        // Unlocked Style (Inactive but clickable)
                         btn.classList.add('text-slate-700');
                         btn.classList.remove('opacity-50', 'cursor-not-allowed');
                         btn.removeAttribute('disabled');
-
-                        // Remove lock icon if present
                         const lockIcon = btn.querySelector('[data-lucide="lock"]');
                         if (lockIcon) lockIcon.remove();
                     } else {
-                        // Locked Style
                         btn.classList.add('text-slate-400', 'opacity-50', 'cursor-not-allowed');
                         btn.setAttribute('disabled', 'true');
                     }
 
                     if (t === phase && isUnlocked) {
-                        // Highlight active phase in Orange
                         btn.classList.add('bg-white', 'text-orange-500', 'shadow-sm');
                         btn.classList.remove('text-slate-700');
                     }
@@ -1353,6 +1342,8 @@
                 document.getElementById('studyVideo').pause();
             }
         }
+
+        // --- 5. Video Phase Interaction ---
 
         // Video Logic
         function togglePlay() {
@@ -1395,13 +1386,13 @@
             document.getElementById('videoProgress').style.width = `${progress}%`;
         }
 
-        function cyclePlaybackRate() {
+        window.cyclePlaybackRate = function () {
             const video = document.getElementById('studyVideo');
             const rates = [1, 1.5, 2, 0.5];
             let currentIdx = rates.indexOf(video.playbackRate);
             let nextIdx = (currentIdx + 1) % rates.length;
             video.playbackRate = rates[nextIdx];
-            document.getElementById('playbackRateText').innerText = `${rates[nextIdx]}x`;
+             documen t.getElementById('playbackRateText').innerText = `${rates[nextIdx]} x`;
         }
 
         const mockBookMeta = {
@@ -1414,46 +1405,151 @@
             cover_url: "https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?q=80&w=2070"
         };
 
-        const mockScenes = [
-            { id: 'silent-stick', scene_no: "SC01", script: "The frozen lake lay still, \na big area of gray ice \nbeneath a heavy winter sky.", image_url: "./public/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC01.png", full_audio: "./public/Audio/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC01.mp3" },
-            { id: 'silent-stick', scene_no: "SC02", script: "He hit the puck with force, \nbut his old stick broke \nsuddenly upon impact.", image_url: "./public/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC02.png", full_audio: "./public/Audio/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC02.mp3" },
-            { id: 'silent-stick', scene_no: "SC03", script: "Two pieces of wood lay on the ice, \nshowing the end of his practice.", image_url: "./public/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC03.png", full_audio: "./public/Audio/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC03.mp3" },
-            { id: 'silent-stick', scene_no: "SC04", script: "Ren worked for hours, \ncutting the skin to show \nthe hard wood under.", image_url: "./public/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC04.png", full_audio: "./public/Audio/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC04.mp3" },
-            { id: 'silent-stick', scene_no: "SC05", script: "When he tested it, \nthe puck flew in strange circles \ndue to the wood’s natural shape.", image_url: "./public/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC05.png", full_audio: "./public/Audio/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC05.mp3" },
-            { id: 'silent-stick', scene_no: "SC06", script: "Jax glanced at Ren’s rough branch \nand offered a cold smile, saying nothing.", image_url: "./public/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC06.png", full_audio: "./public/Audio/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC06.mp3" },
-            { id: 'silent-stick', scene_no: "SC07", script: "Jax controlled the ice, \nhis speed pushing Ren \nback toward his own goal.", image_url: "./public/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC07.png", full_audio: "./public/Audio/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC07.mp3" },
-            { id: 'silent-stick', scene_no: "SC08", script: "The puck turned around the confused player, \ngoing quietly into the net as the whistle blew.", image_url: "./public/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC08.png", full_audio: "./public/Audio/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC08.mp3" },
-            { id: 'silent-stick', scene_no: "SC09", script: "Ren smiled at his rough stick \nand skated away silently.", image_url: "./public/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC09.png", full_audio: "./public/Audio/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC09.mp3" }
-        ];
 
-        // [NEW] Helper for text positioning
-        function getTextPositionClass(index) {
-            switch (index) {
-                case 0: // SC01
-                    return "top-8 left-8 md:top-16 md:left-16 text-left items-start";
-                case 1: // SC02
-                case 2: // SC03
-                case 4: // SC05
-                    return "top-8 right-8 md:top-16 md:right-16 text-left items-start";
-                case 3: // SC04
-                    return "bottom-24 right-8 md:bottom-32 md:right-16 text-left items-start";
-                case 5: // SC06
-                case 6: // SC07
-                case 7: // SC08
-                    return "bottom-24 left-8 md:bottom-32 md:left-16 text-left items-start";
-                case 8: // SC09
-                    return "top-1/2 -translate-y-1/2 left-24 md:left-32 text-left items-start";
-                default:
-                    return "top-8 left-8 md:top-16 md:left-16 text-left items-start";
+
+
+
+        function toggleSettings() {
+            isSettingsOpen = !isSettingsOpen;
+            const overlay = document.getElementById('settingsOverlay');
+            if (isSettingsOpen) {
+                overlay.classList.remove('hidden');
+                updateSettingsUI();
+            } else {
+        overlay.classList.add('hidden');
             }
+            lucide.createIcons();
+        };
+
+        function setNarration(val) {
+            isNarrationOn = val;
+            if (!isNarrationOn) {
+                stopAudio();
+                isPageTurnOn = false;
+            } else {
+                playFullSceneAudio(true);
+            }
+            updateSettingsUI();
+            renderReadPhase();
+        };
+
+        function setPageTurn(val) {
+            if (!isNarrationOn) return;
+            isPageTurnOn = val;
+            updateSettingsUI();
+        };
+
+        function setNarrationSpeed(speed) {
+            narrationSpeed = speed;
+            if (currentAudio) currentAudio.playbackRate = speed;
+            updateSettingsUI();
+        };
+
+        function setTextSize(size) {
+            textSize = size;
+            updateSettingsUI();
+            renderReadPhase();
+        };
+
+        function updateSettingsUI() {
+            // Narration
+            const nToggle = document.getElementById('narrationToggle');
+            const nKnob = nToggle.querySelector('.toggle-knob');
+            if (isNarrationOn) {
+                nToggle.classList.remove('bg-slate-600');
+                nToggle.classList.add('bg-orange-500');
+                nKnob.classList.add('translate-x- 12');
+                 nKnob.innerText = 'on';
+            } else {
+                nToggle.classList.add('bg-slate-600');
+                nToggle.classList.remove('bg-orange-500');
+                nKnob.classList.remove('translate-x-12');
+                nKnob.innerText = 'off';
+            }
+
+            // Page Turn Row
+            const ptRow = document.getElementById('pageTurnRow');
+            const ptToggle = document.getElementById('pageTurnToggle');
+            const ptKnob = ptToggle.querySelector('.toggle-knob');
+            if (isNarrationOn) {
+                ptRow.classList.remove('opacity-30', 'pointer-events-none');
+            } else {
+                ptRow.classList.add('opacity-30', 'pointer-events-none');
+            }
+
+            if (isPageTurnOn) {
+                ptToggle.classList.remove('bg-slate-600');
+                ptToggle.classList.add('bg-orange-500');
+                ptKnob.classList.add('translate-x-12');
+                ptKnob.innerText = 'on';
+            } else {
+                ptToggle.classList.add('bg-slate-600');
+                ptToggle.classList.remove('bg-orange-500');
+                ptKnob.classList.remove('translate-x-12');
+                ptKnob.innerText = 'off';
+            }
+
+            // Narration Speed Row
+            const nsRow = document.getElementById('narrationSpeedRow');
+            if (isNarrationOn) nsRow.classList.remove('opacity-30', 'pointer-events-none');
+            else nsRow.classList.add('opacity-30', 'pointer-events-none');
+
+            [0.8, 1.0, 1.2].forEach(speed => {
+                const btn = document.getElementById(`speed-${speed}`);
+                if (btn) {
+                    if (narrationSpeed === speed) {
+                        btn.classList.add('bg-white', 'text-slate-900', 'shadow-xl', 'scale-105');
+                        btn.classList.remove('bg-slate-700', 'text-white/60');
+                    } else {
+                        btn.classList.remove('bg-white', 'text-slate-900', 'shadow-xl', 'scale-105');
+                        btn.classList.add('bg-slate-700', 'text-white/60');
+                    }
+                }
+            });
+
+            // Text Size
+            ['normal', 'large', 'medium'].forEach(size => {
+                const btn = document.getElementById(`size-${size}`);
+                if (btn) {
+                    if (textSize === size) {
+                        btn.classList.add('bg-white', 'text-slate-900', 'shadow-xl', 'scale-105');
+                        btn.classList.remove('bg-slate-700', 'text-white/60');
+                    } else {
+                        btn.classList.remove('bg-white', 'text-slate-900', 'shadow-xl', 'scale-105');
+                        btn.classList.add('bg-slate-700', 'text-white/60');
+                    }
+                }
+            });
         }
 
-        // [NEW] Async Text Fetcher
-        let currentAudio = null;
-        let playingSentenceIndex = null;
-        let isSceneAudioPlaying = false;
+        function toggleScenePicker() {
+            isScenePickerOpen = !isScenePickerOpen;
+            const overlay = document.getElementById('scenePickerOverlay');
+            if (isScenePickerOpen) {
+                overlay.classList.remove('hidden');
+                renderSceneThumbnails();
+            } else {
+                overlay.classList.add('hidden');
+            }
+            lucide.createIcons();
+        };
 
-        function playFullSceneAudio() {
+        function renderSceneThumbnails() {
+            const container = document.getElementById('sceneThumbnails');
+            const filteredScenes = mockScenes.filter(s => s.id === currentModalBookId);
+
+            container.innerHTML = filteredScenes.map((scene, idx) => `
+                <button onclick="jumpToScene(${idx})" 
+                    class="relative flex-shrink-0 w-72 aspect-video rounded-3xl overflow -hidden  snap-start transition-all duration-300 ${idx === currentSceneIndex ? 'ring-6 ring-orange-500 scale-105 shadow-[0_0_50px_rgba(255,107,0,0.6)] z-10' : 'opacity-50 hover:opacity-100 ring-2 ring-white/10'}">
+                    <img src="${scene.image_url}" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"></div>
+                    <div class="absolute bottom-4 left-6 text-white font-black text-xl">Scene ${String(idx + 1).padStart(2, '0')}</div>
+                </button>
+            `).join('');
+        }
+
+        function playFullSceneAudio(force = false) {
+            if (!force && !isNarrationOn) return;
             const scenes = mockScenes.filter(s => s.id === currentModalBookId);
             const scene = scenes[currentSceneIndex];
             if (!scene || !scene.full_audio) return;
@@ -1461,18 +1557,27 @@
             if (currentAudio) currentAudio.pause();
 
             currentAudio = new Audio(scene.full_audio);
+            currentAudio.playbackRate = narrationSpeed;
             isSceneAudioPlaying = true;
             playingSentenceIndex = null;
 
             currentAudio.play().catch(err => console.error("Audio play failed:", err));
             currentAudio.onended = () => {
                 isSceneAudioPlaying = false;
+                if (isPageTurnOn) {
+                    if (currentSceneIndex < scenes.length - 1) {
+                        setTimeout(() => { window.nextScene(); }, 1000);
+                    } else {
+                        showReadCompletePraise();
+                    }
+                }
                 renderReadPhase();
             };
             renderReadPhase();
-        }
+        };
 
-        function playSentenceAudio(index) {
+        function playSentenceAudio(index, force = false) {
+            if (!force && !isNarrationOn) return;
             const scenes = mockScenes.filter(s => s.id === currentModalBookId);
             const scene = scenes[currentSceneIndex];
             if (!scene || !scene.full_audio) return;
@@ -1480,6 +1585,7 @@
             if (currentAudio) currentAudio.pause();
 
             currentAudio = new Audio(scene.full_audio);
+            currentAudio.playbackRate = narrationSpeed;
             playingSentenceIndex = index;
             isSceneAudioPlaying = false;
 
@@ -1489,7 +1595,7 @@
                 renderReadPhase();
             };
             renderReadPhase();
-        }
+        };
 
         function stopAudio() {
             if (currentAudio) {
@@ -1498,19 +1604,57 @@
             }
             playingSentenceIndex = null;
             isSceneAudioPlaying = false;
-        }
+        };
+
+        function prevScene() {
+            window.stopAudio();
+            if (currentSceneIndex > 0) {
+                window.stopAudio();
+                currentSceneIndex--;
+                isScenePickerOpen = false;
+                renderReadPhase();
+                if (isNarrationOn) {
+                    setTimeout(() => { window.playFullSceneAudio(); }, 500);
+                }
+            }
+        };
+
+        function nextScene() {
+                            topAudio();
+            const scenes = mockScenes.filter(s => s.id === currentModalBookId);
+            if (currentSceneIndex < scenes.length - 1) {
+                window.stopAudio();
+                currentSceneIndex++;
+                if (currentSceneIndex > maxReachedSceneIndex) maxReachedSceneIndex = currentSceneIndex;
+                isScenePickerOpen = false;
+                renderReadPhase();
+                        if (isNarrationOn) {
+                    setTimeout(() => { window.playFullSceneAudio(); }, 500);
+                }
+            } else {
+                showReadCompletePraise();
+            }
+        };
+
+        function jumpToScene(index) {
+            window.stopAudio();
+            currentSceneIndex = index;
+            isScenePickerOpen = false;
+            document.getElementById('scenePickerOverlay').classList.add('hidden');
+            renderReadPhase();
+            if (isNarrationOn) {
+                setTimeout(() => { window.playFullSceneAudio(); }, 500);
+            }
+        };
 
         async function fetchSceneScript(scene) {
             if (scene.fetchedScript) return scene.fetchedScript;
-
-            // Derive path: ./public/Image/.../SC01.png -> ./public/Data/.../SC01.txt
-            // Note: prototype.html is at root, so ./public is correct.
-            const textUrl = scene.image_url.replace('/Image/', '/Data/').replace('.png', '.txt').replace('.jpg', '.txt');
+            const textUrl = scene.image_url.replace("/Image/", "/Data/").replace(".png", ".txt").replace(".jpg", ".txt");
             try {
                 const res = await fetch(textUrl);
                 if (res.ok) {
                     const text = await res.text();
-                    if (text && !text.includes('<!DOCTYPE html>')) {
+                    if (text && !text.includes("<!DOCTYPE html>")) {
                         scene.fetchedScript = text;
                         return text;
                     }
@@ -1518,22 +1662,38 @@
             } catch (e) {
                 console.error("Fetch failed", e);
             }
-            return scene.script; // Fallback
+            return scene.script;
         }
 
-        let currentReadStep = 'selection';
 
         function goToReadStep(step) {
             currentReadStep = step;
+            if (step === 'viewing') {
+                if (isNarrationOn) {
+                    setTimeout(() => { window.playFullSceneAudio(); }, 500);
+                }
+            }
             renderReadPhase();
-        }
+        };
 
         function selectReadingMode(mode) {
             selectedReadingMode = mode;
+            if (mode === 'ebook') {
+                isNarrationOn = true;
+                isPageTurnOn = true;
+            } else if (mode === 'interactive') {
+                isNarrationOn = false;
+                isPageTurnOn = false;
+            }
             renderReadPhase();
-        }
+        };
 
-        // [NEW] Read Complete Praise Overlay
+
+
+
+
+        // --- 8. Speak Stage & Praise Modal ---
+
         function showReadCompletePraise() {
             const overlay = document.createElement('div');
             overlay.id = 'readCompletePraise';
@@ -1552,34 +1712,47 @@
                     
                     <p class="mt-8 text-white text-2xl font-fredoka font-bold animate-pulse">Click to continue</p>
                 </div>
-            `;
+                `;
             document.body.appendChild(overlay);
         }
 
-        // [NEW] Scene Selection Modal
         function showSpeakSelectionModal() {
             const overlay = document.createElement('div');
             overlay.id = 'speakSelectionModal';
             overlay.className = 'fixed inset-0 z-[120] bg-black/60 backdrop-blur-md flex items-center justify-center animate-in fade-in duration-300';
 
+            // [NEW] Default Selection Policy
+            const defaults = [];
+            if (mockScenes.length > 0) {
+                const sc01Idx = mockScenes.findIndex(s => s.scene_no && s.scene_no.includes('SC01'));
+                defaults.push(sc01Idx !== -1 ? sc01Idx : 0);
+                if (mockScenes.length >= 2) {
+                    const lastMinusOne = mockScenes.length - 2;
+                    if (!defaults.includes(lastMinusOne)) defaults.push(lastMinusOne);
+                }
+            }
+            selectedScenes = defaults;
+
             // Generate Scene Checkboxes
-            const sceneGridHtml = mockScenes.map((scene, idx) => `
-                <div class="relative group cursor-pointer" onclick="toggleSceneSelection(${idx})">
-                    <div class="aspect-video bg-slate-100 rounded-xl overflow-hidden border-4 transition-all duration-200 ${idx === 0 ? 'border-orange-500 ring-4 ring-orange-200' : 'border-slate-200 group-hover:border-orange-300'}" id="scene-card-${idx}">
-                        <img src="${scene.image_url}" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
-                        
-                        <!-- Checkbox Overlay -->
-                        <div class="absolute top-2 right-2 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-lg border-2 ${idx === 0 ? 'border-orange-500 bg-orange-500 text-white' : 'border-slate-300 text-transparent'}" id="scene-check-${idx}">
-                            <i data-lucide="check" class="w-5 h-5 font-bold"></i>
-                        </div>
-                        
-                        <!-- Scene Label -->
-                        <div class="absolute bottom-0 inset-x-0 bg-black/50 text-white text-center py-1 text-sm font-bold backdrop-blur-sm">
-                            Scene ${idx + 1}
-                        </div>
+            const sceneGridHtml = mockScenes.map((scene, idx) => {
+                const isSelected = selectedScenes.includes(idx);
+                return `          <div class="relative group cursor-pointer" onclick="toggleSceneSelection(${idx})">
+                <div class="aspect-video bg-slate-100 rounded-xl overflow-hidden border-4 transition-all duration-200 ${isSelected ? 'border-orange-500 ring-4 ring-orange-200' : 'border-slate-200 group-hover:border-orange-300'}" id="scene-card-${idx}">
+                    <img src="${scene.image_url}" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+
+                    <!-- Checkbox Overlay -->
+                    <div class="absolute top-2 right-2 w-8 h-8 rounded-full flex items-center justify-center shadow-lg border-2 ${isSelected ? 'border-orange-500 bg-orange-500 text-white' : 'border-slate-300 bg-white text-transparent'}" id="scene-check-${idx}">
+                        <i data-lucide="check" class="w-5 h-5 font-bold"></i>
+                    </div>
+
+                    <!-- Scene Label -->
+                    <div class="absolute bottom-0 inset-x-0 bg-black/50 text-white text-center py-1 text-sm font-bold backdrop-blur-sm">
+                        Scene ${idx + 1}
                     </div>
                 </div>
-            `).join('');
+                </div>
+                `;
+            }).join('');
 
             overlay.innerHTML = `
                 <div class="bg-white rounded-[40px] p-8 w-[90%] max-w-5xl shadow-2xl animate-in slide-in-from-bottom-10 duration-500 relative">
@@ -1607,19 +1780,20 @@
                     </div>
 
                     <!-- Footer Action -->
-                    <div class="mt-8 flex justify-center">
-                        <button onclick="confirmSpeakSelection()" class="px-16 py-4 bg-white border-4 border-slate-200 text-slate-700 rounded-full text-2xl font-black font-fredoka hover:bg-orange-500 hover:text-white hover:border-orange-500 transition-all shadow-xl hover:shadow-orange-200 active:scale-95">
-                            OK
-                        </button>
-                    </div>
+                <div class="mt-8 flex justify-center">
+                    <button id="confirmSelectBtn" onclick="confirmSpeakSelection()" class="px-16 py-4 rounded-full text-2xl font-black font-fredoka transition-all shadow-xl active:scale-95">
+                        OK
+                    </button>
                 </div>
-            `;
+                </div>
+                `;
             document.body.appendChild(overlay);
+            updateSelectionUI();
             lucide.createIcons();
         }
 
         // [NEW] Selection Logic
-        let selectedScenes = [0]; // Default first scene selected
+
 
         function toggleSceneSelection(idx) {
             const index = selectedScenes.indexOf(idx);
@@ -1628,72 +1802,85 @@
 
             if (index > -1) {
                 selectedScenes.splice(index, 1);
-                // Visual Uncheck
                 card.classList.remove('border-orange-500', 'ring-4', 'ring-orange-200');
                 card.classList.add('border-slate-200');
                 check.classList.remove('border-orange-500', 'bg-orange-500', 'text-white');
                 check.classList.add('border-slate-300', 'text-transparent');
             } else {
                 selectedScenes.push(idx);
-                // Visual Check
                 card.classList.add('border-orange-500', 'ring-4', 'ring-orange-200');
                 card.classList.remove('border-slate-200');
                 check.classList.add('border-orange-500', 'bg-orange-500', 'text-white');
                 check.classList.remove('border-slate-300', 'text-transparent');
             }
-            updateSelectAllState();
+            updateSelectionUI();
         }
 
         function toggleSelectAll() {
-            const isAll = selectedScenes.length === mockScenes.length;
-            const selectAllCheck = document.getElementById('selectAllCheck');
-
+            const isAll = (selectedScenes.length === mockScenes.length && mockScenes.length > 0);
             if (isAll) {
                 selectedScenes = [];
-                // Uncheck all UI
                 mockScenes.forEach((_, i) => {
                     const card = document.getElementById(`scene-card-${i}`);
                     const check = document.getElementById(`scene-check-${i}`);
-                    card.classList.remove('border-orange-500', 'ring-4', 'ring-orange-200');
-                    card.classList.add('border-slate-200');
-                    check.classList.remove('border-orange-500', 'bg-orange-500', 'text-white');
-                    check.classList.add('border-slate-300', 'text-transparent');
+                    if (card) {
+                        card.classList.remove('border-orange-500', 'ring-4', 'ring-orange-200');
+                        card.classList.add('border-slate-200');
+                    }
+                    if (check) {
+                        check.classList.remove('border-orange-500', 'bg-orange-500', 'text-white');
+                        check.classList.add('border-slate-300', 'text-transparent');
+                    }
                 });
-                selectAllCheck.classList.remove('bg-orange-500', 'border-orange-500');
-                selectAllCheck.classList.add('border-slate-300');
             } else {
                 selectedScenes = mockScenes.map((_, i) => i);
-                // Check all UI
                 mockScenes.forEach((_, i) => {
                     const card = document.getElementById(`scene-card-${i}`);
                     const check = document.getElementById(`scene-check-${i}`);
-                    card.classList.add('border-orange-500', 'ring-4', 'ring-orange-200');
-                    card.classList.remove('border-slate-200');
-                    check.classList.add('border-orange-500', 'bg-orange-500', 'text-white');
-                    check.classList.remove('border-slate-300', 'text-transparent');
+                    if (card) {
+                        card.classList.add('border-orange-500', 'ring-4', 'ring-orange-200');
+                        card.classList.remove('border-slate-200');
+                    }
+                    if (check) {
+                        check.classList.add('border-orange-500', 'bg-orange-500', 'text-white');
+                        check.classList.remove('border-slate-300', 'text-transparent');
+                    }
                 });
-                selectAllCheck.classList.add('bg-orange-500', 'border-orange-500');
-                selectAllCheck.classList.remove('border-slate-300');
             }
+            updateSelectionUI();
         }
 
-        function updateSelectAllState() {
-            const isAll = selectedScenes.length === mockScenes.length;
+        function updateSelectionUI() {
+            const isAll = (selectedScenes.length === mockScenes.length && mockScenes.length > 0);
             const selectAllCheck = document.getElementById('selectAllCheck');
-            if (isAll) {
-                selectAllCheck.classList.add('bg-orange-500', 'border-orange-500');
-                selectAllCheck.classList.remove('border-slate-300');
-            } else {
-                selectAllCheck.classList.remove('bg-orange-500', 'border-orange-500');
-                selectAllCheck.classList.add('border-slate-300');
+            if (selectAllCheck) {
+                if (isAll) {
+                    selectAllCheck.classList.add('bg-orange-500', 'border-orange-500');
+                    selectAllCheck.classList.remove('border-slate-300');
+                } else {
+                    selectAllCheck.classList.remove('bg-orange-500', 'border-orange-500');
+                    selectAllCheck.classList.add('border-slate-300');
+                }
+            }
+
+            const confirmBtn = document.getElementById('confirmSelectBtn');
+            if (confirmBtn) {
+                const baseClasses = "px-16 py-4 rounded-full text-2xl font-black font-fredoka transition-all shadow-xl active:scale-95";
+                const disabledClasses = "bg-slate-100 border-4 border-slate-200 text-slate-300 cursor-not-allowed opacity-50";
+                const enabledClasses = "bg-white border-4 border-slate-200 text-slate-700 hover:bg-orange-500 hover:text-white hover:border-orange-500 hover:shadow-orange-200";
+
+                if (selectedScenes.length < 2) {
+                    confirmBtn.disabled = true;
+                    confirmBtn.className = `${baseClasses} ${disabledClasses} `;
+                } else {
+                    confirmBtn.disabled = false;
+                    confirmBtn.className = `${baseClasses} ${enabledClasses} `;
+                }
             }
         }
 
         function confirmSpeakSelection() {
-            if (selectedScenes.length === 0) {
-                alert("Please select at least one scene!");
-                return;
-            }
+            if (selectedScenes.length < 2) return;
             document.getElementById('speakSelectionModal').remove();
 
             // Unlock and Switch to Speak Mode
@@ -1717,40 +1904,12 @@
             }
         }
 
-        function goToReadStep(step) {
-            currentReadStep = step;
-            renderReadPhase();
-        }
-
-
-        function prevScene() {
-            if (currentSceneIndex > 0) {
-                currentSceneIndex--;
-                isScenePickerOpen = false;
-                renderReadPhase();
-            }
-        }
-
-        function toggleScenePicker() {
-            isScenePickerOpen = !isScenePickerOpen;
-            renderReadPhase();
-        }
-
-        function jumpToScene(index) {
-            if (index <= maxReachedSceneIndex) {
-                stopAudio();
-                currentSceneIndex = index;
-                isScenePickerOpen = false;
-                renderReadPhase();
-            }
-        }
 
         function onVideoEnded() {
-            // isReadUnlocked = true; // Don't unlock automatically yet
             document.getElementById('nextPhaseContainer').classList.remove('opacity-0', 'translate-y-10', 'pointer-events-none');
             document.getElementById('nextPhaseContainer').innerHTML = `
                 <button onclick="isReadUnlocked=true; currentReadStep='selection'; setPhase('read'); renderReadPhase();"
-                    class="px-12 py-6 bg-white rounded-full font-black text-slate-900 text-3xl shadow-[0_20px_50px_rgba(0,0,0,0.3)] hover:scale-110 active:scale-95 transition-all flex items-center gap-4 border-8 border-white group">
+            class="px-12 py-6 bg-white rounded-full font-black text-slate-900 text-3xl shadow-[0_20px_50px_rgba(0,0,0,0.3)] hover:scale-110 active:scale-95 transition-all flex items-center gap-4 border-8 border-white group">
                     <div class="flex flex-col items-start leading-none">
                         <span class="text-slate-400 text-xs font-black uppercase tracking-widest mb-1">Great Watching!</span>
                         <span class="font-fredoka uppercase text-4xl">Read Next</span>
@@ -1762,7 +1921,6 @@
             `;
             lucide.createIcons();
 
-            // Reset icons
             document.getElementById('centralPlayIcon').setAttribute('data-lucide', 'play');
             document.getElementById('playIcon').setAttribute('data-lucide', 'play');
             lucide.createIcons();

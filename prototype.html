@@ -269,12 +269,10 @@
 
         /* Glassmorphism Popup Style */
         .glass-popup {
-            background-color: rgba(0, 0, 0, 0.25) !important;
-            /* Further increased transparency: 0.4 -> 0.25 */
-            backdrop-filter: blur(8px) !important;
-            /* Further reduced blur: 12px -> 8px */
-            -webkit-backdrop-filter: blur(8px) !important;
-            border: 4px solid rgba(255, 255, 255, 0.15) !important;
+            background-color: rgba(0, 0, 0, 0.6) !important;
+            backdrop-filter: blur(12px) !important;
+            -webkit-backdrop-filter: blur(12px) !important;
+            border: 4px solid rgba(255, 255, 255, 0.2) !important;
             box-shadow: 0 32px 80px rgba(0, 0, 0, 0.9) !important;
         }
 
@@ -445,9 +443,11 @@
     </div>
 
     <!-- Settings Overlay -->
-    <div id="settingsOverlay" class="fixed inset-0 z-[200] flex items-center justify-center hidden pointer-events-none">
-        <div
-            class="glass-popup w-[560px] rounded-[60px] p-16 relative z-10 text-white font-fredoka pointer-events-auto animate-in fade-in zoom-in-95 duration-300">
+    <div id="settingsOverlay"
+        class="fixed inset-0 z-[200] flex items-center justify-center hidden pointer-events-auto bg-transparent"
+        onclick="toggleSettings()">
+        <div class="glass-popup w-[560px] rounded-[60px] p-16 relative z-10 text-white font-fredoka pointer-events-auto animate-in fade-in zoom-in-95 duration-300"
+            onclick="event.stopPropagation()">
             <div class="flex items-center mb-12 relative h-12">
                 <h2 class="settings-title w-full text-center">Setting</h2>
                 <button onclick="toggleSettings()"
@@ -490,11 +490,15 @@
                 <div class="space-y-6">
                     <span class="settings-label block text-left">Text Size</span>
                     <div class="flex gap-4 settings-btn-group">
-                        <button onclick="setTextSize('small')" id="text-small" class="flex-1 text-sm">Text</button>
-                        <button onclick="setTextSize('medium')" id="text-medium"
-                            class="flex-1 text-xl active">Text</button>
-                        <button onclick="setTextSize('large')" id="text-large"
-                            class="flex-1 text-4xl font-black">Text</button>
+                        <button onclick="setTextSize('small')" id="text-small" class="flex-1">
+                            <span class="text-sm">작게</span>
+                        </button>
+                        <button onclick="setTextSize('medium')" id="text-medium" class="flex-1 active">
+                            <span class="text-base">보통</span>
+                        </button>
+                        <button onclick="setTextSize('large')" id="text-large" class="flex-1">
+                            <span class="text-xl font-black">크게</span>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -505,11 +509,6 @@
     <div id="learningModeOverlay"
         class="fixed inset-0 z-[100] bg-black hidden overflow-hidden shadow-[0_-20px_50px_rgba(0,0,0,0.3)]">
 
-        <!-- Fixed Settings Button (Global in Reading) -->
-        <button id="fixedSettingsBtn" onclick="toggleSettings()"
-            class="fixed bottom-12 left-12 w-16 h-16 bg-black/40 backdrop-blur-md rounded-2xl flex items-center justify-center text-white hover:bg-black/60 transition-all pointer-events-auto shadow-xl z-[120] hidden">
-            <i data-lucide="settings" class="w-10 h-10"></i>
-        </button>
 
         <!-- Floating GNB Wrapper -->
         <div id="gnbWrapper" class="fixed top-0 inset-x-0 z-[110]">
@@ -1183,6 +1182,12 @@
                     <div class="absolute inset-0 bg-black z-0 flex flex-col overflow-hidden animate-in fade-in duration-500">
                         <img src="${scene.image_url}" class="absolute inset-0 w-full h-full object-cover" />
                         
+                        <!-- Fixed Settings Button (Moved inside stacking context) -->
+                        <button id="fixedSettingsBtn" onclick="toggleSettings(); event.stopPropagation();"
+                            class="absolute bottom-12 left-12 w-16 h-16 bg-black/40 backdrop-blur-md rounded-2xl flex items-center justify-center text-white hover:bg-black/60 transition-all pointer-events-auto shadow-xl z-60 hidden">
+                            <i data-lucide="settings" class="w-10 h-10"></i>
+                        </button>
+                        
                         <!-- Shared Text Overlay -->
                         <div class="absolute z-50 p-12 max-w-[1400px] transition-all duration-500 ease-in-out flex items-start gap-8 pointer-events-none ${positionClass.replace('items-start', '').replace('items-end', '')} ${positionClass.includes('left-') ? 'ml-32' : ''} ${positionClass.includes('right-') ? 'mr-32' : ''}">
                             <!-- Play Button -->
@@ -1204,7 +1209,7 @@
                             <div class="flex items-center gap-2">${dotsHtml}</div>
                         </button>
 
-                        <div id="scenePicker" class="absolute bottom-0 inset-x-0 bg-black/80 backdrop-blur-2xl border-t border-white/10 transition-all duration-500 ease-out z-[70] pb-12 pt-8 ${isScenePickerOpen ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0 pointer-events-none'}" onclick="event.stopPropagation()">
+                        <div id="scenePicker" class="absolute bottom-0 inset-x-0 bg-black/80 backdrop-blur-2xl border-t border-white/10 transition-all duration-500 ease-out z-[100] pb-12 pt-8 ${isScenePickerOpen ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0 pointer-events-none'}" onclick="event.stopPropagation()">
                             <div class="px-12">
                                 <button onclick="isScenePickerOpen = false; renderReadPhase();" class="w-full flex justify-center mb-6 py-2 group">
                                     <div class="bg-black/80 backdrop-blur-md rounded-full px-8 py-2 border border-white/20 flex items-center gap-4 shadow-lg group-hover:scale-105 transition-all">
@@ -1245,6 +1250,7 @@
                     </div>
                 `;
             }
+            updateFixedSettingsVisibility();
             lucide.createIcons();
         }
 
@@ -1543,17 +1549,30 @@
             });
 
             // Toggle Fixed Settings Button visibility
-            const fixedSettingsBtn = document.getElementById('fixedSettingsBtn');
-            if (fixedSettingsBtn) {
-                if (phase === 'read') {
-                    fixedSettingsBtn.classList.remove('hidden');
-                } else {
-                    fixedSettingsBtn.classList.add('hidden');
-                }
-            }
+            updateFixedSettingsVisibility(phase);
 
             if (phase === 'read') {
                 document.getElementById('studyVideo').pause();
+            }
+        }
+
+        // [NEW] Helper to manage settings button visibility
+        function updateFixedSettingsVisibility(phase = currentPhase) {
+            const fixedSettingsBtn = document.getElementById('fixedSettingsBtn');
+            if (!fixedSettingsBtn) return;
+
+            const filteredScenes = mockScenes.filter(s => s.id === currentModalBookId);
+            const currentScene = filteredScenes[currentSceneIndex];
+
+            // Condition: Read Phase, Viewing Step (Show for all scenes)
+            const isVisible = (phase === 'read') &&
+                (currentReadStep === 'viewing') &&
+                (currentScene);
+
+            if (isVisible) {
+                fixedSettingsBtn.classList.remove('hidden');
+            } else {
+                fixedSettingsBtn.classList.add('hidden');
             }
         }
 
@@ -2036,7 +2055,9 @@
 
         function setNarration(val) {
             isNarrationOn = val;
-            if (!isNarrationOn) {
+            if (isNarrationOn) {
+                isPageTurnOn = true;
+            } else {
                 stopAudio();
                 isPageTurnOn = false;
             }

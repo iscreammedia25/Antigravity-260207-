@@ -106,8 +106,9 @@ const HeroSection: React.FC<HeroSectionProps> = ({ userName, readingHistory, fre
                 <>
                   <img src={book.src} alt={book.title} className="w-full h-full object-cover" />
                   <div className="absolute top-4 left-4 z-20">
-                    <div className="bg-black/40 backdrop-blur-md px-3 py-1 rounded-full border border-white/20">
-                      <p className="text-white font-black text-[9px] uppercase tracking-widest opacity-90">{isHistoryMode ? 'In Progress' : 'Recommended'}</p>
+                    <div className={`px-4 py-1.5 rounded-full border-2 shadow-lg backdrop-blur-md flex items-center gap-2 ${isHistoryMode ? 'bg-orange-500/90 border-orange-400 text-white' : 'bg-sky-500/90 border-sky-400 text-white'}`}>
+                      <div className={`w-2 h-2 rounded-full animate-pulse ${isHistoryMode ? 'bg-yellow-300' : 'bg-white'}`} />
+                      <p className="font-black text-[10px] uppercase tracking-wider">{isHistoryMode ? 'In Progress' : 'Recommended'}</p>
                     </div>
                   </div>
                   <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex flex-col justify-end p-5 min-h-[40%]">

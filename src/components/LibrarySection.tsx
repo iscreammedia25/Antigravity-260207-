@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { Sparkles, ChevronRight, ChevronLeft, Bookmark } from 'lucide-react';
+import { Sparkles, ChevronRight, ChevronLeft, Heart } from 'lucide-react';
 import { BOOKS_DATA, Book } from '../data/books';
 
 interface LibrarySectionProps {
@@ -11,7 +11,7 @@ interface LibrarySectionProps {
 const LibrarySection: React.FC<LibrarySectionProps> = ({ userName, onViewInfo }) => {
     const scrollRef = useRef<HTMLDivElement>(null);
     const [canScrollLeft, setCanScrollLeft] = useState(false);
-    const [books] = useState<Book[]>(BOOKS_DATA);
+    const books = BOOKS_DATA;
 
     const [isDragging, setIsDragging] = useState(false);
     const [startX, setStartX] = useState(0);
@@ -65,13 +65,13 @@ const LibrarySection: React.FC<LibrarySectionProps> = ({ userName, onViewInfo })
     };
 
     return (
-        <div className="card-bubble p-6 md:p-8 w-full relative overflow-hidden">
+        <div className="card-bubble p-6 md:p-8 w-full h-full flex flex-col relative overflow-hidden">
             <div className="flex justify-between items-center mb-10">
                 <h3 className="text-3xl font-black text-slate-700 flex items-center gap-4 font-jua">
                     <span className="w-12 h-12 bg-sky-100 rounded-2xl flex items-center justify-center text-sky-400 shadow-sm shadow-sky-100">
                         <Sparkles className="w-8 h-8 fill-current" />
                     </span>
-                    Recommended for {userName}
+                    For you
                 </h3>
                 <a href="#" className="p-3 bg-sky-50 text-sky-400 font-black btn-jelly text-xs flex items-center gap-2 hover:bg-sky-100 hover:scale-105 active:scale-95 group font-fredoka">
                     SEE ALL <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -106,8 +106,8 @@ const LibrarySection: React.FC<LibrarySectionProps> = ({ userName, onViewInfo })
                                 {/* Card Bookmark Ribbon - Only show when bookmarked */}
                                 {book.isBookmarked && (
                                     <div className="absolute top-0 left-4 z-10 transition-transform group-hover:scale-110">
-                                        <div className="w-10 h-12 flex items-center justify-center pt-1 pb-4 rounded-b-xl border-2 border-t-0 border-white shadow-md transition-all bg-[#FF6B00] text-white">
-                                            <Bookmark className="w-6 h-6 fill-current" />
+                                        <div className="w-10 h-12 flex items-center justify-center pt-1 pb-4 rounded-b-xl border-2 border-t-0 border-white shadow-md transition-all bg-rose-500 text-white">
+                                            <Heart className="w-6 h-6 fill-current" />
                                         </div>
                                     </div>
                                 )}

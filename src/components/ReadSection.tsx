@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { X, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Play, Book as BookIcon, Check, Video, BookOpen, HelpCircle, MessageCircle, Settings, Volume2 } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Play, Book as BookIcon, Check, Video, BookOpen, HelpCircle, MessageCircle, Settings, Volume2, Mic } from 'lucide-react';
 import { Book } from '../data/books';
 import { ReadingMode, ReadStep, SceneData } from '../types/learning';
 import { MOCK_BOOK_META, MOCK_SCENES_DATA } from '../data/mockData';
@@ -41,7 +41,7 @@ const ReadSection: React.FC<ReadSectionProps> = ({ book, onClose }) => {
 
     // Settings State
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-    const [narrationOn, setNarrationOn] = useState(true);
+    const [narrationOn, setNarrationOn] = useState(false);
     const [pageTurnOn, setPageTurnOn] = useState(false);
     const [narrationSpeed, setNarrationSpeed] = useState<'slow' | 'normal' | 'fast'>('normal');
     const [textSize, setTextSize] = useState<'small' | 'medium' | 'large'>('medium');
@@ -51,6 +51,39 @@ const ReadSection: React.FC<ReadSectionProps> = ({ book, onClose }) => {
     const [isSceneAudioPlaying, setIsSceneAudioPlaying] = useState(false);
     const [maxReachedSceneIndex, setMaxReachedSceneIndex] = useState(0);
     const [showPraise, setShowPraise] = useState(false);
+    const [unlockedReadAloudScenes, setUnlockedReadAloudScenes] = useState<Set<number>>(new Set());
+    const unlockTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const isReadAloudUnlocked = unlockedReadAloudScenes.has(currentSceneIndex);
+
+    // Difficulty State
+    const [difficulty, setDifficulty] = useState<'Easy' | 'Original' | 'Difficult'>('Original');
+    const [isDifficultyOpen, setIsDifficultyOpen] = useState(false);
+    const [isTextFading, setIsTextFading] = useState(false);
+
+    const handleDifficultyChange = (newDiff: 'Easy' | 'Original' | 'Difficult') => {
+        setIsTextFading(true);
+        setIsDifficultyOpen(false);
+        setTimeout(() => {
+            setDifficulty(newDiff);
+            setIsTextFading(false);
+        }, 300);
+    };
+
+    const getDisplayScript = () => {
+        const text = fetchedScript || filteredScenes[currentSceneIndex]?.script || '';
+        if (difficulty === 'Easy') return `[Easy]\n${text}`;
+        if (difficulty === 'Difficult') return `[Difficult]\n${text}`;
+        return text;
+    };
+
+    useEffect(() => {
+        if (readStep === 'viewing' && !narrationOn) {
+            setUnlockedReadAloudScenes(prev => new Set(prev).add(currentSceneIndex));
+        }
+        return () => {
+            if (unlockTimeoutRef.current) clearTimeout(unlockTimeoutRef.current);
+        };
+    }, [currentSceneIndex, readStep, narrationOn]);
 
     useEffect(() => {
         const targetId = book.id === 'rainbow-cloud' ? '0001_lv4' : book.id;
@@ -63,6 +96,13 @@ const ReadSection: React.FC<ReadSectionProps> = ({ book, onClose }) => {
             });
         setFilteredScenes(scenes);
     }, [book.id]);
+
+    // Auto-play audio on scene change
+    useEffect(() => {
+        if (readStep === 'viewing' && narrationOn && !isSettingsOpen) {
+            playFullSceneAudio();
+        }
+    }, [currentSceneIndex, readStep]);
 
     useEffect(() => {
         if (readStep === 'viewing') {
@@ -96,16 +136,35 @@ const ReadSection: React.FC<ReadSectionProps> = ({ book, onClose }) => {
     }, [currentSceneIndex, readStep, filteredScenes]);
 
     const playFullSceneAudio = () => {
-        if (!narrationOn) return;
         const scene = filteredScenes[currentSceneIndex];
         if (!scene || !scene.full_audio) return;
         if (audioRef.current) audioRef.current.pause();
+        if (unlockTimeoutRef.current) clearTimeout(unlockTimeoutRef.current);
+
+        // If narration is off, we still pause but don't start new audio
+        if (!narrationOn) {
+            setIsSceneAudioPlaying(false);
+            setUnlockedReadAloudScenes(prev => new Set(prev).add(currentSceneIndex));
+            return;
+        }
+
         const audio = new Audio(scene.full_audio);
         audioRef.current = audio;
 
         // Apply playback speed
         const playbackRate = narrationSpeed === 'slow' ? 0.75 : narrationSpeed === 'fast' ? 1.5 : 1.0;
         audio.playbackRate = playbackRate;
+
+        // Unlock Read Aloud
+        const currentIdx = currentSceneIndex;
+        if (!unlockedReadAloudScenes.has(currentIdx)) {
+            audio.addEventListener('loadedmetadata', () => {
+                const fastDurationMs = (audio.duration / 1.5) * 1000;
+                unlockTimeoutRef.current = setTimeout(() => {
+                    setUnlockedReadAloudScenes(prev => new Set(prev).add(currentIdx));
+                }, fastDurationMs);
+            });
+        }
 
         setIsSceneAudioPlaying(true);
         setPlayingSentenceIndex(null);
@@ -114,6 +173,16 @@ const ReadSection: React.FC<ReadSectionProps> = ({ book, onClose }) => {
         audio.onended = () => {
             setIsSceneAudioPlaying(false);
             setIsGnbVisible(true); // Show GNB back when done
+            setUnlockedReadAloudScenes(prev => new Set(prev).add(currentSceneIndex));
+
+            // Auto-advance logic
+            if (pageTurnOn) {
+                if (currentSceneIndex < filteredScenes.length - 1) {
+                    setCurrentSceneIndex(prev => prev + 1);
+                } else {
+                    setShowPraise(true);
+                }
+            }
         };
     };
 
@@ -207,7 +276,7 @@ const ReadSection: React.FC<ReadSectionProps> = ({ book, onClose }) => {
                     <div className="relative z-10 flex-1 flex flex-col items-center justify-center animate-in fade-in duration-500">
                         <div className="relative z-20 w-full max-w-4xl bg-white rounded-[48px] shadow-2xl p-12 flex flex-col items-center gap-12">
                             <div className="flex gap-8 w-full">
-                                <button onClick={() => setReadingMode('ebook')} className={`flex-1 group transition-all duration-300`}>
+                                <button onClick={() => { setReadingMode('ebook'); setNarrationOn(false); setPageTurnOn(false); }} className={`flex-1 group transition-all duration-300`}>
                                     <div className={`aspect-[4/3] bg-slate-50 rounded-[32px] p-8 border-4 transition-all flex flex-col items-center justify-center gap-6 ${readingMode === 'ebook' ? 'border-sky-400 bg-sky-50 shadow-lg' : 'border-slate-100'}`}>
                                         <div className="w-full h-48 bg-white rounded-2xl shadow-lg flex items-center justify-center overflow-hidden border-4 border-white px-4">
                                             <img src="/UI/Ebook.png" alt="E-book" className="w-full h-full object-contain" onError={(e) => (e.target as any).src = 'https://img.icons8.com/color/144/storybook.png'} />
@@ -215,7 +284,7 @@ const ReadSection: React.FC<ReadSectionProps> = ({ book, onClose }) => {
                                         <h3 className="text-3xl font-black text-slate-800 font-fredoka">E-book</h3>
                                     </div>
                                 </button>
-                                <button onClick={() => setReadingMode('interactive')} className={`flex-1 group transition-all duration-300`}>
+                                <button onClick={() => { setReadingMode('interactive'); setNarrationOn(true); setPageTurnOn(true); }} className={`flex-1 group transition-all duration-300`}>
                                     <div className={`aspect-[4/3] bg-slate-50 rounded-[32px] p-8 border-4 transition-all flex flex-col items-center justify-center gap-6 ${readingMode === 'interactive' ? 'border-sky-400 bg-sky-50 shadow-lg' : 'border-slate-100'}`}>
                                         <div className="w-full h-48 bg-white rounded-2xl shadow-lg flex items-center justify-center group-hover:rotate-12 transition-transform overflow-hidden relative border-4 border-white px-4">
                                             <img src="/UI/Anibook.png" alt="Ani-book" className="w-full h-full object-contain" onError={(e) => (e.target as any).src = 'https://img.icons8.com/color/144/dragon.png'} />
@@ -261,17 +330,69 @@ const ReadSection: React.FC<ReadSectionProps> = ({ book, onClose }) => {
                 {/* Viewing Step */}
                 {readStep === 'viewing' && (
                     <div className="relative flex-1 flex flex-col" onClick={resetGnbTimer}>
+                        {/* Read Aloud Button */}
+                        <div className={`absolute left-12 z-40 transition-all duration-300 ${isGnbVisible ? 'top-[120px]' : 'top-12'}`}>
+                            <button
+                                disabled={!isReadAloudUnlocked}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (audioRef.current && !audioRef.current.paused) {
+                                        audioRef.current.pause();
+                                        setIsSceneAudioPlaying(false);
+                                    }
+                                    if (unlockTimeoutRef.current) clearTimeout(unlockTimeoutRef.current);
+                                    console.log('Read Aloud Clicked');
+                                }}
+                                className={`flex items-center gap-3 px-6 py-4 rounded-3xl font-black text-xl shadow-lg transition-all border-4 ${isReadAloudUnlocked ? 'bg-[#FF6B00] text-white border-orange-400' : 'bg-black/40 text-white/50 border-white/10 cursor-not-allowed backdrop-blur-md'}`}
+                            >
+                                <Mic size={28} />
+                                Read Aloud
+                            </button>
+                        </div>
+
+                        {/* Difficulty Dropdown */}
+                        <div className={`absolute right-12 transition-all duration-300 z-[120] ${isGnbVisible ? 'top-[120px]' : 'top-12'}`}>
+                            <div className="relative">
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setIsDifficultyOpen(!isDifficultyOpen);
+                                    }}
+                                    className="flex items-center gap-3 px-6 py-4 rounded-3xl font-black text-xl shadow-xl transition-all border-4 bg-white/95 text-slate-800 border-white/20 backdrop-blur-md hover:bg-white active:scale-95 pointer-events-auto"
+                                >
+                                    <span className="font-fredoka tracking-wide uppercase">{difficulty}</span>
+                                    {isDifficultyOpen ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
+                                </button>
+                                {isDifficultyOpen && (
+                                    <div className="absolute top-full mt-3 right-0 w-full bg-white/98 backdrop-blur-xl rounded-[24px] shadow-2xl overflow-hidden border-2 border-slate-100 flex flex-col pointer-events-auto animate-in slide-in-from-top-3 duration-300 z-[121]">
+                                        {(['Easy', 'Original', 'Difficult'] as const).filter(d => d !== difficulty).map(d => (
+                                            <button
+                                                key={d}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleDifficultyChange(d);
+                                                }}
+                                                className="py-4 px-6 text-xl font-black text-slate-600 hover:bg-slate-50 hover:text-orange-500 transition-all text-left font-fredoka uppercase tracking-wide border-b border-slate-50 last:border-0"
+                                            >
+                                                {d}
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
                         {filteredScenes[currentSceneIndex] && (
                             <div className={`absolute z-50 p-12 max-w-[1400px] transition-all duration-500 flex items-start gap-8 pointer-events-none ${getTextPositionClass(currentSceneIndex).replace('items-start', '').replace('items-end', '')} ${getTextPositionClass(currentSceneIndex).includes('left-') ? 'ml-32' : ''} ${getTextPositionClass(currentSceneIndex).includes('right-') ? 'mr-32' : ''}`}>
                                 <button onClick={(e) => { e.stopPropagation(); playFullSceneAudio(); }} className={`mt-40 w-14 h-14 bg-[#FF6B00] rounded-full shadow-lg flex items-center justify-center text-white hover:bg-[#FF8500] hover:scale-110 transition-all pointer-events-auto flex-shrink-0 ${isSceneAudioPlaying ? 'ring-4 ring-orange-300' : ''}`}>
                                     <Play size={28} fill="currentColor" className="ml-1" />
                                 </button>
-                                <div className="flex-1 pointer-events-auto">
+                                <div className={`flex-1 pointer-events-auto transition-opacity duration-300 ${isTextFading ? 'opacity-0' : 'opacity-100'}`}>
                                     <p className={`font-black text-white leading-[1.3] drop-shadow-2xl font-fredoka whitespace-pre-line ${getTextPositionClass(currentSceneIndex).includes('text-right') ? 'text-right' : 'text-left'} ${textSize === 'small' ? 'text-2xl md:text-3xl lg:text-4xl' :
                                         textSize === 'large' ? 'text-5xl md:text-7xl lg:text-8xl' :
                                             'text-4xl md:text-5xl lg:text-6xl'
                                         }`}>
-                                        {(fetchedScript || filteredScenes[currentSceneIndex].script).split(/(?<=[.!?]) +/).map((sentence, idx) => (
+                                        {getDisplayScript().split(/(?<=[.!?]) +/).map((sentence, idx) => (
                                             <span key={idx} onClick={(e) => { e.stopPropagation(); playSentenceAudio(idx); }} className={`cursor-pointer hover:text-orange-300 transition-all inline-block mr-4 mb-3 ${playingSentenceIndex === idx ? 'text-orange-400 scale-105' : ''}`}>
                                                 {sentence}
                                             </span>
@@ -352,7 +473,7 @@ const ReadSection: React.FC<ReadSectionProps> = ({ book, onClose }) => {
                         {readStep === 'viewing' && filteredScenes[currentSceneIndex] && (
                             <button
                                 onClick={() => setIsSettingsOpen(true)}
-                                className="absolute bottom-12 left-12 w-16 h-16 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center text-white border-2 border-white/20 transition-all active:scale-95 shadow-lg group z-60"
+                                className="absolute bottom-12 left-12 w-16 h-16 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center text-white border-2 border-white/20 transition-all active:scale-95 shadow-lg group z-[120]"
                             >
                                 <Settings size={32} className="group-hover:rotate-45 transition-transform" />
                             </button>
@@ -380,46 +501,61 @@ const ReadSection: React.FC<ReadSectionProps> = ({ book, onClose }) => {
 
                                     <div className="space-y-10">
                                         {/* Narration Toggle */}
-                                        <div className="flex justify-between items-center">
-                                            <span className="text-[30px] font-bold text-white drop-shadow-md">Narration</span>
+                                        <div className="flex justify-between items-center group/item hover:bg-white/5 p-4 rounded-[24px] transition-all">
+                                            <span className="text-[28px] font-bold text-white drop-shadow-md font-fredoka uppercase tracking-wider">Narration</span>
                                             <div
                                                 onClick={() => {
                                                     const newVal = !narrationOn;
                                                     setNarrationOn(newVal);
                                                     if (newVal) {
                                                         setPageTurnOn(true);
+                                                        // Use a slight timeout to ensure state has propagated or just call play function
+                                                        // Actually, the useEffect on currentSceneIndex might not trigger if index stays same
+                                                        // So we trigger it here if turning on
+                                                        setTimeout(() => playFullSceneAudio(), 0);
                                                     } else {
                                                         setPageTurnOn(false);
+                                                        if (audioRef.current) audioRef.current.pause();
+                                                        setIsSceneAudioPlaying(false);
                                                     }
                                                 }}
-                                                className={`w-[100px] h-[48px] rounded-[24px] border-2 transition-all relative flex items-center px-[6px] cursor-pointer ${narrationOn ? 'bg-white border-white' : 'bg-black border-white/30 shadow-inner'}`}
+                                                className={`w-[110px] h-[52px] rounded-[26px] border-2 transition-all duration-500 relative flex items-center px-1 cursor-pointer overflow-hidden ${narrationOn ? 'bg-white border-white shadow-[0_0_25px_rgba(255,255,255,0.4)]' : 'bg-slate-800 border-white/10 shadow-inner'}`}
                                             >
-                                                <span className={`text-[18px] font-black uppercase transition-colors ml-2 ${narrationOn ? 'text-black' : 'text-white'}`}>on</span>
-                                                <div className={`w-[36px] h-[36px] rounded-full absolute shadow-lg transition-transform ${narrationOn ? 'translate-x-[50px] bg-black' : 'translate-x-0 bg-white'}`} />
+                                                <span className={`text-[15px] font-black uppercase transition-all duration-500 z-10 w-full text-center ${narrationOn ? 'pr-8 text-slate-900' : 'pl-8 text-white/40'}`}>
+                                                    {narrationOn ? 'ON' : 'OFF'}
+                                                </span>
+                                                <div className={`w-[40px] h-[40px] rounded-full absolute shadow-xl transition-all duration-500 cubic-bezier(0.175, 0.885, 0.32, 1.275) z-0 ${narrationOn ? 'translate-x-[60px] bg-slate-900' : 'translate-x-[2px] bg-white'}`} />
                                             </div>
                                         </div>
 
                                         {/* Page Turn Toggle */}
-                                        <div className="flex justify-between items-center">
-                                            <span className="text-[30px] font-bold text-white drop-shadow-md">Page Turn</span>
+                                        <div className={`flex justify-between items-center group/item hover:bg-white/5 p-4 rounded-[24px] transition-all ${!narrationOn ? 'opacity-30' : ''}`}>
+                                            <span className="text-[28px] font-bold text-white drop-shadow-md font-fredoka uppercase tracking-wider">Page Turn</span>
                                             <div
-                                                onClick={() => setPageTurnOn(!pageTurnOn)}
-                                                className={`w-[100px] h-[48px] rounded-[24px] border-2 transition-all relative flex items-center px-[6px] cursor-pointer ${pageTurnOn ? 'bg-white border-white' : 'bg-black border-white/30 shadow-inner'}`}
+                                                onClick={() => {
+                                                    if (narrationOn) {
+                                                        setPageTurnOn(!pageTurnOn);
+                                                    }
+                                                }}
+                                                className={`w-[110px] h-[52px] rounded-[26px] border-2 transition-all duration-500 relative flex items-center px-1 overflow-hidden ${narrationOn ? 'cursor-pointer' : 'cursor-not-allowed'} ${pageTurnOn ? 'bg-white border-white shadow-[0_0_25px_rgba(255,255,255,0.4)]' : 'bg-slate-800 border-white/10 shadow-inner'}`}
                                             >
-                                                <span className={`text-[18px] font-black uppercase transition-colors ml-2 ${pageTurnOn ? 'text-black' : 'text-white'}`}>on</span>
-                                                <div className={`w-[36px] h-[36px] rounded-full absolute shadow-lg transition-transform ${pageTurnOn ? 'translate-x-[50px] bg-black' : 'translate-x-0 bg-white'}`} />
+                                                <span className={`text-[15px] font-black uppercase transition-all duration-500 z-10 w-full text-center ${pageTurnOn ? 'pr-8 text-slate-900' : 'pl-8 text-white/40'}`}>
+                                                    {pageTurnOn ? 'ON' : 'OFF'}
+                                                </span>
+                                                <div className={`w-[40px] h-[40px] rounded-full absolute shadow-xl transition-all duration-500 cubic-bezier(0.175, 0.885, 0.32, 1.275) z-0 ${pageTurnOn ? 'translate-x-[60px] bg-slate-900' : 'translate-x-[2px] bg-white'}`} />
                                             </div>
                                         </div>
 
                                         {/* Narration Speed */}
-                                        <div className="space-y-6">
-                                            <span className="text-[30px] font-bold text-white block text-left drop-shadow-md">Narration Speed</span>
+                                        <div className={`space-y-6 p-4 rounded-[24px] transition-all ${!narrationOn ? 'opacity-30' : ''}`}>
+                                            <span className="text-[28px] font-bold text-white block text-left drop-shadow-md font-fredoka uppercase tracking-wider">Narration Speed</span>
                                             <div className="flex gap-4">
                                                 {(['slow', 'normal', 'fast'] as const).map((speed) => (
                                                     <button
                                                         key={speed}
+                                                        disabled={!narrationOn}
                                                         onClick={() => setNarrationSpeed(speed)}
-                                                        className={`flex-1 py-4 rounded-[16px] font-black text-xl border-2 transition-all ${narrationSpeed === speed ? 'bg-white text-black border-white shadow-xl' : 'bg-black text-white border-white/20 hover:border-white/40'}`}
+                                                        className={`flex-1 py-5 rounded-[20px] font-black text-xl border-2 transition-all duration-300 ${narrationSpeed === speed ? 'bg-white text-slate-900 border-white shadow-[0_10px_30px_rgba(255,255,255,0.2)] scale-105' : 'bg-slate-800 text-white/50 border-white/10 hover:border-white/30 hover:text-white'} ${!narrationOn ? 'cursor-not-allowed' : ''}`}
                                                     >
                                                         {speed === 'slow' ? 'Slow' : speed === 'fast' ? 'Fast' : 'Normal'}
                                                     </button>

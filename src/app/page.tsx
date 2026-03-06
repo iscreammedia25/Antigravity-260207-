@@ -1,9 +1,10 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Bell, Menu, Play } from 'lucide-react';
+import { Bell, Menu, Play, Heart, X, Video, Maximize } from 'lucide-react';
 import HeroSection from '@/components/HeroSection';
 import LibrarySection from '@/components/LibrarySection';
+import MultiSection from '@/components/MultiSection';
 import WatchSection from '@/components/WatchSection';
 import ReadSection from '@/components/ReadSection';
 import { BOOKS_DATA, Book } from '@/data/books';
@@ -40,6 +41,11 @@ export default function Home() {
     const [freshHeroBook, setFreshHeroBook] = useState<Book | null>(null);
 
     const [isFlashing, setIsFlashing] = useState(false);
+    const [isPlayingInline, setIsPlayingInline] = useState(false);
+
+    React.useEffect(() => {
+        setIsPlayingInline(false);
+    }, [selectedBook]);
 
     React.useEffect(() => {
         if (isDemoMode) {
@@ -230,14 +236,21 @@ export default function Home() {
 
                             {/* Library Section */}
                             <div className="w-full pb-8">
-                                <LibrarySection
-                                    userName={userName}
-                                    onStartLearning={startLearning}
-                                    onViewInfo={(book, origin) => {
-                                        setSelectedBook(book);
-                                        setModalOrigin(origin || 'recommendation');
-                                    }}
-                                />
+                                <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_300px] gap-6 items-stretch">
+                                    <div className="overflow-hidden flex">
+                                        <LibrarySection
+                                            userName={userName}
+                                            onStartLearning={startLearning}
+                                            onViewInfo={(book, origin) => {
+                                                setSelectedBook(book);
+                                                setModalOrigin(origin || 'recommendation');
+                                            }}
+                                        />
+                                    </div>
+                                    <div className="flex min-h-[300px]">
+                                        <MultiSection />
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -247,9 +260,28 @@ export default function Home() {
                         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
                             <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setSelectedBook(null)} />
                             <div className="card-bubble w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col relative z-50 animate-in zoom-in-95 duration-200">
+                                {/* Bookmark Ribbon - Stuck to Top */}
+                                <div className="absolute top-0 left-12 z-20 pointer-events-none">
+                                    <button
+                                        onClick={() => {
+                                            if (selectedBook) {
+                                                const originalBook = BOOKS_DATA.find(b => b.id === selectedBook.id);
+                                                if (originalBook) {
+                                                    originalBook.isBookmarked = !originalBook.isBookmarked;
+                                                    setSelectedBook({ ...originalBook });
+                                                    // Force a minimal re-render if needed, but the modal will update
+                                                }
+                                            }
+                                        }}
+                                        className={`w-16 h-24 flex items-center justify-center pt-2 pb-8 transition-all pointer-events-auto active:scale-95 shadow-xl rounded-b-3xl border-[6px] border-t-0 border-white bg-white ${selectedBook.isBookmarked ? 'text-rose-500' : 'text-slate-300'}`}
+                                    >
+                                        <Heart className={`w-10 h-10 transition-colors ${selectedBook.isBookmarked ? 'fill-current' : ''}`} />
+                                    </button>
+                                </div>
+
                                 {/* Modal Header */}
                                 <div className="p-6 md:p-8 flex justify-between items-center border-b-[6px] border-slate-50">
-                                    <div className="w-12 h-12" /> {/* Spacer */}
+                                    <div className="w-16 h-12" /> {/* Spacer for Ribbon */}
                                     <h2 className="text-3xl md:text-4xl font-black text-slate-700 font-jua text-center flex-1 mx-4 truncate">
                                         {selectedBook.title}
                                     </h2>
@@ -257,34 +289,88 @@ export default function Home() {
                                         onClick={() => setSelectedBook(null)}
                                         className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-600 transition-colors flex-shrink-0"
                                     >
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-x"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+                                        <X className="w-8 h-8" />
                                     </button>
                                 </div>
 
                                 {/* Modal Body */}
                                 <div className="flex-1 overflow-y-auto p-6 md:p-10">
-                                    <div className="flex flex-col md:flex-row gap-10">
-                                        <div className="w-full md:w-1/2 flex-shrink-0">
-                                            <div className="aspect-[3/4] rounded-[48px] overflow-hidden border-[8px] border-white shadow-2xl shadow-slate-200">
-                                                <img src={selectedBook.src} alt={selectedBook.title} className="w-full h-full object-cover" />
-                                            </div>
+                                    <div className="flex flex-col gap-6">
+                                        {/* Badges */}
+                                        <div className="flex flex-wrap gap-3 justify-start">
+                                            <span className="px-5 py-2 bg-orange-100 text-orange-500 rounded-full font-black text-sm border-2 border-orange-200">Lexile: {selectedBook.lexile}</span>
+                                            <span className="px-5 py-2 bg-green-100 text-green-500 rounded-full font-black text-sm border-2 border-green-200">{selectedBook.wordCount} Words</span>
+                                            <span className="px-5 py-2 bg-sky-100 text-sky-500 rounded-full font-black text-sm border-2 border-sky-200">{selectedBook.category}</span>
                                         </div>
-                                        <div className="w-full md:w-1/2 space-y-8">
-                                            <div className="flex flex-wrap gap-3">
-                                                <span className="px-5 py-2 bg-orange-100 text-orange-500 rounded-full font-black text-sm border-2 border-orange-200">Lexile: {selectedBook.lexile}</span>
-                                                <span className="px-5 py-2 bg-green-100 text-green-500 rounded-full font-black text-sm border-2 border-green-200">{selectedBook.wordCount} Words</span>
-                                                <span className="px-5 py-2 bg-sky-100 text-sky-500 rounded-full font-black text-sm border-2 border-sky-200">{selectedBook.category}</span>
-                                            </div>
-                                            <div className="space-y-4">
-                                                <h4 className="text-xl font-black text-slate-800 font-jua">Summary</h4>
-                                                <p className="text-lg text-slate-600 leading-relaxed font-fredoka">{selectedBook.summary}</p>
-                                            </div>
-                                            <div className="space-y-4">
-                                                <h4 className="text-xl font-black text-slate-800 font-jua">Keywords</h4>
-                                                <div className="flex flex-wrap gap-2">
-                                                    {selectedBook.keywords.map((word, i) => (
-                                                        <span key={i} className="px-4 py-1.5 bg-slate-100 text-slate-500 rounded-xl font-bold text-sm">#{word}</span>
-                                                    ))}
+
+                                        {/* Top: Video Thumbnail */}
+                                        <div
+                                            className="w-full aspect-video bg-slate-200 rounded-3xl overflow-hidden border-[6px] border-white shadow-lg shadow-slate-200/50 group flex items-center justify-center relative video-container"
+                                        >
+                                            {isPlayingInline ? (
+                                                <video
+                                                    className="absolute inset-0 w-full h-full object-cover z-20"
+                                                    controls
+                                                    autoPlay
+                                                    src={selectedBook.videoUrl}
+                                                />
+                                            ) : (
+                                                <>
+                                                    <div
+                                                        className="absolute inset-0 group-hover:scale-105 transition-transform duration-700 ease-out"
+                                                        style={{
+                                                            backgroundImage: `url(${selectedBook.src})`,
+                                                            backgroundSize: 'cover',
+                                                            backgroundPosition: 'center',
+                                                        }}
+                                                    />
+                                                    <div className="absolute inset-0 bg-slate-900/30 group-hover:bg-slate-900/20 transition-colors duration-300" />
+                                                    <button
+                                                        className="w-20 h-20 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center z-10 shadow-2xl group-hover:scale-110 transition-transform duration-300 cursor-pointer"
+                                                        onClick={() => setIsPlayingInline(true)}
+                                                    >
+                                                        <Play className="w-10 h-10 text-slate-800 ml-1" fill="currentColor" />
+                                                    </button>
+                                                    <div className="absolute top-4 left-4 bg-rose-500/90 backdrop-blur-md text-white px-4 py-1.5 rounded-full text-sm font-black shadow-lg border border-white/20 flex items-center gap-2 pointer-events-none">
+                                                        <Video className="w-4 h-4" /> Greeting Video
+                                                    </div>
+                                                </>
+                                            )}
+
+                                            <button
+                                                className="absolute bottom-4 right-4 w-12 h-12 bg-black/50 hover:bg-black/70 rounded-full flex items-center justify-center text-white backdrop-blur-sm transition-all shadow-lg z-30 cursor-pointer"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    const elem = e.currentTarget.closest('.video-container');
+                                                    if (elem) {
+                                                        if (!document.fullscreenElement) {
+                                                            elem.requestFullscreen().catch(err => {
+                                                                console.error(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
+                                                            });
+                                                        } else {
+                                                            document.exitFullscreen();
+                                                        }
+                                                    }
+                                                }}
+                                            >
+                                                <Maximize className="w-6 h-6" />
+                                            </button>
+                                        </div>
+
+                                        {/* Bottom: Details */}
+                                        <div className="w-full flex-col gap-6">
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                                <div className="space-y-3">
+                                                    <h4 className="text-xl font-black text-slate-800 font-jua">Summary</h4>
+                                                    <p className="text-lg text-slate-600 leading-relaxed font-fredoka">{selectedBook.summary}</p>
+                                                </div>
+                                                <div className="space-y-3">
+                                                    <h4 className="text-xl font-black text-slate-800 font-jua">Keywords</h4>
+                                                    <div className="flex flex-wrap gap-2">
+                                                        {selectedBook.keywords.map((word, i) => (
+                                                            <span key={i} className="px-4 py-1.5 bg-slate-100 text-slate-500 rounded-xl font-bold text-sm">#{word}</span>
+                                                        ))}
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>

@@ -175,91 +175,93 @@
 
         /* Settings Toggle Styles */
         .toggle-btn {
-            width: 100px;
-            height: 48px;
-            background-color: #000;
-            /* Strict Black for OFF */
-            border-radius: 24px;
+            width: 110px;
+            height: 52px;
+            background-color: #1e293b;
+            /* Slate-800 */
+            border-radius: 26px;
             position: relative;
             cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             display: flex;
             align-items: center;
-            padding: 0 6px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
         }
 
         .toggle-btn.on {
-            background-color: #fff;
-            /* Strict White for ON */
-            border-color: #fff;
-            box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+            background-color: #ffffff;
+            border-color: #ffffff;
+            box-shadow: 0 0 25px rgba(255, 255, 255, 0.4), inset 0 2px 4px rgba(0, 0, 0, 0.05);
         }
 
         .toggle-circle {
-            width: 36px;
-            height: 36px;
-            background-color: #fff;
-            /* White circle on Black background (OFF) */
+            width: 40px;
+            height: 40px;
+            background-color: #ffffff;
             border-radius: 50%;
             position: absolute;
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            right: 6px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            left: 5px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
             z-index: 2;
         }
 
         .toggle-btn.on .toggle-circle {
-            background-color: #000;
-            /* Black circle on White background (ON) */
-            transform: translateX(0);
-            /* Circle stays Right in 'ON' position */
-        }
-
-        .toggle-btn.off .toggle-circle {
-            transform: translateX(-52px);
-            /* Circle moves Left in 'OFF' position */
+            background-color: #0f172a;
+            /* Slate-900 */
+            transform: translateX(58px);
         }
 
         .toggle-text {
-            color: #fff;
-            /* White text on Black background (OFF) */
+            position: absolute;
+            width: 100%;
+            text-align: center;
             font-weight: 900;
-            font-size: 18px;
-            margin-left: 12px;
+            font-size: 16px;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
+            letter-spacing: 0.1em;
             z-index: 1;
-            transition: color 0.3s;
+            transition: all 0.3s;
+            pointer-events: none;
         }
 
         .toggle-btn.on .toggle-text {
-            color: #000;
-            /* Black text on White background (ON) */
+            color: #0f172a;
+            padding-right: 40px;
         }
 
         .toggle-btn.off .toggle-text {
-            margin-left: 50px;
+            color: #ffffff;
+            padding-left: 40px;
         }
 
         .settings-btn-group button {
-            background-color: #000;
-            /* Strict Black for Inactive */
-            color: #fff;
-            padding: 14px 28px;
-            border-radius: 16px;
-            font-weight: 900;
-            font-size: 20px;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            border: 2px solid rgba(255, 255, 255, 0.2);
+            background-color: #1e293b;
+            color: rgba(255, 255, 255, 0.4);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            padding: 14px 24px;
+            border-radius: 20px;
+            font-weight: 800;
+            font-size: 18px;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            font-family: 'Fredoka', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
 
         .settings-btn-group button.active {
-            background-color: #fff;
-            /* Strict White for Active */
-            color: #000;
-            box-shadow: 0 8px 16px rgba(255, 255, 255, 0.4);
-            border-color: #fff;
+            background-color: #ffffff;
+            color: #0f172a;
+            border-color: #ffffff;
+            box-shadow: 0 10px 25px rgba(255, 255, 255, 0.2), 0 0 0 4px rgba(255, 255, 255, 0.1);
+            transform: scale(1.05);
+        }
+
+        .settings-btn-group button:hover:not(.active):not(:disabled) {
+            border-color: rgba(255, 255, 255, 0.3);
+            color: #ffffff;
+            background-color: #334155;
         }
 
         .settings-btn-group button:disabled {
@@ -332,43 +334,109 @@
             <!-- Will be rendered by script -->
         </div>
 
-        <!-- Library Section -->
-        <div class="card-bubble p-8 md:p-10 w-full relative">
-            <div class="flex justify-between items-center mb-10">
-                <h3 class="text-4xl font-black text-slate-700 flex items-center gap-5 font-jua">
-                    <span
-                        class="w-14 h-14 bg-sky-100 rounded-[20px] flex items-center justify-center text-sky-400 shadow-sm shadow-sky-100 transform rotate-3">
-                        <i data-lucide="sparkles" class="w-9 h-9 fill-current"></i>
-                    </span>
-                    Recommended for Ami
-                </h3>
-                <a href="#"
-                    class="px-6 py-4 bg-sky-50 text-sky-400 font-black btn-jelly text-sm flex items-center gap-3 hover:bg-sky-100 group">
-                    SEE ALL <i data-lucide="chevron-right"
-                        class="w-5 h-5 group-hover:translate-x-1 transition-transform"></i>
-                </a>
+        <!-- Lower Section Container with Grid for History Mode -->
+        <div id="lowerSectionGrid"
+            class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_300px] gap-6 items-stretch w-full mb-8">
+            <!-- Library Section -->
+            <div id="libraryContainer" class="overflow-hidden flex transition-all duration-300">
+                <div class="card-bubble p-6 md:p-8 w-full h-full flex flex-col relative overflow-hidden">
+                    <div class="flex justify-between items-center mb-10">
+                        <h3 class="text-3xl font-black text-slate-700 flex items-center gap-4 font-jua">
+                            <span
+                                class="w-12 h-12 bg-sky-100 rounded-2xl flex items-center justify-center text-sky-400 shadow-sm shadow-sky-100">
+                                <i data-lucide="sparkles" class="w-8 h-8 fill-current"></i>
+                            </span>
+                            For you
+                        </h3>
+                        <a href="#"
+                            class="p-3 bg-sky-50 text-sky-400 font-black btn-jelly text-xs flex items-center gap-2 hover:bg-sky-100 hover:scale-105 active:scale-95 group font-fredoka">
+                            SEE ALL <i data-lucide="chevron-right"
+                                class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
+                        </a>
+                    </div>
+
+                    <div class="relative group/scroll px-2 flex-grow flex flex-col justify-center min-h-[14rem]">
+                        <!-- Bookshelf Base -->
+                        <div
+                            class="absolute bottom-6 left-0 right-0 h-14 bg-slate-200/60 rounded-full mx-4 border-b-4 border-slate-300/40 shadow-inner">
+                        </div>
+
+                        <button id="scrollLeftBtn" onclick="scrollContainer(-400)"
+                            class="absolute left-0 top-[35%] -translate-y-1/2 -translate-x-6 w-12 h-12 bg-white text-sky-400 rounded-full shadow-lg border border-slate-100 flex items-center justify-center z-20 opacity-0 group-hover/scroll:opacity-100 transition-all hover:bg-sky-50 active:scale-90 invisible">
+                            <i data-lucide="chevron-left" class="w-8 h-8"></i>
+                        </button>
+
+                        <div id="bookContainer"
+                            class="flex gap-3 md:gap-4 overflow-x-auto pt-8 pb-8 scroll-smooth custom-scrollbar relative z-10 cursor-grab active:cursor-grabbing select-none h-full items-end">
+                            <!-- Books will be injected by script -->
+                        </div>
+
+                        <button onclick="scrollContainer(400)"
+                            class="absolute right-0 top-[35%] -translate-y-1/2 translate-x-6 w-12 h-12 bg-white text-sky-400 rounded-full shadow-lg border border-slate-100 flex items-center justify-center z-20 opacity-0 group-hover/scroll:opacity-100 transition-all hover:bg-sky-50 active:scale-90">
+                            <i data-lucide="chevron-right" class="w-8 h-8"></i>
+                        </button>
+                    </div>
+                </div>
             </div>
 
-            <div class="relative group/scroll px-4">
-                <!-- Bookshelf Base -->
+            <!-- Multi Section -->
+            <div id="multiSectionContainer" class="flex min-h-[300px] transition-all duration-300">
                 <div
-                    class="absolute bottom-10 left-0 right-0 h-16 bg-slate-200/40 rounded-full mx-6 border-b-4 border-slate-300/20">
+                    class="card-bubble p-6 md:p-8 w-full h-full flex flex-col relative overflow-hidden bg-white shadow-sm border border-slate-100">
+                    <!-- Header -->
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-2xl font-black text-slate-700 font-jua">
+                            Media Box
+                        </h3>
+                        <a href="#"
+                            class="p-2 bg-sky-50 text-sky-400 font-black btn-jelly text-xs flex items-center gap-1 hover:bg-sky-100 hover:scale-105 active:scale-95 group font-fredoka">
+                            SEE ALL <i data-lucide="chevron-right"
+                                class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
+                        </a>
+                    </div>
+
+                    <!-- List -->
+                    <div class="flex flex-col gap-4 flex-1 overflow-y-auto w-full pr-2 custom-scrollbar">
+                        <!-- Greeting Item -->
+                        <button
+                            class="w-full bg-slate-50 hover:bg-sky-50 transition-colors rounded-3xl p-4 flex items-center gap-4 text-left group border-2 border-transparent hover:border-sky-100 active:scale-[0.98]">
+                            <div
+                                class="w-14 h-14 rounded-2xl bg-indigo-100 text-indigo-500 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform shadow-sm">
+                                <i data-lucide="video" class="w-7 h-7 fill-current text-indigo-500"></i>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="font-black text-slate-700 text-lg font-jua truncate">Greeting</p>
+                                <p class="text-sm font-bold text-slate-400 truncate mt-0.5">Start your day</p>
+                            </div>
+                        </button>
+
+                        <!-- Movie Item -->
+                        <button
+                            class="w-full bg-slate-50 hover:bg-sky-50 transition-colors rounded-3xl p-4 flex items-center gap-4 text-left group border-2 border-transparent hover:border-sky-100 active:scale-[0.98]">
+                            <div
+                                class="w-14 h-14 rounded-2xl bg-rose-100 text-rose-500 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform shadow-sm">
+                                <i data-lucide="film" class="w-7 h-7 fill-current text-rose-500"></i>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="font-black text-slate-700 text-lg font-jua truncate">Movie</p>
+                                <p class="text-sm font-bold text-slate-400 truncate mt-0.5">Fun animations</p>
+                            </div>
+                        </button>
+
+                        <!-- Audio Item -->
+                        <button
+                            class="w-full bg-slate-50 hover:bg-sky-50 transition-colors rounded-3xl p-4 flex items-center gap-4 text-left group border-2 border-transparent hover:border-sky-100 active:scale-[0.98]">
+                            <div
+                                class="w-14 h-14 rounded-2xl bg-amber-100 text-amber-500 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform shadow-sm">
+                                <i data-lucide="headphones" class="w-7 h-7 fill-current text-amber-500"></i>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="font-black text-slate-700 text-lg font-jua truncate">Audio</p>
+                                <p class="text-sm font-bold text-slate-400 truncate mt-0.5">Listen to stories</p>
+                            </div>
+                        </button>
+                    </div>
                 </div>
-
-                <button id="scrollLeftBtn" onclick="scrollContainer(-400)"
-                    class="absolute left-0 top-[35%] -translate-y-1/2 -translate-x-6 w-14 h-14 bg-white text-sky-400 rounded-full shadow-lg border border-slate-100 flex items-center justify-center z-20 opacity-0 group-hover/scroll:opacity-100 transition-all hover:bg-sky-50 active:scale-90 invisible">
-                    <i data-lucide="chevron-left" class="w-9 h-9"></i>
-                </button>
-
-                <div id="bookContainer"
-                    class="flex gap-4 md:gap-6 overflow-x-auto pt-10 pb-12 scroll-smooth custom-scrollbar relative z-10 cursor-grab active:cursor-grabbing select-none">
-                    <!-- Books will be injected by script -->
-                </div>
-
-                <button onclick="scrollContainer(400)"
-                    class="absolute right-0 top-[35%] -translate-y-1/2 translate-x-6 w-14 h-14 bg-white text-sky-400 rounded-full shadow-lg border border-slate-100 flex items-center justify-center z-20 opacity-0 group-hover/scroll:opacity-100 transition-all hover:bg-sky-50 active:scale-90">
-                    <i data-lucide="chevron-right" class="w-9 h-9"></i>
-                </button>
             </div>
         </div>
     </div>
@@ -381,8 +449,8 @@
             <!-- Bookmark Ribbon - Stuck to Top -->
             <div class="absolute top-0 left-12 z-20 pointer-events-none">
                 <button onclick="toggleBookmarkModal()" id="modalBookmarkBtn"
-                    class="w-16 h-24 flex items-center justify-center pt-2 pb-8 transition-all pointer-events-auto active:scale-95 shadow-xl rounded-b-3xl border-[6px] border-t-0 border-white bg-white text-slate-200">
-                    <i data-lucide="bookmark" id="modalBookmarkIcon" class="w-10 h-10"></i>
+                    class="w-16 h-24 flex items-center justify-center pt-2 pb-8 transition-all pointer-events-auto active:scale-95 shadow-xl rounded-b-3xl border-[6px] border-t-0 border-white bg-white text-slate-300">
+                    <i data-lucide="heart" id="modalBookmarkIcon" class="w-10 h-10 transition-colors"></i>
                 </button>
             </div>
 
@@ -400,33 +468,60 @@
             </div>
 
             <!-- Modal Body -->
-            <div class="flex-1 overflow-y-auto p-6 md:p-10">
-                <div class="flex flex-col md:flex-row gap-10">
-                    <div class="w-full md:w-1/2 flex-shrink-0">
+            <div id="modalBody" class="flex-1 overflow-y-auto p-6 md:p-10 flex-col gap-6 flex">
+                <!-- Badges -->
+                <div class="flex flex-wrap gap-3 justify-start">
+                    <span
+                        class="modalLexile px-5 py-2 bg-orange-100 text-orange-500 rounded-full font-black text-sm border-2 border-orange-200">Lexile:
+                        300</span>
+                    <span
+                        class="modalWords px-5 py-2 bg-green-100 text-green-500 rounded-full font-black text-sm border-2 border-green-200">140
+                        Words</span>
+                    <span
+                        class="modalCategory px-5 py-2 bg-sky-100 text-sky-500 rounded-full font-black text-sm border-2 border-sky-200">Science</span>
+                </div>
+
+                <!-- Top: Video Thumbnail -->
+                <div
+                    class="w-full aspect-video bg-slate-200 rounded-3xl overflow-hidden border-[6px] border-white shadow-lg shadow-slate-200/50 group flex items-center justify-center relative video-container">
+
+                    <!-- The video element itself, initially hidden -->
+                    <video id="inlineVideo" class="absolute inset-0 w-full h-full object-cover z-20 hidden" controls
+                        src="https://www.w3schools.com/html/mov_bbb.mp4"></video>
+
+                    <div id="inlineVideoThumbnailWrapper" class="absolute inset-0 flex items-center justify-center">
+                        <img id="modalVideoBg" src="" alt="Video Thumbnail"
+                            class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" />
                         <div
-                            class="aspect-[3/4] rounded-[48px] overflow-hidden border-[8px] border-white shadow-2xl shadow-slate-200">
-                            <img id="modalImg" src="" alt="" class="w-full h-full object-cover">
+                            class="absolute inset-0 bg-slate-900/30 group-hover:bg-slate-900/20 transition-colors duration-300">
+                        </div>
+                        <button onclick="playInlineVideo(event)"
+                            class="w-20 h-20 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center z-10 shadow-2xl group-hover:scale-110 transition-transform duration-300 cursor-pointer">
+                            <i data-lucide="play" class="w-10 h-10 text-slate-800 ml-1" fill="currentColor"></i>
+                        </button>
+                        <div
+                            class="absolute top-4 left-4 bg-rose-500/90 backdrop-blur-md text-white px-4 py-1.5 rounded-full text-sm font-black shadow-lg border border-white/20 flex items-center gap-2 pointer-events-none">
+                            <i data-lucide="video" class="w-4 h-4"></i> Greeting Video
                         </div>
                     </div>
-                    <div class="w-full md:w-1/2 space-y-8">
-                        <div class="flex flex-wrap gap-3">
-                            <span id="modalLexile"
-                                class="px-5 py-2 bg-orange-100 text-orange-500 rounded-full font-black text-sm border-2 border-orange-200">Lexile:
-                                300</span>
-                            <span id="modalWords"
-                                class="px-5 py-2 bg-green-100 text-green-500 rounded-full font-black text-sm border-2 border-green-200">140
-                                Words</span>
-                            <span id="modalCategory"
-                                class="px-5 py-2 bg-sky-100 text-sky-500 rounded-full font-black text-sm border-2 border-sky-200">Science</span>
-                        </div>
-                        <div class="space-y-4">
+
+                    <button onclick="toggleFullscreen(event)"
+                        class="absolute bottom-4 right-4 w-12 h-12 bg-black/50 hover:bg-black/70 rounded-full flex items-center justify-center text-white backdrop-blur-sm transition-all shadow-lg z-30 cursor-pointer">
+                        <i data-lucide="maximize" class="w-6 h-6"></i>
+                    </button>
+                </div>
+
+                <!-- Bottom: Details -->
+                <div class="w-full flex-col gap-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="space-y-3">
                             <h4 class="text-xl font-black text-slate-800 font-jua">Summary</h4>
-                            <p id="modalSummary" class="text-lg text-slate-600 leading-relaxed font-fredoka">Summary
+                            <p class="modalSummary text-lg text-slate-600 leading-relaxed font-fredoka">Summary
                                 goes here...</p>
                         </div>
-                        <div class="space-y-4">
+                        <div class="space-y-3">
                             <h4 class="text-xl font-black text-slate-800 font-jua">Keywords</h4>
-                            <div id="modalKeywords" class="flex flex-wrap gap-2"></div>
+                            <div class="modalKeywords flex flex-wrap gap-2"></div>
                         </div>
                     </div>
                 </div>
@@ -449,28 +544,32 @@
         <div class="glass-popup w-[560px] rounded-[60px] p-16 relative z-10 text-white font-fredoka pointer-events-auto animate-in fade-in zoom-in-95 duration-300"
             onclick="event.stopPropagation()">
             <div class="flex items-center mb-12 relative h-12">
-                <h2 class="settings-title w-full text-center">Setting</h2>
+                <h2
+                    class="text-[40px] font-black text-white font-fredoka w-full text-center drop-shadow-lg tracking-tight uppercase">
+                    SETTING</h2>
                 <button onclick="toggleSettings()"
-                    class="absolute right-0 w-10 h-10 bg-black/20 rounded-full flex items-center justify-center hover:bg-black/40">
-                    <i data-lucide="x" class="w-6 h-6"></i>
+                    class="absolute right-0 w-12 h-12 bg-white/10 rounded-full flex items-center justify-center hover:bg-white/20 hover:scale-110 active:scale-90 transition-all border border-white/10 shadow-lg">
+                    <i data-lucide="x" class="w-8 h-8 text-white"></i>
                 </button>
             </div>
 
             <div class="space-y-10">
                 <!-- Narration -->
-                <div class="flex justify-between items-center">
+                <div
+                    class="flex justify-between items-center group/item hover:bg-white/5 p-4 rounded-3xl transition-colors">
                     <span class="settings-label">Narration</span>
-                    <div id="toggle-narration" onclick="setNarration(!isNarrationOn)" class="toggle-btn">
-                        <span class="toggle-text">on</span>
+                    <div id="toggle-narration" onclick="setNarration(!isNarrationOn)" class="toggle-btn off">
+                        <span class="toggle-text">OFF</span>
                         <div class="toggle-circle"></div>
                     </div>
                 </div>
 
                 <!-- Page Turn -->
-                <div class="flex justify-between items-center">
+                <div
+                    class="flex justify-between items-center group/item hover:bg-white/5 p-4 rounded-3xl transition-colors">
                     <span class="settings-label">Page Turn</span>
-                    <div id="toggle-pageturn" onclick="setPageTurn(!isPageTurnOn)" class="toggle-btn">
-                        <span class="toggle-text">on</span>
+                    <div id="toggle-pageturn" onclick="setPageTurn(!isPageTurnOn)" class="toggle-btn off">
+                        <span class="toggle-text">OFF</span>
                         <div class="toggle-circle"></div>
                     </div>
                 </div>
@@ -783,14 +882,19 @@
 
         let currentPhase = 'home'; // 'home' or 'read'
         let currentSceneIndex = 0;
-        let selectedReadingMode = 'ebook';
+        let selectedReadingMode = null;
 
         // Settings State
         let isSettingsOpen = false;
-        let isNarrationOn = true;
-        let isPageTurnOn = true;
+        let isNarrationOn = false;
+        let isPageTurnOn = false;
         let narrationSpeed = 'normal';
         let textSize = 'medium';
+
+        // Difficulty State
+        let currentDifficulty = 'Original';
+        let isDifficultyOpen = false;
+        let isTextFading = false;
         const scenesData = [
             { book_id: "silent-stick", scene_no: "SC01", script: "The frozen lake lay still, a big area of gray ice beneath a heavy winter sky.", image_url: "./public/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC01.png" },
             { book_id: "silent-stick", scene_no: "SC02", script: "He hit the puck with force, but his old stick broke suddenly upon impact.", image_url: "./public/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC02.png" },
@@ -807,6 +911,7 @@
             isHistoryMode = !isHistoryMode;
             currentHeroIndex = 0;
             const btn = document.getElementById('modeToggleBtn');
+
             if (isHistoryMode) {
                 btn.innerText = 'HISTORY MODE';
                 btn.classList.remove('bg-white', 'text-slate-400', 'border-slate-100');
@@ -961,8 +1066,8 @@
                         <!-- Card Bookmark Ribbon - Only show when bookmarked -->
                         ${book.isBookmarked ? `
                         <div class="absolute top-0 left-4 z-10 transition-transform group-hover:scale-110">
-                            <div class="w-10 h-12 flex items-center justify-center pt-1 pb-4 rounded-b-xl border-2 border-t-0 border-white shadow-md transition-all bg-[#FF6B00] text-white">
-                                <i data-lucide="bookmark" class="w-6 h-6 fill-current"></i>
+                            <div class="w-10 h-12 flex items-center justify-center pt-1 pb-4 rounded-b-xl border-2 border-t-0 border-white shadow-md transition-all bg-rose-500 text-white">
+                                <i data-lucide="heart" class="w-6 h-6 fill-current"></i>
                             </div>
                         </div>
                         ` : ''}
@@ -979,15 +1084,26 @@
             currentModalBookId = bookId;
             currentModalOrigin = origin;
 
-            document.getElementById('modalTitle ').innerText = book.title;
-            document.getElementById('modalImg').src = book.src;
-            document.getElementById('modalLexile').innerText = `Lexile: ${book.lexile}`;
-            document.getElementById('modalWords').innerText = `${book.wordCount} Words`;
-            document.getElementById('modalCategory').innerText = book.category;
-            document.getElementById('modalSummary').innerText = book.summary;
-            document.getElementById('modalKeywords').innerHTML = book.keywords.map(kw => `
+            resetInlineVideo();
+
+            document.getElementById('modalTitle').innerText = book.title;
+
+            // Update all corresponding fields via class (for both Fresh and History layouts)
+            document.querySelectorAll('.modalLexile').forEach(el => el.innerText = `Lexile: ${book.lexile}`);
+            document.querySelectorAll('.modalWords').forEach(el => el.innerText = `${book.wordCount} Words`);
+            document.querySelectorAll('.modalCategory').forEach(el => el.innerText = book.category);
+            document.querySelectorAll('.modalSummary').forEach(el => el.innerText = book.summary);
+
+            const kwHtml = book.keywords.map(kw => `
                 <span class="px-4 py-1.5 bg-slate-100 text-slate-500 rounded-xl font-bold text-sm">#${kw}</span>
             `).join('');
+            document.querySelectorAll('.modalKeywords').forEach(el => el.innerHTML = kwHtml);
+
+            // Update images and specific layout toggles
+            const modalVideoBg = document.getElementById('modalVideoBg');
+            if (modalVideoBg) modalVideoBg.src = book.src;
+            const inlineVideo = document.getElementById('inlineVideo');
+            if (inlineVideo && book.videoUrl) inlineVideo.src = book.videoUrl;
 
             updateBookmarkIcon(book.isBookmarked);
 
@@ -1025,7 +1141,44 @@
             lucide.createIcons();
         }
 
+        function toggleFullscreen(e) {
+            e.stopPropagation();
+            const elem = e.currentTarget.closest('.video-container');
+            if (elem) {
+                if (!document.fullscreenElement) {
+                    elem.requestFullscreen().catch(err => {
+                        console.error(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
+                    });
+                } else {
+                    document.exitFullscreen();
+                }
+            }
+        }
+
+        function playInlineVideo(e) {
+            if (e) e.stopPropagation();
+            const wrapper = document.getElementById('inlineVideoThumbnailWrapper');
+            const video = document.getElementById('inlineVideo');
+            if (wrapper && video) {
+                wrapper.classList.add('hidden');
+                video.classList.remove('hidden');
+                video.play();
+            }
+        }
+
+        function resetInlineVideo() {
+            const wrapper = document.getElementById('inlineVideoThumbnailWrapper');
+            const video = document.getElementById('inlineVideo');
+            if (wrapper && video) {
+                wrapper.classList.remove('hidden');
+                video.classList.add('hidden');
+                video.pause();
+                video.currentTime = 0;
+            }
+        }
+
         function closeModal() {
+            resetInlineVideo();
             const modal = document.getElementById('bookModal');
             const content = document.getElementById('modalContent');
             content.classList.remove('scale-100', 'opacity-100');
@@ -1160,11 +1313,20 @@
                         scene.isFetching = false;
                         if (currentSceneIndex === filteredScenes.indexOf(scene)) {
                             renderReadPhase();
+                            // [NEW] Auto-play narration if on
+                            if (isNarrationOn && !isSettingsOpen) {
+                                playFullSceneAudio();
+                            }
                         }
                     });
                 }
 
-                const script = scene.fetchedScript || scene.script;
+                const baseScript = scene.fetchedScript || scene.script;
+
+                let script = baseScript;
+                if (currentDifficulty === 'Easy') script = `[Easy]\n${baseScript}`;
+                if (currentDifficulty === 'Difficult') script = `[Difficult]\n${baseScript}`;
+
                 const sentences = script.split(/(?<=[.!?]) +/);
                 const sentencesHtml = sentences.map((sentence, idx) => `
                     <span onclick="event.stopPropagation(); playSentenceAudio(${idx})" class="cursor-pointer hover:text-orange-300 transition-colors pointer-events-auto inline-block mr-3 mb-2 ${playingSentenceIndex === idx ? 'text-orange-400 drop-shadow-[0_0_15px_rgba(251,146,60,0.8)] scale-105' : ''}">
@@ -1184,10 +1346,41 @@
                         
                         <!-- Fixed Settings Button (Moved inside stacking context) -->
                         <button id="fixedSettingsBtn" onclick="toggleSettings(); event.stopPropagation();"
-                            class="absolute bottom-12 left-12 w-16 h-16 bg-black/40 backdrop-blur-md rounded-2xl flex items-center justify-center text-white hover:bg-black/60 transition-all pointer-events-auto shadow-xl z-60 hidden">
-                            <i data-lucide="settings" class="w-10 h-10"></i>
+                            class="absolute bottom-12 left-12 w-16 h-16 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center text-white hover:bg-white/20 border-2 border-white/20 transition-all pointer-events-auto shadow-xl z-[120] hidden group">
+                            <i data-lucide="settings" class="w-10 h-10 group-hover:rotate-45 transition-transform"></i>
                         </button>
                         
+                        <!-- Read Aloud Button -->
+                        <div class="absolute left-12 z-40 transition-all duration-300 ${isGnbVisible ? 'top-[120px]' : 'top-12'}">
+                            <button id="readAloudBtn" ${!unlockedReadAloudScenes.has(currentSceneIndex) ? 'disabled' : ''}
+                                onclick="event.stopPropagation(); stopAudio(); console.log('Read Aloud Clicked');"
+                                class="flex items-center gap-3 px-6 py-4 rounded-3xl font-black text-xl shadow-lg transition-all border-4 ${unlockedReadAloudScenes.has(currentSceneIndex) ? 'bg-[#FF6B00] text-white border-orange-400' : 'bg-black/40 text-white/50 border-white/10 cursor-not-allowed backdrop-blur-md'}">
+                                <i data-lucide="mic" class="w-7 h-7"></i>
+                                Read Aloud
+                            </button>
+                        </div>
+
+                        <!-- Difficulty Dropdown -->
+                        <div class="absolute right-12 transition-all duration-300 z-[120] ${isGnbVisible ? 'top-[120px]' : 'top-12'}">
+                            <div class="relative">
+                                <button onclick="event.stopPropagation(); toggleDifficulty();"
+                                    class="flex items-center gap-3 px-6 py-4 rounded-3xl font-black text-xl shadow-xl transition-all border-4 bg-white/95 text-slate-800 border-white/20 backdrop-blur-md hover:bg-white active:scale-95 pointer-events-auto">
+                                    <span class="uppercase tracking-wider font-fredoka">${currentDifficulty}</span>
+                                    <i data-lucide="${isDifficultyOpen ? 'chevron-up' : 'chevron-down'}" class="w-6 h-6"></i>
+                                </button>
+                                ${isDifficultyOpen ? `
+                                <div class="absolute top-full mt-3 right-0 w-full bg-white/98 backdrop-blur-xl rounded-[24px] shadow-2xl overflow-hidden border-2 border-slate-100 flex flex-col pointer-events-auto animate-in slide-in-from-top-3 duration-300 z-[121]">
+                                    ${['Easy', 'Original', 'Difficult'].filter(d => d !== currentDifficulty).map(d => `
+                                        <button onclick="event.stopPropagation(); handleDifficultyChange('${d}');"
+                                            class="py-4 px-6 text-xl font-black text-slate-600 hover:bg-slate-50 hover:text-orange-500 transition-all text-left uppercase font-fredoka tracking-wide border-b border-slate-50 last:border-0">
+                                            ${d}
+                                        </button>
+                                    `).join('')}
+                                </div>
+                                ` : ''}
+                            </div>
+                        </div>
+
                         <!-- Shared Text Overlay -->
                         <div class="absolute z-50 p-12 max-w-[1400px] transition-all duration-500 ease-in-out flex items-start gap-8 pointer-events-none ${positionClass.replace('items-start', '').replace('items-end', '')} ${positionClass.includes('left-') ? 'ml-32' : ''} ${positionClass.includes('right-') ? 'mr-32' : ''}">
                             <!-- Play Button -->
@@ -1195,8 +1388,8 @@
                                 <i data-lucide="play" class="w-8 h-8 ${isSceneAudioPlaying ? 'fill-current' : ''}"></i>
                             </button>
 
-                            <div class="flex-1 pointer-events-auto">
-                                <p class="text-white text-4xl md:text-5xl lg:text-6xl font-black font-fredoka leading-[1.3] drop-shadow-[0_8px_16px_rgba(0,0,0,0.9)] whitespace-pre-line ${positionClass.includes('text-right') ? 'text-right' : 'text-left'}">
+                            <div class="flex-1 pointer-events-auto transition-opacity duration-300 ${isTextFading ? 'opacity-0' : 'opacity-100'}">
+                                <p id="viewing-script" class="text-white font-black font-fredoka leading-[1.3] drop-shadow-[0_8px_16px_rgba(0,0,0,0.9)] whitespace-pre-line ${positionClass.includes('text-right') ? 'text-right' : 'text-left'} ${textSize === 'small' ? 'text-3xl md:text-4xl' : textSize === 'large' ? 'text-6xl md:text-8xl' : 'text-4xl md:text-6xl'}">
                                     ${sentencesHtml}
                                 </p>
                             </div>
@@ -1256,7 +1449,6 @@
 
         window.prevScene = function () {
             if (currentSceneIndex > 0) {
-                stopAudio();
                 currentSceneIndex--;
                 renderReadPhase();
             }
@@ -1266,14 +1458,16 @@
             const filteredScenes = mockScenes.filter(s => s.id === currentModalBookId);
 
             if (currentSceneIndex < filteredScenes.length - 1) {
-                stopAudio();
                 currentSceneIndex++;
                 if (currentSceneIndex > maxReachedSceneIndex) {
                     maxReachedSceneIndex = currentSceneIndex;
                 }
                 renderReadPhase();
+                // [NEW] Auto-play next scene if narration is on
+                if (isNarrationOn && !isSettingsOpen) {
+                    playFullSceneAudio();
+                }
             } else {
-                stopAudio();
                 showReadCompletePraise();
             }
         };
@@ -1296,16 +1490,17 @@
         function updateBookmarkIcon(isBookmarked) {
             const btn = document.getElementById('modalBookmarkBtn');
             const icon = document.getElementById('modalBookmarkIcon');
+
+            // Set base classes
+            btn.className = "w-16 h-24 flex items-center justify-center pt-2 pb-8 transition-all pointer-events-auto active:scale-95 shadow-xl rounded-b-3xl border-[6px] border-t-0 border-white bg-white";
+
             if (isBookmarked) {
-                btn.classList.remove('bg-white', 'text-slate-200');
-                btn.classList.add('bg-[#FF6B00]', 'text-white');
-                icon.classList.add('fill-current');
+                btn.classList.add('text-rose-500');
+                if (icon) icon.classList.add('fill-current');
             } else {
-                btn.classList.remove('bg-[#FF6B00]', 'text-white');
-                btn.classList.add('bg-white', 'text-slate-200');
-                icon.classList.remove('fill-current');
+                btn.classList.add('text-slate-300');
+                if (icon) icon.classList.remove('fill-current');
             }
-            lucide.createIcons();
         }
 
         function addBookWithAnimation(bookId) {
@@ -1396,6 +1591,10 @@
         let maxReachedSceneIndex = 0;
         let isScenePickerOpen = false;
 
+        // Read Aloud State
+        let unlockedReadAloudScenes = new Set();
+        let unlockReadAloudTimeout = null;
+
         function startLearning() {
             closeModal();
             const book = booksData.find(b => b.id === currentModalBookId) || booksData[0];
@@ -1418,6 +1617,12 @@
                 if (relevantScenes.length > 0) {
                     currentPhase = 'read';
                     currentSceneIndex = 0;
+
+                    // Unlock immediately if narration is off default
+                    if (!isNarrationOn) {
+                        unlockedReadAloudScenes.add(currentSceneIndex);
+                    }
+
                     setPhase('read');
                     renderReadPhase();
                     return;
@@ -1680,21 +1885,61 @@
             const scene = scenes[currentSceneIndex];
             if (!scene || !scene.full_audio) return;
 
+            if (unlockReadAloudTimeout) clearTimeout(unlockReadAloudTimeout);
+
+            if (!isNarrationOn) { // [NEW] Stop if narration is off and unlock Read Aloud
+                unlockedReadAloudScenes.add(currentSceneIndex);
+                renderReadPhase();
+                return;
+            }
+
             if (currentAudio) currentAudio.pause();
 
             currentAudio = new Audio(scene.full_audio);
+
+            // [NEW] Apply narration speed
+            const playbackRate = narrationSpeed === 'slow' ? 0.75 : narrationSpeed === 'fast' ? 1.5 : 1.0;
+            currentAudio.playbackRate = playbackRate;
+
+            // [NEW] Unlock Read Aloud
+            const currentIdx = currentSceneIndex;
+            if (!unlockedReadAloudScenes.has(currentIdx)) {
+                currentAudio.addEventListener('loadedmetadata', () => {
+                    const fastDurationMs = (currentAudio.duration / 1.5) * 1000;
+                    unlockReadAloudTimeout = setTimeout(() => {
+                        unlockedReadAloudScenes.add(currentIdx);
+                        if (currentSceneIndex === currentIdx) {
+                            renderReadPhase(); // Refresh UI to activate button
+                        }
+                    }, fastDurationMs);
+                });
+            }
+
             isSceneAudioPlaying = true;
             playingSentenceIndex = null;
 
             currentAudio.play().catch(err => console.error("Audio play failed:", err));
             currentAudio.onended = () => {
                 isSceneAudioPlaying = false;
-                renderReadPhase();
+                unlockedReadAloudScenes.add(currentSceneIndex);
+
+                // [NEW] Auto-advance if page turn is on
+                if (isPageTurnOn) {
+                    const filteredScenes = mockScenes.filter(s => s.id === currentModalBookId);
+                    if (currentSceneIndex < filteredScenes.length - 1) {
+                        nextScene();
+                    } else {
+                        showReadCompletePraise();
+                    }
+                } else {
+                    renderReadPhase();
+                }
             };
             renderReadPhase();
         }
 
         function playSentenceAudio(index) {
+            if (!isNarrationOn) return; // [NEW] Stop if narration is off
             const scenes = mockScenes.filter(s => s.id === currentModalBookId);
             const scene = scenes[currentSceneIndex];
             if (!scene || !scene.full_audio) return;
@@ -1702,6 +1947,11 @@
             if (currentAudio) currentAudio.pause();
 
             currentAudio = new Audio(scene.full_audio);
+
+            // [NEW] Apply narration speed
+            const playbackRate = narrationSpeed === 'slow' ? 0.75 : narrationSpeed === 'fast' ? 1.5 : 1.0;
+            currentAudio.playbackRate = playbackRate;
+
             playingSentenceIndex = index;
             isSceneAudioPlaying = false;
 
@@ -1752,6 +2002,15 @@
 
         function selectReadingMode(mode) {
             selectedReadingMode = mode;
+            // [NEW] Default settings based on mode
+            if (mode === 'ebook') {
+                isNarrationOn = false;
+                isPageTurnOn = false;
+            } else if (mode === 'interactive') {
+                isNarrationOn = true;
+                isPageTurnOn = true;
+            }
+            updateSettingsUI();
             renderReadPhase();
         }
 
@@ -2040,8 +2299,24 @@
             bookContainer.scrollLeft = scrollLeftPos - walk;
         });
 
-        // Settings Logic
-        function toggleSettings() {
+        window.toggleDifficulty = function () {
+            isDifficultyOpen = !isDifficultyOpen;
+            renderReadPhase();
+        };
+
+        window.handleDifficultyChange = function (newDiff) {
+            isTextFading = true;
+            isDifficultyOpen = false;
+            renderReadPhase();
+
+            setTimeout(() => {
+                currentDifficulty = newDiff;
+                isTextFading = false;
+                renderReadPhase();
+            }, 300);
+        };
+
+        window.toggleSettings = function () {
             isSettingsOpen = !isSettingsOpen;
             const overlay = document.getElementById('settingsOverlay');
             if (isSettingsOpen) {
@@ -2051,7 +2326,7 @@
                 overlay.classList.add('hidden');
             }
             lucide.createIcons();
-        }
+        };
 
         function setNarration(val) {
             isNarrationOn = val;
@@ -2062,6 +2337,7 @@
                 isPageTurnOn = false;
             }
             updateSettingsUI();
+            renderReadPhase(); // Ensure UI updates if needed
         }
 
         function setPageTurn(val) {
@@ -2098,21 +2374,21 @@
             if (isNarrationOn) {
                 narrBtn.classList.remove('off');
                 narrBtn.classList.add('on');
-                narrBtn.querySelector('.toggle-text').innerText = 'on';
+                narrBtn.querySelector('.toggle-text').innerText = 'ON';
             } else {
                 narrBtn.classList.add('off');
                 narrBtn.classList.remove('on');
-                narrBtn.querySelector('.toggle-text').innerText = 'off';
+                narrBtn.querySelector('.toggle-text').innerText = 'OFF';
             }
 
             if (isPageTurnOn) {
                 pageBtn.classList.remove('off');
                 pageBtn.classList.add('on');
-                pageBtn.querySelector('.toggle-text').innerText = 'on';
+                pageBtn.querySelector('.toggle-text').innerText = 'ON';
             } else {
                 pageBtn.classList.add('off');
                 pageBtn.classList.remove('on');
-                pageBtn.querySelector('.toggle-text').innerText = 'off';
+                pageBtn.querySelector('.toggle-text').innerText = 'OFF';
             }
 
             // Dependence logic

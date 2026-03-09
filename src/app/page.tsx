@@ -13,7 +13,7 @@ import { getReadingHistory } from '@/utils/storage';
 
 export default function Home() {
     const userName = "Ami";
-    const [view, setView] = useState<'home' | 'watch' | 'read'>('home');
+    const [view, setView] = useState<'home' | 'watch' | 'read' | 'library'>('home');
     const [currentBook, setCurrentBook] = useState<Book | null>(null);
     const [isDemoMode, setIsDemoMode] = useState(true);
 
@@ -245,6 +245,7 @@ export default function Home() {
                                                 setSelectedBook(book);
                                                 setModalOrigin(origin || 'recommendation');
                                             }}
+                                            onSeeAll={() => setView('library')}
                                         />
                                     </div>
                                     <div className="flex min-h-[300px]">
@@ -390,6 +391,19 @@ export default function Home() {
                         </div>
                     )}
                 </>
+            )}
+
+            {view === 'library' && (
+                <LibrarySection
+                    userName={userName}
+                    onStartLearning={startLearning}
+                    onViewInfo={(book, origin) => {
+                        setSelectedBook(book);
+                        setModalOrigin(origin || 'recommendation');
+                    }}
+                    onClose={() => setView('home')}
+                    isFullPage={true}
+                />
             )}
 
             {view === 'watch' && currentBook && (

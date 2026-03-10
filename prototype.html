@@ -1206,10 +1206,17 @@
                 let librarySortBy = 'Recent';
                 let libraryShowUnreadOnly = false;
 
+                let mediaFilters = {
+                    'Greeting': true,
+                    'Movie Book': true,
+                    'Audio Book': true
+                };
+                let mediaShowUnplayedOnly = false;
+
                 const libraryZones = {
                     'Book Zone': ['For you', 'Topics', "MD's pick", 'All Books'],
-                    'Media Zone': ['All Media', 'Movies', 'Audios'],
-                    'My Library': ['My Books'] // New zone
+                    'Media Zone': ['All Media', 'Greeting', 'Movie Book', 'Audio Book'],
+                    'My Library': []
                 };
 
                 const topicCategories = ['All', 'Classics', 'Sports', 'Science', 'Fantasy', 'Nature', 'World', 'Career', 'Family', 'Music', 'Body'];
@@ -2845,7 +2852,7 @@
 
                 window.setActiveZone = function (zone) {
                     currentActiveZone = zone;
-                    currentActiveSubTab = libraryZones[zone][0];
+                    currentActiveSubTab = libraryZones[zone].length > 0 ? libraryZones[zone][0] : null;
                     currentSubCategory = 'All';
 
                     const zoneBook = document.getElementById('zone-book');
@@ -3099,6 +3106,111 @@
                     container.innerHTML = html;
                     lucide.createIcons();
                     initLibraryDraggable();
+                }
+
+                window.toggleMediaUnplayedOnly = function () {
+                    mediaShowUnplayedOnly = !mediaShowUnplayedOnly;
+                    renderLibraryContent();
+                };
+
+                window.toggleMediaFilter = function (type) {
+                    mediaFilters[type] = !mediaFilters[type];
+                    renderLibraryContent();
+                };
+
+                function renderMediaContent() {
+                    let html = '';
+                    let groupsToRender = [...mockMediaData];
+
+                    if (librarySortBy === 'ABC') {
+                        groupsToRender.sort((a, b) => a.bookTitle.localeCompare(b.bookTitle));
+                    } else if (librarySortBy === 'ZYX') {
+                        groupsToRender.sort((a, b) => b.bookTitle.localeCompare(a.bookTitle));
+                    }
+
+                    if (currentActiveSubTab === 'All Media') {
+                        html += `<div class="space-y-6">`;
+                        let hasVisibleGroups = false;
+                        groupsToRender.forEach(group => {
+                            let items = group.items.filter(item => mediaFilters[item.type]);
+                            if (mediaShowUnplayedOnly) {
+                                items = items.filter(item => item.isUnplayed);
+                            }
+                            if (items.length === 0) return;
+                            hasVisibleGroups = true;
+
+                            html += `
+                            <div class="animate-in fade-in slide-in-from-bottom-2 duration-500 bg-white p-6 rounded-[32px] shadow-sm border-[3px] border-slate-100 flex gap-6 overflow-hidden relative">
+                                <div class="w-48 shrink-0 flex flex-col justify-center border-r-2 border-slate-100 pr-6">
+                                    <h3 class="text-2xl font-black text-slate-700 font-jua leading-tight mb-2">${group.bookTitle}</h3>
+                                    <p class="text-sm font-bold text-slate-400 uppercase tracking-widest">${items.length} Series</p>
+                                </div>
+                                <div class="library-scroll-container flex gap-6 overflow-x-auto pb-4 cursor-grab active:cursor-grabbing select-none flex-1">
+                                    ${renderMediaCardsList(items)}
+                                </div>
+                            </div>
+                            `;
+                        });
+                        if (!hasVisibleGroups) {
+                            html += `
+                            <div class="flex flex-col items-center justify-center py-20 opacity-40 w-full animate-in fade-in">
+                                <i data-lucide="search-x" class="w-24 h-24 mb-6"></i>
+                                <h2 class="text-3xl font-black">No Media Matches the Filters</h2>
+                            </div>`;
+                        }
+                        html += `</div>`;
+                    } else {
+                        // Single grid view
+                        let items = [];
+                        groupsToRender.forEach(group => {
+                            items.push(...group.items.filter(item => item.type === currentActiveSubTab));
+                        });
+
+                        if (mediaShowUnplayedOnly) {
+                            items = items.filter(item => item.isUnplayed);
+                        }
+
+                        if (items.length > 0) {
+                            html += `
+                            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-x-6 gap-y-10 animate-in fade-in">
+                                ${renderMediaCardsList(items, true)}
+                            </div>
+                            `;
+                        } else {
+                            html += `
+                            <div class="flex flex-col items-center justify-center py-20 opacity-40 w-full animate-in fade-in">
+                                <i data-lucide="search-x" class="w-24 h-24 mb-6"></i>
+                                <h2 class="text-3xl font-black">No Media Found</h2>
+                            </div>`;
+                        }
+                    }
+                    return html;
+                }
+
+                function renderMediaCardsList(items, isGrid = false) {
+                    return items.map(item => `
+                        <div class="group cursor-pointer ${isGrid ? 'w-full' : 'w-64 shrink-0'} flex flex-col gap-3 transition-all duration-300 transform origin-left" onclick="openModal('${item.id.split('__')[0]}', 'library')">
+                            <div class="aspect-video bg-slate-100 rounded-3xl overflow-hidden shadow-sm group-hover:shadow-xl group-hover:-translate-y-1.5 transition-all duration-300 relative border-4 border-white ring-1 ring-slate-100">
+                                <img src="${item.src}" class="w-full h-full object-cover">
+                                <div class="absolute inset-0 bg-slate-900/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                    <div class="w-16 h-16 bg-white/95 backdrop-blur-md rounded-full flex items-center justify-center scale-75 group-hover:scale-100 transition-transform duration-300 shadow-2xl">
+                                        <i data-lucide="play" class="w-8 h-8 ml-1 text-sky-500 fill-current"></i>
+                                    </div>
+                                </div>
+                                <div class="absolute bottom-3 right-3 px-2.5 py-1 bg-black/70 backdrop-blur-md rounded-lg text-white font-black text-xs tabular-nums tracking-wider shadow-sm border border-white/20">
+                                    ${item.rt}
+                                </div>
+                                ${item.isUnplayed ? '<div class="absolute top-3 left-3 px-3 py-1 bg-[#fbbf24] text-[#0f172a] font-black text-[9px] uppercase tracking-widest rounded-full shadow-md z-10 border-2 border-transparent group-hover:border-white/50 transition-colors">NEW</div>' : ''}
+                            </div>
+                            <div class="px-1">
+                                <h4 class="text-[15px] font-bold text-slate-700 line-clamp-1 group-hover:text-sky-500 transition-colors font-jua">${item.title}</h4>
+                                <p class="text-[11px] font-black text-slate-400 uppercase tracking-widest mt-1.5 flex items-center gap-1.5">
+                                    <i data-lucide="${item.type === 'Greeting' ? 'video' : item.type === 'Audio Book' ? 'headphones' : 'film'}" class="w-3.5 h-3.5"></i>
+                                    ${item.type}
+                                </p>
+                            </div>
+                        </div>
+                    `).join('');
                 }
 
                 function handleHeartClick(event, bookId) {

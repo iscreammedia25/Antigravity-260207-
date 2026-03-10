@@ -18,6 +18,13 @@ const LibrarySection: React.FC<LibrarySectionProps> = ({ userName, onViewInfo, o
     const [activeSubTab, setActiveSubTab] = useState<string>('All Books');
     const [isFilterOpen, setIsFilterOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
+    const [mediaSortBy, setMediaSortBy] = useState('Recent');
+    const [mediaShowUnplayedOnly, setMediaShowUnplayedOnly] = useState(false);
+    const [mediaFilters, setMediaFilters] = useState<Record<string, boolean>>({
+        'Greeting': true,
+        'Movie Book': true,
+        'Audio Book': true
+    });
 
     const zones: Record<Zone, string[]> = {
         'Book Zone': ['All Books', 'For you', 'Topics', "MD's pick"],
@@ -124,24 +131,185 @@ const LibrarySection: React.FC<LibrarySectionProps> = ({ userName, onViewInfo, o
                 </div>
             </nav>
 
-            {/* 3. Content Area Placeholder */}
+            {/* 3. Content Area Placeholder & Media Zone */}
             <main className="flex-1 overflow-y-auto p-10 bg-slate-50/30">
-                <div className="content-placeholder w-full h-full border-4 border-dashed border-slate-200 rounded-[48px] flex flex-col items-center justify-center text-center p-12 bg-white/50 backdrop-blur-sm">
-                    <div className="w-32 h-32 bg-sky-50 rounded-full flex items-center justify-center text-sky-400 mb-8 animate-bounce">
-                        <Sparkles className="w-16 h-16 fill-current" />
+                {activeZone === 'Media Zone' ? (
+                    <MediaZoneContent
+                        activeSubTab={activeSubTab}
+                        mediaSortBy={mediaSortBy}
+                        setMediaSortBy={setMediaSortBy}
+                        mediaShowUnplayedOnly={mediaShowUnplayedOnly}
+                        setMediaShowUnplayedOnly={setMediaShowUnplayedOnly}
+                        mediaFilters={mediaFilters}
+                        toggleMediaFilter={(type: string) => setMediaFilters(prev => ({ ...prev, [type]: !prev[type] }))}
+                        onViewInfo={onViewInfo}
+                    />
+                ) : (
+                    <div className="content-placeholder w-full h-full border-4 border-dashed border-slate-200 rounded-[48px] flex flex-col items-center justify-center text-center p-12 bg-white/50 backdrop-blur-sm">
+                        <div className="w-32 h-32 bg-sky-50 rounded-full flex items-center justify-center text-sky-400 mb-8 animate-bounce">
+                            <Sparkles className="w-16 h-16 fill-current" />
+                        </div>
+                        <h2 className="text-4xl font-black text-slate-800 mb-4 font-jua">
+                            {activeZone} - {activeSubTab}
+                        </h2>
+                        <p className="text-2xl text-slate-400 font-medium">
+                            여기에 <span className="text-sky-400 font-black">[{activeZone} - {activeSubTab}]</span> 콘텐츠가 들어갈 예정입니다.
+                        </p>
+                        <div className="mt-12 grid grid-cols-2 gap-4">
+                            <div className="w-48 h-64 bg-slate-100 rounded-3xl animate-pulse"></div>
+                            <div className="w-48 h-64 bg-slate-100 rounded-3xl animate-pulse"></div>
+                        </div>
                     </div>
-                    <h2 className="text-4xl font-black text-slate-800 mb-4 font-jua">
-                        {activeZone} - {activeSubTab}
-                    </h2>
-                    <p className="text-2xl text-slate-400 font-medium">
-                        여기에 <span className="text-sky-400 font-black">[{activeZone} - {activeSubTab}]</span> 콘텐츠가 들어갈 예정입니다.
-                    </p>
-                    <div className="mt-12 grid grid-cols-2 gap-4">
-                        <div className="w-48 h-64 bg-slate-100 rounded-3xl animate-pulse"></div>
-                        <div className="w-48 h-64 bg-slate-100 rounded-3xl animate-pulse"></div>
-                    </div>
-                </div>
+                )}
             </main>
+        </div>
+    );
+};
+
+const mockMediaData = BOOKS_DATA.map(book => {
+    // create pseudo-random stable boolean for unplayed
+    const hash = book.id.length;
+    return {
+        baseId: book.id,
+        bookTitle: book.title,
+        items: [
+            { id: `${book.id}__greeting`, type: 'Greeting', title: `${book.title} Greeting`, src: book.src, rt: '01:20', isUnplayed: hash % 2 === 0 },
+            { id: `${book.id}__movie`, type: 'Movie Book', title: `${book.title} Movie`, src: book.src, rt: '05:45', isUnplayed: hash % 3 === 0 },
+            { id: `${book.id}__audio`, type: 'Audio Book', title: `${book.title} Audio`, src: book.src, rt: '04:30', isUnplayed: hash % 4 === 0 }
+        ]
+    };
+});
+
+const MediaZoneContent = ({ activeSubTab, mediaSortBy, setMediaSortBy, mediaShowUnplayedOnly, setMediaShowUnplayedOnly, mediaFilters, toggleMediaFilter, onViewInfo }: any) => {
+    let groupsToRender = [...mockMediaData];
+
+    if (mediaSortBy === 'ABC') {
+        groupsToRender.sort((a, b) => a.bookTitle.localeCompare(b.bookTitle));
+    } else if (mediaSortBy === 'ZYX') {
+        groupsToRender.sort((a, b) => b.bookTitle.localeCompare(a.bookTitle));
+    }
+
+    const renderMediaCardsList = (items: any[], isGrid = false) => {
+        return items.map(item => (
+            <div key={item.id} className={`group cursor-pointer ${isGrid ? 'w-full' : 'w-64 shrink-0'} flex flex-col gap-3 transition-all duration-300 transform origin-left`}
+                onClick={() => {
+                    const book = BOOKS_DATA.find(b => b.id === item.id.split('__')[0]);
+                    if (book) onViewInfo(book, 'library');
+                }}>
+                <div className="aspect-video bg-slate-100 rounded-3xl overflow-hidden shadow-sm group-hover:shadow-xl group-hover:-translate-y-1.5 transition-all duration-300 relative border-4 border-white ring-1 ring-slate-100">
+                    <img src={item.src} className="w-full h-full object-cover" alt="" />
+                    <div className="absolute inset-0 bg-slate-900/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <div className="w-16 h-16 bg-white/95 backdrop-blur-md rounded-full flex items-center justify-center scale-75 group-hover:scale-100 transition-transform duration-300 shadow-2xl">
+                            <svg className="w-8 h-8 ml-1 text-sky-500 fill-current" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                        </div>
+                    </div>
+                    <div className="absolute bottom-3 right-3 px-2.5 py-1 bg-black/70 backdrop-blur-md rounded-lg text-white font-black text-xs tabular-nums tracking-wider shadow-sm border border-white/20">
+                        {item.rt}
+                    </div>
+                    {item.isUnplayed && (
+                        <div className="absolute top-3 left-3 px-3 py-1 bg-[#fbbf24] text-[#0f172a] font-black text-[9px] uppercase tracking-widest rounded-full shadow-md z-10 border-2 border-transparent group-hover:border-white/50 transition-colors">NEW</div>
+                    )}
+                </div>
+                <div className="px-1">
+                    <h4 className="text-[15px] font-bold text-slate-700 line-clamp-1 group-hover:text-sky-500 transition-colors font-jua">{item.title}</h4>
+                    <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest mt-1.5 flex items-center gap-1.5">
+                        {item.type}
+                    </p>
+                </div>
+            </div>
+        ));
+    };
+
+    return (
+        <div className="flex flex-col h-full w-full">
+            <div className="flex items-center justify-between mb-8 flex-wrap gap-4">
+                <div className="flex items-center gap-6">
+                    <div className="relative group">
+                        <select value={mediaSortBy} onChange={e => setMediaSortBy(e.target.value)}
+                            className="appearance-none h-14 pl-6 pr-12 bg-white border-2 border-slate-100 rounded-2xl font-bold text-slate-600 outline-none focus:border-[#fbbf24] transition-all cursor-pointer">
+                            <option value="Recent">Newest First</option>
+                            <option value="ABC">A to Z</option>
+                            <option value="ZYX">Z to A</option>
+                        </select>
+                        <svg className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </div>
+                    <label className="flex items-center gap-3 cursor-pointer group">
+                        <div className="relative">
+                            <input type="checkbox" className="sr-only peer" checked={mediaShowUnplayedOnly} onChange={() => setMediaShowUnplayedOnly(!mediaShowUnplayedOnly)} />
+                            <div className="w-12 h-6 bg-slate-200 rounded-full peer peer-checked:bg-[#fbbf24] transition-all"></div>
+                            <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full peer-checked:translate-x-6 transition-transform"></div>
+                        </div>
+                        <span className="font-bold text-slate-500 group-hover:text-slate-700 transition-colors">Unplayed Only</span>
+                    </label>
+                </div>
+                {activeSubTab === 'All Media' && (
+                    <div className="flex items-center gap-4 bg-white px-4 py-2 rounded-2xl border-2 border-slate-100 shadow-sm animate-in fade-in slide-in-from-right-4">
+                        <span className="font-bold text-slate-400 text-sm uppercase tracking-wider mr-2">Filters</span>
+                        {['Greeting', 'Movie Book', 'Audio Book'].map(type => (
+                            <label key={type} className="flex items-center gap-2 cursor-pointer group">
+                                <div className={`relative flex items-center justify-center w-6 h-6 rounded-lg border-2 transition-all ${mediaFilters[type] ? 'bg-sky-500 border-sky-500 text-white shadow-sm' : 'border-slate-300 text-transparent bg-white group-hover:border-sky-400'}`}>
+                                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                    <input type="checkbox" className="sr-only" checked={mediaFilters[type]} onChange={() => toggleMediaFilter(type)} />
+                                </div>
+                                <span className="font-bold text-slate-600 group-hover:text-sky-500 transition-colors select-none whitespace-nowrap">{type}</span>
+                            </label>
+                        ))}
+                    </div>
+                )}
+            </div>
+
+            {activeSubTab === 'All Media' ? (
+                <div className="space-y-6 pb-20">
+                    {groupsToRender.map(group => {
+                        let items = group.items.filter((item: any) => mediaFilters[item.type]);
+                        if (mediaShowUnplayedOnly) items = items.filter((item: any) => item.isUnplayed);
+                        if (items.length === 0) return null;
+
+                        return (
+                            <div key={group.baseId} className="animate-in fade-in slide-in-from-bottom-2 duration-500 bg-white p-6 rounded-[32px] shadow-sm border-[3px] border-slate-100 flex gap-6 overflow-hidden relative">
+                                <div className="w-48 shrink-0 flex flex-col justify-center border-r-2 border-slate-100 pr-6">
+                                    <h3 className="text-2xl font-black text-slate-700 font-jua leading-tight mb-2">{group.bookTitle}</h3>
+                                    <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">{items.length} Series</p>
+                                </div>
+                                <div className="flex gap-6 overflow-x-auto custom-scrollbar pb-2 flex-1">
+                                    {renderMediaCardsList(items)}
+                                </div>
+                            </div>
+                        );
+                    })}
+                    {groupsToRender.every(group => {
+                        let items = group.items.filter((item: any) => mediaFilters[item.type]);
+                        if (mediaShowUnplayedOnly) items = items.filter((item: any) => item.isUnplayed);
+                        return items.length === 0;
+                    }) && (
+                            <div className="flex flex-col items-center justify-center py-20 opacity-40 w-full animate-in fade-in">
+                                <svg className="w-24 h-24 mb-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m13.5 8.5-5 5" /><path d="m8.5 8.5 5 5" /><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
+                                <h2 className="text-3xl font-black">No Media Matches the Filters</h2>
+                            </div>
+                        )}
+                </div>
+            ) : (() => {
+                let items: any[] = [];
+                groupsToRender.forEach(group => {
+                    items.push(...group.items.filter((item: any) => item.type === activeSubTab));
+                });
+                if (mediaShowUnplayedOnly) items = items.filter((item: any) => item.isUnplayed);
+
+                if (items.length > 0) {
+                    return (
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-x-6 gap-y-10 animate-in fade-in pb-20">
+                            {renderMediaCardsList(items, true)}
+                        </div>
+                    );
+                } else {
+                    return (
+                        <div className="flex flex-col items-center justify-center py-20 opacity-40 w-full animate-in fade-in">
+                            <svg className="w-24 h-24 mb-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m13.5 8.5-5 5" /><path d="m8.5 8.5 5 5" /><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
+                            <h2 className="text-3xl font-black">No Media Found</h2>
+                        </div>
+                    );
+                }
+            })()}
         </div>
     );
 };

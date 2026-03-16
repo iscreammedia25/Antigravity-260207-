@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Sparkles, ChevronRight, ChevronLeft, Heart, Search, SlidersHorizontal, ArrowLeft, Check } from 'lucide-react';
 import { BOOKS_DATA, Book } from '../data/books';
+import UnifiedPlayer from './UnifiedPlayer';
+import { MediaItem } from '../types/media';
 
 interface LibrarySectionProps {
     userName: string;
@@ -9,13 +11,21 @@ interface LibrarySectionProps {
     onClose?: () => void;
     onSeeAll?: () => void;
     isFullPage?: boolean;
+    initialTab?: { zone: string; subTab: string } | null;
 }
 
 type Zone = 'Book Zone' | 'Media Zone';
 
-const LibrarySection: React.FC<LibrarySectionProps> = ({ userName, onViewInfo, onClose, onSeeAll, isFullPage = false }) => {
-    const [activeZone, setActiveZone] = useState<Zone>('Book Zone');
-    const [activeSubTab, setActiveSubTab] = useState<string>('All Books');
+const LibrarySection: React.FC<LibrarySectionProps> = ({ userName, onViewInfo, onClose, onSeeAll, isFullPage = false, initialTab }) => {
+    const [activeZone, setActiveZone] = useState<Zone>((initialTab?.zone as Zone) || 'Book Zone');
+    const [activeSubTab, setActiveSubTab] = useState<string>(initialTab?.subTab || (initialTab?.zone === 'Media Zone' ? 'All Media' : 'All Books'));
+
+    React.useEffect(() => {
+        if (initialTab) {
+            setActiveZone(initialTab.zone as Zone);
+            setActiveSubTab(initialTab.subTab);
+        }
+    }, [initialTab]);
     const [isFilterOpen, setIsFilterOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [mediaSortBy, setMediaSortBy] = useState('Recent');
@@ -25,6 +35,11 @@ const LibrarySection: React.FC<LibrarySectionProps> = ({ userName, onViewInfo, o
         'Movie Book': true,
         'Audio Book': true
     });
+
+    // Player State
+    const [isPlayerOpen, setIsPlayerOpen] = useState(false);
+    const [playerMediaList, setPlayerMediaList] = useState<MediaItem[]>([]);
+    const [playerStartIndex, setPlayerStartIndex] = useState(0);
 
     const zones: Record<Zone, string[]> = {
         'Book Zone': ['All Books', 'For you', 'Topics', "MD's pick"],
@@ -36,6 +51,7 @@ const LibrarySection: React.FC<LibrarySectionProps> = ({ userName, onViewInfo, o
         setActiveSubTab(zones[zone][0]); // Default to first tab of the new zone
     };
 
+
     // If not full page, render the original "For You" slider (for backward compatibility on Home)
     if (!isFullPage) {
         // ... (Original LibrarySection logic here if we want to keep it on Home page)
@@ -44,26 +60,26 @@ const LibrarySection: React.FC<LibrarySectionProps> = ({ userName, onViewInfo, o
     }
 
     return (
-        <div className="fixed inset-0 bg-[#F8FAFC] z-50 flex flex-col font-fredoka overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-300">
+        <div className="fixed inset-0 bg-[#0f172a] z-50 flex flex-col font-fredoka overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-300">
             {/* 1. Top Navigation & Search Bar */}
-            <header className="bg-white border-b-4 border-slate-100 px-6 py-4 flex flex-col gap-4 shadow-sm z-30">
+            <header className="px-6 py-6 flex flex-col gap-6 z-30">
                 <div className="flex items-center gap-4">
                     <button
                         onClick={onClose}
-                        className="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 hover:text-sky-500 hover:bg-sky-50 transition-all active:scale-95"
+                        className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-slate-400 hover:text-sky-400 hover:bg-white/10 transition-all active:scale-95"
                     >
                         <ArrowLeft className="w-7 h-7" />
                     </button>
 
                     {/* Search Bar */}
                     <div className="flex-1 relative group">
-                        <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-6 h-6 text-slate-300 group-focus-within:text-sky-400 transition-colors" />
+                        <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-6 h-6 text-slate-500 group-focus-within:text-sky-400 transition-colors" />
                         <input
                             type="text"
                             placeholder="Search for books or keywords..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full h-14 pl-14 pr-6 bg-slate-50 border-4 border-transparent focus:border-sky-100 focus:bg-white rounded-full text-lg font-bold text-slate-700 placeholder:text-slate-300 transition-all outline-none"
+                            className="w-full h-14 pl-14 pr-6 bg-white/10 border-4 border-transparent focus:border-sky-500/30 focus:bg-white/15 rounded-full text-lg font-bold text-white placeholder:text-slate-500 transition-all outline-none"
                         />
                     </div>
 
@@ -71,7 +87,7 @@ const LibrarySection: React.FC<LibrarySectionProps> = ({ userName, onViewInfo, o
                     <div className="relative">
                         <button
                             onClick={() => setIsFilterOpen(!isFilterOpen)}
-                            className={`h-14 px-6 rounded-3xl border-4 flex items-center gap-3 transition-all active:scale-95 font-black ${isFilterOpen ? 'bg-sky-500 text-white border-sky-400' : 'bg-white text-slate-400 border-slate-100 hover:border-slate-200'}`}
+                            className={`h-14 px-6 rounded-3xl border-4 flex items-center gap-3 transition-all active:scale-95 font-black ${isFilterOpen ? 'bg-sky-500 text-white border-sky-400' : 'bg-white/5 text-slate-300 border-white/5 hover:bg-white/10'}`}
                         >
                             <SlidersHorizontal className="w-6 h-6" />
                             <span>Filters</span>
@@ -79,8 +95,8 @@ const LibrarySection: React.FC<LibrarySectionProps> = ({ userName, onViewInfo, o
 
                         {/* Filter Dropdown */}
                         {isFilterOpen && (
-                            <div className="absolute top-16 right-0 w-72 bg-white rounded-[32px] shadow-2xl border-4 border-slate-50 p-6 z-50 animate-in zoom-in-95 slide-in-from-top-2 duration-200">
-                                <h4 className="text-slate-800 font-black text-lg mb-4 flex items-center gap-2">
+                            <div className="absolute top-16 right-0 w-82 bg-[#1e293b] rounded-[32px] shadow-2xl border-4 border-white/10 p-6 z-50 animate-in zoom-in-95 slide-in-from-top-2 duration-200">
+                                <h4 className="text-white font-black text-lg mb-4 flex items-center gap-2">
                                     <Sparkles className="w-5 h-5 text-sky-400" /> Advanced Filter
                                 </h4>
                                 <div className="space-y-6">
@@ -90,7 +106,7 @@ const LibrarySection: React.FC<LibrarySectionProps> = ({ userName, onViewInfo, o
                                 </div>
                                 <button
                                     onClick={() => setIsFilterOpen(false)}
-                                    className="w-full mt-6 py-4 bg-sky-500 text-white rounded-2xl font-black hover:bg-sky-600 transition-colors shadow-lg shadow-sky-100"
+                                    className="w-full mt-6 py-4 bg-sky-500 text-white rounded-2xl font-black hover:bg-sky-600 transition-colors shadow-lg shadow-sky-500/20"
                                 >
                                     Apply Filters
                                 </button>
@@ -100,12 +116,12 @@ const LibrarySection: React.FC<LibrarySectionProps> = ({ userName, onViewInfo, o
                 </div>
 
                 {/* Zone Toggle Tabs */}
-                <div className="flex gap-4 p-1.5 bg-slate-50 rounded-[28px] w-fit border-2 border-slate-100/50">
+                <div className="flex gap-4 p-1.5 bg-black/30 rounded-[28px] w-fit border-2 border-white/5 shadow-inner">
                     {(Object.keys(zones) as Zone[]).map((zone) => (
                         <button
                             key={zone}
                             onClick={() => handleZoneChange(zone)}
-                            className={`px-8 py-3 rounded-[22px] font-black text-lg transition-all ${activeZone === zone ? 'bg-white text-sky-500 shadow-md transform scale-[1.02]' : 'text-slate-400 hover:text-slate-600'}`}
+                            className={`px-8 py-3 rounded-[22px] font-black text-lg transition-all ${activeZone === zone ? 'bg-[#fbbf24] text-[#0f172a] shadow-xl shadow-amber-500/20 transform scale-[1.05]' : 'text-slate-500 hover:text-slate-300'}`}
                         >
                             {zone}
                         </button>
@@ -114,25 +130,25 @@ const LibrarySection: React.FC<LibrarySectionProps> = ({ userName, onViewInfo, o
             </header>
 
             {/* 2. Sub Navigation */}
-            <nav className="bg-white border-b-2 border-slate-50 px-8 py-2 overflow-x-auto no-scrollbar">
+            <nav className="px-8 py-2 overflow-x-auto no-scrollbar border-b border-white/5">
                 <div className="flex gap-8 whitespace-nowrap min-w-max">
                     {zones[activeZone].map((tab) => (
                         <button
                             key={tab}
                             onClick={() => setActiveSubTab(tab)}
-                            className={`relative py-4 text-xl font-black transition-all ${activeSubTab === tab ? 'text-sky-500' : 'text-slate-300 hover:text-slate-400'}`}
+                            className={`relative py-4 text-xl font-black transition-all ${activeSubTab === tab ? 'text-[#fbbf24]' : 'text-slate-500 hover:text-slate-300'}`}
                         >
                             {tab}
                             {activeSubTab === tab && (
-                                <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-sky-400 rounded-full animate-in fade-in slide-in-from-bottom-1" />
+                                <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-[#fbbf24] rounded-full shadow-[0_0_15px_rgba(251,191,36,0.5)] animate-in fade-in slide-in-from-bottom-1" />
                             )}
                         </button>
                     ))}
                 </div>
             </nav>
 
-            {/* 3. Content Area Placeholder & Media Zone */}
-            <main className="flex-1 overflow-y-auto p-10 bg-slate-50/30">
+            {/* 3. Content Area */}
+            <main className="flex-1 overflow-y-auto px-10 py-8 relative">
                 {activeZone === 'Media Zone' ? (
                     <MediaZoneContent
                         activeSubTab={activeSubTab}
@@ -142,26 +158,34 @@ const LibrarySection: React.FC<LibrarySectionProps> = ({ userName, onViewInfo, o
                         setMediaShowUnplayedOnly={setMediaShowUnplayedOnly}
                         mediaFilters={mediaFilters}
                         toggleMediaFilter={(type: string) => setMediaFilters(prev => ({ ...prev, [type]: !prev[type] }))}
-                        onViewInfo={onViewInfo}
+                        onPlayMedia={(list: MediaItem[], index: number) => {
+                            setPlayerMediaList(list);
+                            setPlayerStartIndex(index);
+                            setIsPlayerOpen(true);
+                        }}
                     />
                 ) : (
-                    <div className="content-placeholder w-full h-full border-4 border-dashed border-slate-200 rounded-[48px] flex flex-col items-center justify-center text-center p-12 bg-white/50 backdrop-blur-sm">
-                        <div className="w-32 h-32 bg-sky-50 rounded-full flex items-center justify-center text-sky-400 mb-8 animate-bounce">
-                            <Sparkles className="w-16 h-16 fill-current" />
-                        </div>
-                        <h2 className="text-4xl font-black text-slate-800 mb-4 font-jua">
-                            {activeZone} - {activeSubTab}
-                        </h2>
-                        <p className="text-2xl text-slate-400 font-medium">
-                            여기에 <span className="text-sky-400 font-black">[{activeZone} - {activeSubTab}]</span> 콘텐츠가 들어갈 예정입니다.
-                        </p>
-                        <div className="mt-12 grid grid-cols-2 gap-4">
-                            <div className="w-48 h-64 bg-slate-100 rounded-3xl animate-pulse"></div>
-                            <div className="w-48 h-64 bg-slate-100 rounded-3xl animate-pulse"></div>
-                        </div>
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-8 pb-32">
+                        {BOOKS_DATA.map(book => (
+                            <div key={book.id} onClick={() => onViewInfo(book, 'recommendation')} className="group cursor-pointer flex flex-col items-center">
+                                <div className="w-full aspect-[3/4] bg-white/10 rounded-[40px] overflow-hidden relative group-hover:scale-105 transition-all duration-300 border-4 border-transparent group-hover:border-[#fbbf24]/50 shadow-2xl">
+                                    <img src={book.src} alt={book.title} className="w-full h-full object-cover" />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                                </div>
+                                <h4 className="mt-4 text-center text-xl font-black text-slate-200 font-jua group-hover:text-[#fbbf24] transition-colors leading-tight px-2">{book.title}</h4>
+                            </div>
+                        ))}
                     </div>
                 )}
             </main>
+
+            {/* Unified Media Player */}
+            <UnifiedPlayer 
+                isOpen={isPlayerOpen}
+                onClose={() => setIsPlayerOpen(false)}
+                mediaList={playerMediaList}
+                initialIndex={playerStartIndex}
+            />
         </div>
     );
 };
@@ -169,18 +193,31 @@ const LibrarySection: React.FC<LibrarySectionProps> = ({ userName, onViewInfo, o
 const mockMediaData = BOOKS_DATA.map(book => {
     // create pseudo-random stable boolean for unplayed
     const hash = book.id.length;
+    // Map to Unified Player's MediaItem format
+    const greeting: MediaItem = { 
+        id: `${book.id}__greeting`, bookId: book.id, type: 'Greeting', title: `${book.title} Greeting`, 
+        src: 'https://vjs.zencdn.net/v/oceans.mp4', // Test video
+        thumbnail: book.src, duration: '01:20', isUnplayed: hash % 2 === 0, bookTitle: book.title 
+    };
+    const movie: MediaItem = { 
+        id: `${book.id}__movie`, bookId: book.id, type: 'Movie Book', title: `${book.title} Movie`, 
+        src: '/Video/the_silent_stick_watch.mp4', 
+        thumbnail: book.src, duration: '05:45', isUnplayed: hash % 3 === 0, bookTitle: book.title 
+    };
+    const audio: MediaItem = { 
+        id: `${book.id}__audio`, bookId: book.id, type: 'Audio Book', title: `${book.title} Audio`, 
+        src: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3', // Test audio
+        thumbnail: book.src, duration: '04:30', isUnplayed: hash % 4 === 0, bookTitle: book.title 
+    };
+
     return {
         baseId: book.id,
         bookTitle: book.title,
-        items: [
-            { id: `${book.id}__greeting`, type: 'Greeting', title: `${book.title} Greeting`, src: book.src, rt: '01:20', isUnplayed: hash % 2 === 0 },
-            { id: `${book.id}__movie`, type: 'Movie Book', title: `${book.title} Movie`, src: book.src, rt: '05:45', isUnplayed: hash % 3 === 0 },
-            { id: `${book.id}__audio`, type: 'Audio Book', title: `${book.title} Audio`, src: book.src, rt: '04:30', isUnplayed: hash % 4 === 0 }
-        ]
+        items: [greeting, movie, audio]
     };
 });
 
-const MediaZoneContent = ({ activeSubTab, mediaSortBy, setMediaSortBy, mediaShowUnplayedOnly, setMediaShowUnplayedOnly, mediaFilters, toggleMediaFilter, onViewInfo }: any) => {
+const MediaZoneContent = ({ activeSubTab, mediaSortBy, setMediaSortBy, mediaShowUnplayedOnly, setMediaShowUnplayedOnly, mediaFilters, toggleMediaFilter, onPlayMedia }: any) => {
     let groupsToRender = [...mockMediaData];
 
     if (mediaSortBy === 'ABC') {
@@ -190,27 +227,24 @@ const MediaZoneContent = ({ activeSubTab, mediaSortBy, setMediaSortBy, mediaShow
     }
 
     const renderMediaCardsList = (items: any[], isGrid = false) => {
-        return items.map(item => (
-            <div key={item.id} className={`group cursor-pointer ${isGrid ? 'w-full' : 'w-64 shrink-0'} flex flex-col gap-3 transition-all duration-300 transform origin-left`}
-                onClick={() => {
-                    const book = BOOKS_DATA.find(b => b.id === item.id.split('__')[0]);
-                    if (book) onViewInfo(book, 'library');
-                }}>
-                <div className="aspect-video bg-slate-100 rounded-3xl overflow-hidden shadow-sm group-hover:shadow-xl group-hover:-translate-y-1.5 transition-all duration-300 relative border-4 border-white ring-1 ring-slate-100">
-                    <img src={item.src} className="w-full h-full object-cover" alt="" />
-                    <div className="absolute inset-0 bg-slate-900/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+        return items.map((item, idx) => (
+            <div key={item.id} className={`group cursor-pointer ${isGrid ? 'w-full' : 'w-64 shrink-0'} flex flex-col gap-3 transition-all duration-300 transform origin-left focus:outline-none`}
+                onClick={() => onPlayMedia(items, idx)}>
+                <div className="aspect-video bg-slate-100 rounded-3xl overflow-hidden shadow-sm group-hover:shadow-xl group-hover:-translate-y-1.5 transition-all duration-300 relative border-4 border-white ring-1 ring-slate-100 pointer-events-none">
+                    <img src={item.thumbnail} className="w-full h-full object-cover" alt="" />
+                    <div className="absolute inset-0 bg-slate-900/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
                         <div className="w-16 h-16 bg-white/95 backdrop-blur-md rounded-full flex items-center justify-center scale-75 group-hover:scale-100 transition-transform duration-300 shadow-2xl">
                             <svg className="w-8 h-8 ml-1 text-sky-500 fill-current" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
                         </div>
                     </div>
                     <div className="absolute bottom-3 right-3 px-2.5 py-1 bg-black/70 backdrop-blur-md rounded-lg text-white font-black text-xs tabular-nums tracking-wider shadow-sm border border-white/20">
-                        {item.rt}
+                        {item.duration}
                     </div>
                     {item.isUnplayed && (
                         <div className="absolute top-3 left-3 px-3 py-1 bg-[#fbbf24] text-[#0f172a] font-black text-[9px] uppercase tracking-widest rounded-full shadow-md z-10 border-2 border-transparent group-hover:border-white/50 transition-colors">NEW</div>
                     )}
                 </div>
-                <div className="px-1">
+                <div className="px-1 pointer-events-none">
                     <h4 className="text-[15px] font-bold text-slate-700 line-clamp-1 group-hover:text-sky-500 transition-colors font-jua">{item.title}</h4>
                     <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest mt-1.5 flex items-center gap-1.5">
                         {item.type}
@@ -226,32 +260,32 @@ const MediaZoneContent = ({ activeSubTab, mediaSortBy, setMediaSortBy, mediaShow
                 <div className="flex items-center gap-6">
                     <div className="relative group">
                         <select value={mediaSortBy} onChange={e => setMediaSortBy(e.target.value)}
-                            className="appearance-none h-14 pl-6 pr-12 bg-white border-2 border-slate-100 rounded-2xl font-bold text-slate-600 outline-none focus:border-[#fbbf24] transition-all cursor-pointer">
-                            <option value="Recent">Newest First</option>
-                            <option value="ABC">A to Z</option>
-                            <option value="ZYX">Z to A</option>
+                            className="appearance-none h-14 pl-6 pr-12 bg-white/5 border-2 border-white/5 rounded-2xl font-bold text-slate-300 outline-none focus:border-[#fbbf24]/50 transition-all cursor-pointer">
+                            <option value="Recent" className="bg-[#1e293b]">Newest First</option>
+                            <option value="ABC" className="bg-[#1e293b]">A to Z</option>
+                            <option value="ZYX" className="bg-[#1e293b]">Z to A</option>
                         </select>
                         <svg className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
                     </div>
                     <label className="flex items-center gap-3 cursor-pointer group">
                         <div className="relative">
                             <input type="checkbox" className="sr-only peer" checked={mediaShowUnplayedOnly} onChange={() => setMediaShowUnplayedOnly(!mediaShowUnplayedOnly)} />
-                            <div className="w-12 h-6 bg-slate-200 rounded-full peer peer-checked:bg-[#fbbf24] transition-all"></div>
-                            <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full peer-checked:translate-x-6 transition-transform"></div>
+                            <div className="w-12 h-6 bg-white/10 rounded-full peer peer-checked:bg-[#fbbf24] transition-all border border-white/10"></div>
+                            <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full peer-checked:translate-x-6 transition-transform shadow-md"></div>
                         </div>
-                        <span className="font-bold text-slate-500 group-hover:text-slate-700 transition-colors">Unplayed Only</span>
+                        <span className="font-bold text-slate-400 group-hover:text-slate-200 transition-colors">Unplayed Only</span>
                     </label>
                 </div>
                 {activeSubTab === 'All Media' && (
-                    <div className="flex items-center gap-4 bg-white px-4 py-2 rounded-2xl border-2 border-slate-100 shadow-sm animate-in fade-in slide-in-from-right-4">
-                        <span className="font-bold text-slate-400 text-sm uppercase tracking-wider mr-2">Filters</span>
+                    <div className="flex items-center gap-4 bg-white/5 px-6 py-3 rounded-2xl border-2 border-white/5 shadow-sm animate-in fade-in slide-in-from-right-4">
+                        <span className="font-bold text-slate-500 text-xs uppercase tracking-widest mr-2">Filters</span>
                         {['Greeting', 'Movie Book', 'Audio Book'].map(type => (
                             <label key={type} className="flex items-center gap-2 cursor-pointer group">
-                                <div className={`relative flex items-center justify-center w-6 h-6 rounded-lg border-2 transition-all ${mediaFilters[type] ? 'bg-sky-500 border-sky-500 text-white shadow-sm' : 'border-slate-300 text-transparent bg-white group-hover:border-sky-400'}`}>
+                                <div className={`relative flex items-center justify-center w-6 h-6 rounded-lg border-2 transition-all ${mediaFilters[type] ? 'bg-sky-500 border-sky-500 text-white shadow-sm' : 'border-white/20 text-transparent bg-transparent group-hover:border-sky-400'}`}>
                                     <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
                                     <input type="checkbox" className="sr-only" checked={mediaFilters[type]} onChange={() => toggleMediaFilter(type)} />
                                 </div>
-                                <span className="font-bold text-slate-600 group-hover:text-sky-500 transition-colors select-none whitespace-nowrap">{type}</span>
+                                <span className="font-bold text-slate-400 group-hover:text-slate-200 transition-colors select-none whitespace-nowrap text-sm">{type}</span>
                             </label>
                         ))}
                     </div>
@@ -266,13 +300,40 @@ const MediaZoneContent = ({ activeSubTab, mediaSortBy, setMediaSortBy, mediaShow
                         if (items.length === 0) return null;
 
                         return (
-                            <div key={group.baseId} className="animate-in fade-in slide-in-from-bottom-2 duration-500 bg-white p-6 rounded-[32px] shadow-sm border-[3px] border-slate-100 flex gap-6 overflow-hidden relative">
-                                <div className="w-48 shrink-0 flex flex-col justify-center border-r-2 border-slate-100 pr-6">
-                                    <h3 className="text-2xl font-black text-slate-700 font-jua leading-tight mb-2">{group.bookTitle}</h3>
-                                    <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">{items.length} Series</p>
+                            <div key={group.baseId} className="animate-in fade-in slide-in-from-bottom-2 duration-500 bg-white/5 p-6 rounded-[32px] shadow-sm border-2 border-white/5 flex gap-6 overflow-hidden relative">
+                                <div className="w-48 shrink-0 flex flex-col justify-center border-r-2 border-white/5 pr-6">
+                                    <h3 className="text-2xl font-black text-white font-jua leading-tight mb-2">{group.bookTitle}</h3>
+                                    <p className="text-sm font-bold text-slate-500 uppercase tracking-widest">{items.length} Series</p>
                                 </div>
                                 <div className="flex gap-6 overflow-x-auto custom-scrollbar pb-2 flex-1">
-                                    {renderMediaCardsList(items)}
+                                    {items.map((item, idx) => (
+                                        <div key={item.id} className="group cursor-pointer w-64 shrink-0 flex flex-col gap-3 transition-all duration-300 transform origin-left"
+                                             onClick={(e) => {
+                                                 e.stopPropagation();
+                                                 onPlayMedia(items, idx);
+                                             }}>
+                                            <div className="aspect-video bg-slate-100 rounded-3xl overflow-hidden shadow-sm group-hover:shadow-xl group-hover:-translate-y-1.5 transition-all duration-300 relative border-4 border-white ring-1 ring-slate-100 pointer-events-none">
+                                                <img src={item.thumbnail} className="w-full h-full object-cover" alt="" />
+                                                <div className="absolute inset-0 bg-slate-900/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
+                                                    <div className="w-16 h-16 bg-white/95 backdrop-blur-md rounded-full flex items-center justify-center scale-75 group-hover:scale-100 transition-transform duration-300 shadow-2xl">
+                                                        <svg className="w-8 h-8 ml-1 text-sky-500 fill-current" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                                                    </div>
+                                                </div>
+                                                <div className="absolute bottom-3 right-3 px-2.5 py-1 bg-black/70 backdrop-blur-md rounded-lg text-white font-black text-xs tabular-nums tracking-wider shadow-sm border border-white/20">
+                                                    {item.duration}
+                                                </div>
+                                                {item.isUnplayed && (
+                                                    <div className="absolute top-3 left-3 px-3 py-1 bg-[#fbbf24] text-[#0f172a] font-black text-[9px] uppercase tracking-widest rounded-full shadow-md z-10 border-2 border-transparent group-hover:border-white/50 transition-colors">NEW</div>
+                                                )}
+                                            </div>
+                                            <div className="px-1">
+                                                <h4 className="text-[15px] font-bold text-slate-700 line-clamp-1 group-hover:text-sky-500 transition-colors font-jua">{item.title}</h4>
+                                                <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest mt-1.5 flex items-center gap-1.5">
+                                                    {item.type}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
                         );
@@ -298,7 +359,34 @@ const MediaZoneContent = ({ activeSubTab, mediaSortBy, setMediaSortBy, mediaShow
                 if (items.length > 0) {
                     return (
                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-x-6 gap-y-10 animate-in fade-in pb-20">
-                            {renderMediaCardsList(items, true)}
+                            {items.map((item, idx) => (
+                                <div key={item.id} className="group cursor-pointer w-full flex flex-col gap-3 transition-all duration-300 transform origin-left"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        onPlayMedia(items, idx);
+                                    }}>
+                                    <div className="aspect-video bg-slate-100 rounded-3xl overflow-hidden shadow-sm group-hover:shadow-xl group-hover:-translate-y-1.5 transition-all duration-300 relative border-4 border-white ring-1 ring-slate-100 pointer-events-none">
+                                        <img src={item.thumbnail} className="w-full h-full object-cover" alt="" />
+                                        <div className="absolute inset-0 bg-slate-900/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                            <div className="w-16 h-16 bg-white/95 backdrop-blur-md rounded-full flex items-center justify-center scale-75 group-hover:scale-100 transition-transform duration-300 shadow-2xl">
+                                                <svg className="w-8 h-8 ml-1 text-sky-500 fill-current" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                                            </div>
+                                        </div>
+                                        <div className="absolute bottom-3 right-3 px-2.5 py-1 bg-black/70 backdrop-blur-md rounded-lg text-white font-black text-xs tabular-nums tracking-wider shadow-sm border border-white/20">
+                                            {item.duration}
+                                        </div>
+                                        {item.isUnplayed && (
+                                            <div className="absolute top-3 left-3 px-3 py-1 bg-[#fbbf24] text-[#0f172a] font-black text-[9px] uppercase tracking-widest rounded-full shadow-md z-10 border-2 border-transparent group-hover:border-white/50 transition-colors">NEW</div>
+                                        )}
+                                    </div>
+                                    <div className="px-1">
+                                        <h4 className="text-[15px] font-bold text-slate-700 line-clamp-1 group-hover:text-sky-500 transition-colors font-jua">{item.title}</h4>
+                                        <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest mt-1.5 flex items-center gap-1.5">
+                                            {item.type}
+                                        </p>
+                                    </div>
+                                </div>
+                            ))}
                         </div>
                     );
                 } else {

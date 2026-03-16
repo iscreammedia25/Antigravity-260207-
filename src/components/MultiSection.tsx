@@ -1,7 +1,18 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Video, Film, Headphones, ChevronRight } from 'lucide-react';
+import { BOOKS_DATA } from '../data/books';
+import UnifiedPlayer from './UnifiedPlayer';
+import { MediaItem } from '../types/media';
 
-const MultiSection: React.FC = () => {
+interface MultiSectionProps {
+    onNavigate?: (tab: string) => void;
+}
+
+const MultiSection: React.FC<MultiSectionProps> = ({ onNavigate }) => {
+    const handleNavigation = (tab: string) => {
+        if (onNavigate) onNavigate(tab);
+    };
+
     return (
         <div className="card-bubble p-6 md:p-8 w-full h-full flex flex-col relative overflow-hidden bg-white shadow-sm border border-slate-100">
             {/* Header */}
@@ -9,15 +20,21 @@ const MultiSection: React.FC = () => {
                 <h3 className="text-2xl font-black text-slate-700 font-jua">
                     Media Box
                 </h3>
-                <a href="#" className="p-2 bg-sky-50 text-sky-400 font-black btn-jelly text-xs flex items-center gap-1 hover:bg-sky-100 hover:scale-105 active:scale-95 group font-fredoka">
+                <button 
+                    onClick={() => handleNavigation('All Media')}
+                    className="p-2 bg-sky-50 text-sky-400 font-black btn-jelly text-xs flex items-center gap-1 hover:bg-sky-100 hover:scale-105 active:scale-95 group font-fredoka"
+                >
                     SEE ALL <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                </a>
+                </button>
             </div>
 
             {/* List */}
             <div className="flex flex-col gap-4 flex-1 overflow-y-auto w-full pr-2 custom-scrollbar">
                 {/* Greeting Item */}
-                <button className="w-full bg-slate-50 hover:bg-sky-50 transition-colors rounded-3xl p-4 flex items-center gap-4 text-left group border-2 border-transparent hover:border-sky-100 active:scale-[0.98]">
+                <button 
+                    onClick={() => handleNavigation('Greeting')}
+                    className="w-full bg-slate-50 hover:bg-sky-50 transition-colors rounded-3xl p-4 flex items-center gap-4 text-left group border-2 border-transparent hover:border-sky-100 active:scale-[0.98]"
+                >
                     <div className="w-14 h-14 rounded-2xl bg-indigo-100 text-indigo-500 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform shadow-sm">
                         <Video className="w-7 h-7 fill-current" />
                     </div>
@@ -28,7 +45,10 @@ const MultiSection: React.FC = () => {
                 </button>
 
                 {/* Movie Item */}
-                <button className="w-full bg-slate-50 hover:bg-sky-50 transition-colors rounded-3xl p-4 flex items-center gap-4 text-left group border-2 border-transparent hover:border-sky-100 active:scale-[0.98]">
+                <button 
+                    onClick={() => handleNavigation('Movie Book')}
+                    className="w-full bg-slate-50 hover:bg-sky-50 transition-colors rounded-3xl p-4 flex items-center gap-4 text-left group border-2 border-transparent hover:border-sky-100 active:scale-[0.98]"
+                >
                     <div className="w-14 h-14 rounded-2xl bg-rose-100 text-rose-500 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform shadow-sm">
                         <Film className="w-7 h-7 fill-current" />
                     </div>
@@ -39,7 +59,10 @@ const MultiSection: React.FC = () => {
                 </button>
 
                 {/* Audio Item */}
-                <button className="w-full bg-slate-50 hover:bg-sky-50 transition-colors rounded-3xl p-4 flex items-center gap-4 text-left group border-2 border-transparent hover:border-sky-100 active:scale-[0.98]">
+                <button 
+                    onClick={() => handleNavigation('Audio Book')}
+                    className="w-full bg-slate-50 hover:bg-sky-50 transition-colors rounded-3xl p-4 flex items-center gap-4 text-left group border-2 border-transparent hover:border-sky-100 active:scale-[0.98]"
+                >
                     <div className="w-14 h-14 rounded-2xl bg-amber-100 text-amber-500 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform shadow-sm">
                         <Headphones className="w-7 h-7 fill-current" />
                     </div>

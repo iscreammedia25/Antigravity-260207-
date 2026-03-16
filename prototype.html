@@ -394,6 +394,33 @@
                 padding: 2rem;
             }
         }
+
+        /* Unified Media Player Styles */
+        @keyframes bounce-slow {
+            0%, 100% { transform: translateY(0) rotate(3deg); }
+            50% { transform: translateY(-20px) rotate(-1deg); }
+        }
+        @keyframes wave {
+            0%, 100% { transform: scaleY(0.5); }
+            50% { transform: scaleY(1.2); }
+        }
+        .animate-bounce-slow {
+            animation: bounce-slow 4s ease-in-out infinite;
+        }
+        .audio-visualizer-bar {
+            transition: height 0.2s ease-in-out;
+        }
+        #unifiedMediaPlayer {
+            z-index: 50000 !important;
+        }
+        .circular-countdown {
+            transform: rotate(-90deg);
+        }
+        .circular-countdown circle {
+            fill: none;
+            stroke-width: 12;
+            stroke-linecap: round;
+        }
     </style>
 </head>
 
@@ -520,7 +547,7 @@
                                 </span>
                                 For you
                             </h3>
-                            <button onclick="openLibraryFullPage(); setActiveSubTab('For you');"
+                            <button onclick="openLibraryFullPage('Book Zone', 'For you');"
                                 class="px-5 py-2.5 bg-[#0f172a] text-[#fbbf24] font-black rounded-2xl text-xs flex items-center gap-2 hover:scale-105 active:scale-95 transition-all group font-fredoka uppercase tracking-widest shadow-lg shadow-black/10">
                                 SEE ALL <i data-lucide="chevron-right"
                                     class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
@@ -560,7 +587,7 @@
                             <h3 class="text-2xl font-black text-slate-700 font-jua">
                                 Media Box
                             </h3>
-                            <button onclick="openLibraryFullPage(); setActiveZone('Media Zone');"
+                            <button onclick="openLibraryFullPage('Media Zone', 'All Media');"
                                 class="px-5 py-2.5 bg-[#0f172a] text-[#fbbf24] font-black rounded-2xl text-xs flex items-center gap-2 hover:scale-105 active:scale-95 transition-all group font-fredoka uppercase tracking-widest shadow-lg shadow-black/10 text-center">
                                 SEE ALL <i data-lucide="chevron-right"
                                     class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
@@ -571,7 +598,7 @@
                         <div class="flex flex-col gap-4 flex-1 overflow-y-auto w-full pr-2 custom-scrollbar">
                             <!-- Greeting Item -->
                             <button
-                                onclick="openLibraryFullPage(); setActiveZone('Media Zone'); setActiveSubTab('Greeting');"
+                                onclick="openLibraryFullPage('Media Zone', 'Greeting');"
                                 class="w-full bg-slate-50 hover:bg-sky-50 transition-colors rounded-3xl p-4 flex items-center gap-4 text-left group border-2 border-transparent hover:border-sky-100 active:scale-[0.98]">
                                 <div
                                     class="w-14 h-14 rounded-2xl bg-indigo-100 text-indigo-500 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform shadow-sm">
@@ -585,7 +612,7 @@
 
                             <!-- Movie Item -->
                             <button
-                                onclick="openLibraryFullPage(); setActiveZone('Media Zone'); setActiveSubTab('Movie Book');"
+                                onclick="openLibraryFullPage('Media Zone', 'Movie Book');"
                                 class="w-full bg-slate-50 hover:bg-sky-50 transition-colors rounded-3xl p-4 flex items-center gap-4 text-left group border-2 border-transparent hover:border-sky-100 active:scale-[0.98]">
                                 <div
                                     class="w-14 h-14 rounded-2xl bg-rose-100 text-rose-500 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform shadow-sm">
@@ -599,7 +626,7 @@
 
                             <!-- Audio Item -->
                             <button
-                                onclick="openLibraryFullPage(); setActiveZone('Media Zone'); setActiveSubTab('Audio Book');"
+                                onclick="openLibraryFullPage('Media Zone', 'Audio Book');"
                                 class="w-full bg-slate-50 hover:bg-sky-50 transition-colors rounded-3xl p-4 flex items-center gap-4 text-left group border-2 border-transparent hover:border-sky-100 active:scale-[0.98]">
                                 <div
                                     class="w-14 h-14 rounded-2xl bg-amber-100 text-amber-500 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform shadow-sm">
@@ -2801,7 +2828,25 @@
                 }
 
                 // Library Full Page Logic
-                window.openLibraryFullPage = function () {
+                window.openLibraryFullPage = function (zone, subTab) {
+                    if (zone) {
+                        currentActiveZone = zone;
+                        currentActiveSubTab = subTab || (libraryZones[zone].length > 0 ? libraryZones[zone][0] : null);
+                        currentSubCategory = 'All';
+
+                        // Update Zone UI
+                        const zoneBook = document.getElementById('zone-book');
+                        const zoneMedia = document.getElementById('zone-media');
+                        
+                        if (zone === 'Book Zone') {
+                            if(zoneBook) zoneBook.className = "px-8 py-2.5 rounded-[22px] font-black text-base transition-all bg-[#fbbf24] text-[#0f172a] shadow-xl";
+                            if(zoneMedia) zoneMedia.className = "px-8 py-2.5 rounded-[22px] font-black text-base transition-all text-white/50 hover:text-white";
+                        } else if (zone === 'Media Zone') {
+                            if(zoneMedia) zoneMedia.className = "px-8 py-2.5 rounded-[22px] font-black text-base transition-all bg-[#fbbf24] text-[#0f172a] shadow-xl";
+                            if(zoneBook) zoneBook.className = "px-8 py-2.5 rounded-[22px] font-black text-base transition-all text-white/50 hover:text-white";
+                        }
+                    }
+
                     const page = document.getElementById('libraryFullPage');
                     page.classList.remove('hidden');
                     document.body.style.overflow = 'hidden';
@@ -3187,9 +3232,12 @@
                     return html;
                 }
 
+
+
                 function renderMediaCardsList(items, isGrid = false) {
-                    return items.map(item => `
-                        <div class="group cursor-pointer ${isGrid ? 'w-full' : 'w-64 shrink-0'} flex flex-col gap-3 transition-all duration-300 transform origin-left" onclick="openModal('${item.id.split('__')[0]}', 'library')">
+                    const itemsJson = encodeURIComponent(JSON.stringify(items));
+                    return items.map((item, idx) => `
+                        <div class="group cursor-pointer ${isGrid ? 'w-full' : 'w-64 shrink-0'} flex flex-col gap-3 transition-all duration-300 transform origin-left" onclick="prepareAndPlayMedia(${idx}, '${itemsJson}')">
                             <div class="aspect-video bg-slate-100 rounded-3xl overflow-hidden shadow-sm group-hover:shadow-xl group-hover:-translate-y-1.5 transition-all duration-300 relative border-4 border-white ring-1 ring-slate-100">
                                 <img src="${item.src}" class="w-full h-full object-cover">
                                 <div class="absolute inset-0 bg-slate-900/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
@@ -3299,100 +3347,7 @@
                     `}).join('');
                 }
 
-                function renderMediaContent() {
-                    let html = '';
-                    let groupsToRender = [...mockMediaData];
 
-                    if (librarySortBy === 'ABC') {
-                        groupsToRender.sort((a, b) => a.bookTitle.localeCompare(b.bookTitle));
-                    } else if (librarySortBy === 'ZYX') {
-                        groupsToRender.sort((a, b) => b.bookTitle.localeCompare(a.bookTitle));
-                    }
-
-                    if (currentActiveSubTab === 'All Media') {
-                        html += `<div class="space-y-6">`;
-                        let hasVisibleGroups = false;
-                        groupsToRender.forEach(group => {
-                            let items = group.items.filter(item => mediaFilters[item.type]);
-                            if (mediaShowUnplayedOnly) {
-                                items = items.filter(item => item.isUnplayed);
-                            }
-                            if (items.length === 0) return;
-                            hasVisibleGroups = true;
-
-                            html += `
-                            <div class="animate-in fade-in slide-in-from-bottom-2 duration-500 bg-white p-6 rounded-[32px] shadow-sm border-[3px] border-slate-100 flex gap-6 overflow-hidden relative">
-                                <div class="w-48 shrink-0 flex flex-col justify-center border-r-2 border-slate-100 pr-6">
-                                    <h3 class="text-2xl font-black text-slate-700 font-jua leading-tight mb-2">${group.bookTitle}</h3>
-                                    <p class="text-sm font-bold text-slate-400 uppercase tracking-widest">${items.length} Series</p>
-                                </div>
-                                <div class="flex gap-6 overflow-x-auto custom-scrollbar pb-2 flex-1">
-                                    ${renderMediaCardsList(items)}
-                                </div>
-                            </div>
-                            `;
-                        });
-                        if (!hasVisibleGroups) {
-                            html += `
-                            <div class="flex flex-col items-center justify-center py-20 opacity-40 w-full animate-in fade-in">
-                                <i data-lucide="search-x" class="w-24 h-24 mb-6"></i>
-                                <h2 class="text-3xl font-black">No Media Matches the Filters</h2>
-                            </div>`;
-                        }
-                        html += `</div>`;
-                    } else {
-                        // Single grid view
-                        let items = [];
-                        groupsToRender.forEach(group => {
-                            items.push(...group.items.filter(item => item.type === currentActiveSubTab));
-                        });
-
-                        if (mediaShowUnplayedOnly) {
-                            items = items.filter(item => item.isUnplayed);
-                        }
-
-                        if (items.length > 0) {
-                            html += `
-                            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-x-6 gap-y-10 animate-in fade-in">
-                                ${renderMediaCardsList(items, true)}
-                            </div>
-                            `;
-                        } else {
-                            html += `
-                            <div class="flex flex-col items-center justify-center py-20 opacity-40 w-full animate-in fade-in">
-                                <i data-lucide="search-x" class="w-24 h-24 mb-6"></i>
-                                <h2 class="text-3xl font-black">No Media Found</h2>
-                            </div>`;
-                        }
-                    }
-                    return html;
-                }
-
-                function renderMediaCardsList(items, isGrid = false) {
-                    return items.map(item => `
-                        <div class="group cursor-pointer ${isGrid ? 'w-full' : 'w-64 shrink-0'} flex flex-col gap-3 transition-all duration-300 transform origin-left" onclick="openModal('${item.id.split('__')[0]}', 'library')">
-                            <div class="aspect-video bg-slate-100 rounded-3xl overflow-hidden shadow-sm group-hover:shadow-xl group-hover:-translate-y-1.5 transition-all duration-300 relative border-4 border-white ring-1 ring-slate-100">
-                                <img src="${item.src}" class="w-full h-full object-cover">
-                                <div class="absolute inset-0 bg-slate-900/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                    <div class="w-16 h-16 bg-white/95 backdrop-blur-md rounded-full flex items-center justify-center scale-75 group-hover:scale-100 transition-transform duration-300 shadow-2xl">
-                                        <i data-lucide="play" class="w-8 h-8 ml-1 text-sky-500 fill-current"></i>
-                                    </div>
-                                </div>
-                                <div class="absolute bottom-3 right-3 px-2.5 py-1 bg-black/70 backdrop-blur-md rounded-lg text-white font-black text-xs tabular-nums tracking-wider shadow-sm border border-white/20">
-                                    ${item.rt}
-                                </div>
-                                ${item.isUnplayed ? '<div class="absolute top-3 left-3 px-3 py-1 bg-[#fbbf24] text-[#0f172a] font-black text-[9px] uppercase tracking-widest rounded-full shadow-md z-10 border-2 border-transparent group-hover:border-white/50 transition-colors">NEW</div>' : ''}
-                            </div>
-                            <div class="px-1">
-                                <h4 class="text-[15px] font-bold text-slate-700 line-clamp-1 group-hover:text-sky-500 transition-colors font-jua">${item.title}</h4>
-                                <p class="text-[11px] font-black text-slate-400 uppercase tracking-widest mt-1.5 flex items-center gap-1.5">
-                                    <i data-lucide="${item.type === 'Greeting' ? 'video' : item.type === 'Audio Book' ? 'headphones' : 'film'}" class="w-3.5 h-3.5"></i>
-                                    ${item.type}
-                                </p>
-                            </div>
-                        </div>
-                    `).join('');
-                }
 
                 function initLibraryDraggable() {
                     const sliders = document.querySelectorAll('.library-scroll-container');
@@ -3459,14 +3414,428 @@
                     }
                 });
 
-                // Home Screen Initializer
-                document.addEventListener('DOMContentLoaded', () => {
-                    renderBooks();
-                    renderHero();
-                    updateSettingsUI(); /* Sync settings UI on load */
+                // Unified Player Globals (used by prepareAndPlayMedia)
+                let playerMediaList = [];
+                let playerCurrentIndex = 0;
+                let isPlayerAutoPlay = true;
+                let playerCountdownTimer = null;
+                let playerVisualizerInterval = null;
+
+                const playerMediaData = [
+                    { id: '1', type: 'Greeting', title: 'Hello Space!', src: 'https://vjs.zencdn.net/v/oceans.mp4', thumb: 'https://api.dicebear.com/7.x/shapes/svg?seed=1' },
+                    { id: '2', type: 'Movie Book', title: 'The Silent Stick', src: 'https://www.w3schools.com/html/mov_bbb.mp4', thumb: 'https://api.dicebear.com/7.x/shapes/svg?seed=2' },
+                    { id: '3', type: 'Audio Book', title: 'Cosmic Journey', src: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3', thumb: 'https://api.dicebear.com/7.x/shapes/svg?seed=3' }
+                ];
+            </script>
+
+
+    <!-- Unified Media Player Modal (Theater Mode) -->
+    <div id="unifiedMediaPlayer" class="fixed inset-0 hidden bg-[#030712]/98 flex flex-col items-center justify-center font-fredoka overflow-hidden select-none z-[50000]">
+        <!-- Background Blur -->
+        <div id="playerBgBlur" class="absolute inset-0 z-0 opacity-20 blur-3xl scale-125 transition-all duration-1000"></div>
+
+        <!-- Theater Modal Container -->
+        <div id="theaterModal" class="relative w-full max-w-5xl lg:max-w-6xl aspect-video bg-black shadow-[0_0_100px_rgba(0,0,0,0.8)] overflow-hidden scale-95 opacity-0 transition-all duration-500 flex flex-col group/player">
+            
+            <!-- 1. Top Bar (Title & Tools) -->
+            <div class="absolute top-0 left-0 right-0 p-8 flex justify-between items-start z-50 bg-gradient-to-b from-black/80 via-black/40 to-transparent opacity-0 group-hover/player:opacity-100 transition-opacity duration-300">
+                <div class="flex flex-col">
+                    <span id="playerMediaTypeLabel" class="text-sky-400 font-black text-xs uppercase tracking-[0.2em] mb-1">Type</span>
+                    <h2 id="playerMediaTitle" class="text-white text-3xl font-black font-jua drop-shadow-md">Title</h2>
+                </div>
+                <div class="flex items-center gap-5">
+                    <!-- Auto-play Toggle -->
+                    <div class="flex items-center gap-3 bg-white/10 backdrop-blur-md px-5 py-2.5 rounded-2xl border border-white/20 hover:bg-white/20 transition-all cursor-pointer" onclick="togglePlayerAutoPlay()">
+                        <span class="text-white/90 font-bold text-sm tracking-tight">Auto-play</span>
+                        <div id="playerAutoPlayBtn" class="w-12 h-6 rounded-full relative bg-sky-500 transition-colors">
+                            <div id="playerAutoPlayKnob" class="absolute top-1 w-4 h-4 bg-white rounded-full transition-all left-7"></div>
+                        </div>
+                    </div>
+                    <button onclick="closeUnifiedPlayer()" class="w-12 h-12 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center text-white transition-all active:scale-90 border border-white/20 shadow-xl">
+                        <i data-lucide="x" class="w-8 h-8"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 2. Content Area (Video/Audio) -->
+            <div class="flex-1 relative flex items-center justify-center overflow-hidden" id="playerMainArea">
+                <!-- Video Element -->
+                <video id="playerVideo" class="w-full h-full object-contain hidden"></video>
+                
+                <!-- Audio UI Elements -->
+                <div id="playerAudioUI" class="w-full h-full hidden flex flex-col items-center justify-center bg-[#0f172a]">
+                    <audio id="playerAudio"></audio>
+                    <div class="relative z-10">
+                        <div class="w-72 h-88 bg-white p-4 rounded-[40px] shadow-[0_0_80px_rgba(56,189,248,0.2)] transform hover:rotate-2 transition-transform duration-500">
+                            <img id="playerAudioThumbnail" src="" class="w-full h-full object-cover rounded-[28px]" alt="" />
+                        </div>
+                    </div>
+                    <!-- Visualizer -->
+                    <div id="playerVisualizer" class="absolute bottom-24 flex items-end gap-1.5 h-12 opacity-50"></div>
+                </div>
+
+                <!-- Bridge UI Overlay -->
+                <div id="playerBridgeUI" class="absolute inset-0 bg-black/80 backdrop-blur-sm z-[60] hidden flex items-center justify-center">
+                    <div class="flex flex-col items-center">
+                        <div class="relative w-32 h-32 mb-8">
+                            <svg class="w-full h-full -rotate-90" viewBox="0 0 128 128">
+                                <circle cx="64" cy="64" r="58" class="stroke-white/10 fill-none" stroke-width="8" />
+                                <circle id="countdownCircle" cx="64" cy="64" r="58" class="stroke-sky-400 fill-none" stroke-width="8" stroke-dasharray="364.4" stroke-dashoffset="0" stroke-linecap="round" />
+                            </svg>
+                            <span id="countdownText" class="absolute inset-0 flex items-center justify-center text-4xl font-black text-white">3</span>
+                        </div>
+                        <h3 class="text-2xl font-black text-white drop-shadow-lg">Next episode starting...</h3>
+                    </div>
+                </div>
+
+                <!-- End Screen Overlay -->
+                <div id="playerEndScreen" class="absolute inset-0 bg-black/90 backdrop-blur-xl z-[70] hidden flex items-center justify-center">
+                    <div id="endScreenContent" class="bg-white rounded-[64px] p-16 max-w-xl w-full mx-6 shadow-2xl flex flex-col items-center text-center scale-95 opacity-0 transition-all duration-500"></div>
+                </div>
+            </div>
+
+            <!-- 3. Bottom Control Bar -->
+            <div class="absolute bottom-0 left-0 right-0 p-8 pt-20 bg-gradient-to-t from-black/90 via-black/60 to-transparent z-50 opacity-0 group-hover/player:opacity-100 transition-opacity duration-300">
+                <!-- Progress Slider -->
+                <div class="relative w-full h-8 flex items-center group/progress cursor-pointer mb-6" id="playerProgressContainer" onclick="handleProgressBarClick(event)">
+                    <div class="absolute w-full h-2 bg-white/20 rounded-full overflow-hidden">
+                        <div id="playerProgressBar" class="h-full bg-sky-400 rounded-full w-0 shadow-[0_0_10px_rgba(56,189,248,0.5)]"></div>
+                    </div>
+                    <div id="playerProgressKnob" class="absolute w-5 h-5 bg-white rounded-full shadow-xl scale-0 group-hover/progress:scale-100 transition-transform duration-200 left-0 -ml-2.5"></div>
+                </div>
+
+                <div class="flex items-center justify-between">
+                    <!-- Left: Time & Controls -->
+                    <div class="flex items-center gap-8">
+                        <div class="flex items-center gap-4">
+                            <button onclick="playPrevious()" class="w-12 h-12 text-white/70 hover:text-white transition-all active:scale-90">
+                                <i data-lucide="skip-back" class="w-8 h-8 fill-current"></i>
+                            </button>
+                            <button onclick="togglePlayerPlay()" class="w-16 h-16 bg-white text-[#0f172a] rounded-full flex items-center justify-center shadow-2xl hover:scale-110 active:scale-90 transition-all">
+                                <i data-lucide="play" id="playerPlayIcon" class="w-9 h-9 fill-current ml-1"></i>
+                            </button>
+                            <button onclick="playNext()" class="w-12 h-12 text-white/70 hover:text-white transition-all active:scale-90">
+                                <i data-lucide="skip-forward" class="w-8 h-8 fill-current"></i>
+                            </button>
+                        </div>
+                        <div class="text-white font-bold text-sm tracking-widest tabular-nums bg-white/10 px-4 py-2 rounded-xl">
+                            <span id="playerCurrentTime">00:00</span>
+                            <span class="mx-2 text-white/30">/</span>
+                            <span id="playerTotalTime" class="text-white/60">00:00</span>
+                        </div>
+                    </div>
+
+                    <!-- Right: Volume & Fullscreen -->
+                    <div class="flex items-center gap-6">
+                        <div class="flex items-center gap-4 bg-white/5 rounded-2xl px-5 py-2.5 hover:bg-white/10 transition-all">
+                            <button onclick="togglePlayerMute()" class="text-white/70 hover:text-white transition-all">
+                                <i data-lucide="volume-2" id="playerVolumeIcon" class="w-6 h-6"></i>
+                            </button>
+                        </div>
+                        <button onclick="toggleFullscreen()" class="w-14 h-14 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center text-white transition-all active:scale-90 border border-white/10">
+                            <i data-lucide="maximize" id="playerFullscreenIcon" class="w-7 h-7"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Unified Player Engine ---
+        // (Globals moved to first script tag)
+
+        function openUnifiedPlayer(listType, startIndex = 0) {
+            playerMediaList = playerMediaData; // In real case, filter by listType
+            playerCurrentIndex = startIndex;
+            
+            const playerOverlay = document.getElementById('unifiedMediaPlayer');
+            const theaterModal = document.getElementById('theaterModal');
+            
+            playerOverlay.classList.remove('hidden');
+            
+            // Animation trigger
+            setTimeout(() => {
+                theaterModal.classList.remove('scale-95', 'opacity-0');
+                theaterModal.classList.add('scale-100', 'opacity-100');
+            }, 50);
+
+            loadPlayerMedia(playerCurrentIndex);
+            lucide.createIcons();
+        }
+
+        function closeUnifiedPlayer() {
+            const theaterModal = document.getElementById('theaterModal');
+            theaterModal.classList.add('scale-95', 'opacity-0');
+            theaterModal.classList.remove('scale-100', 'opacity-100');
+            
+            setTimeout(() => {
+                const video = document.getElementById('playerVideo');
+                const audio = document.getElementById('playerAudio');
+                video.pause();
+                audio.pause();
+                document.getElementById('unifiedMediaPlayer').classList.add('hidden');
+                clearInterval(playerCountdownTimer);
+                clearInterval(playerVisualizerInterval);
+            }, 400);
+        }
+
+        function loadPlayerMedia(index) {
+            const media = playerMediaList[index];
+            if (!media) return;
+
+            const video = document.getElementById('playerVideo');
+            const audio = document.getElementById('playerAudio');
+            
+            // UI Setup
+            document.getElementById('playerMediaTitle').innerText = media.title;
+            document.getElementById('playerMediaTypeLabel').innerText = media.type;
+            document.getElementById('playerBgBlur').style.backgroundImage = `url(${media.thumb})`;
+            document.getElementById('playerBgBlur').style.backgroundSize = 'cover';
+            
+            // Reset UI
+            video.classList.add('hidden');
+            document.getElementById('playerAudioUI').classList.add('hidden');
+            document.getElementById('playerBridgeUI').classList.add('hidden');
+            document.getElementById('playerEndScreen').classList.add('hidden');
+            
+            // Stop current
+            video.pause();
+            audio.pause();
+
+            const currentMediaEl = (media.type === 'Audio Book') ? audio : video;
+
+            if (media.type === 'Audio Book') {
+                document.getElementById('playerAudioUI').classList.remove('hidden');
+                document.getElementById('playerAudioThumbnail').src = media.thumb;
+                audio.src = media.src;
+                audio.load();
+                audio.play().catch(e => console.log("Autoplay blocked"));
+                startVisualizer();
+            } else {
+                video.classList.remove('hidden');
+                video.src = media.src;
+                video.load();
+                video.play().catch(e => console.log("Autoplay blocked"));
+                clearInterval(playerVisualizerInterval);
+            }
+            
+            updatePlayIcon(true);
+            
+            // Events
+            currentMediaEl.onended = handleMediaEnd;
+            currentMediaEl.onloadedmetadata = () => {
+                document.getElementById('playerTotalTime').innerText = formatTime(currentMediaEl.duration);
+            };
+            currentMediaEl.ontimeupdate = () => {
+                const prog = (currentMediaEl.currentTime / currentMediaEl.duration) * 100;
+                document.getElementById('playerProgressBar').style.width = `${prog}%`;
+                document.getElementById('playerCurrentTime').innerText = formatTime(currentMediaEl.currentTime);
+                const knob = document.getElementById('playerProgressKnob');
+                if(knob) knob.style.left = `${prog}%`;
+            };
+        }
+
+        function formatTime(seconds) {
+            if (isNaN(seconds)) return '00:00';
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function handleMediaEnd() {
+            if (isPlayerAutoPlay && playerCurrentIndex < playerMediaList.length - 1) {
+                startBridge();
+            } else {
+                showEndScreen();
+            }
+        }
+
+        function startBridge() {
+            const bridge = document.getElementById('playerBridgeUI');
+            const circle = document.getElementById('countdownCircle');
+            const text = document.getElementById('countdownText');
+            bridge.classList.remove('hidden');
+            
+            let count = 3;
+            text.innerText = count;
+            circle.style.strokeDashoffset = 0;
+            
+            clearInterval(playerCountdownTimer);
+            playerCountdownTimer = setInterval(() => {
+                count--;
+                if (count <= 0) {
+                    clearInterval(playerCountdownTimer);
+                    playerCurrentIndex++;
+                    loadPlayerMedia(playerCurrentIndex);
+                } else {
+                    text.innerText = count;
+                    circle.style.strokeDashoffset = (364.4 * (3 - count)) / 3;
+                }
+            }, 1000);
+        }
+
+        function showEndScreen() {
+            const screen = document.getElementById('playerEndScreen');
+            const content = document.getElementById('endScreenContent');
+            screen.classList.remove('hidden');
+            
+            const nextMedia = playerMediaList[playerCurrentIndex + 1];
+            
+            setTimeout(() => {
+                content.classList.remove('scale-95', 'opacity-0');
+                content.classList.add('scale-100', 'opacity-100');
+            }, 10);
+
+            if (nextMedia) {
+                content.innerHTML = `
+                    <p class="text-sky-500 font-extrabold text-sm uppercase tracking-widest mb-6">Finished!</p>
+                    <div class="relative w-full aspect-video bg-slate-100 rounded-[40px] overflow-hidden mb-8 shadow-2xl group/next cursor-pointer" onclick="playNextDirectly()">
+                        <img src="${nextMedia.thumb}" class="w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover/next:opacity-100 transition-opacity">
+                             <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-2xl">
+                                <i data-lucide="play" class="w-10 h-10 text-sky-500 fill-current ml-1"></i>
+                             </div>
+                        </div>
+                    </div>
+                    <h3 class="text-3xl font-black text-slate-800 font-jua mb-10">${nextMedia.title}</h3>
+                    <div class="flex gap-4 w-full">
+                        <button onclick="closeUnifiedPlayer()" class="flex-1 py-6 bg-slate-100 text-slate-500 rounded-[32px] font-black hover:bg-slate-200 transition-all">Close</button>
+                        <button onclick="playNextDirectly()" class="flex-[1.5] py-6 bg-sky-500 text-white rounded-[32px] font-black shadow-lg shadow-sky-200 hover:scale-105 active:scale-95 transition-all">Play Next Now</button>
+                    </div>
+                `;
+            } else {
+                content.innerHTML = `
+                    <div class="w-24 h-24 bg-sky-100 rounded-full flex items-center justify-center mb-8 mx-auto">
+                        <i data-lucide="sparkles" class="w-12 h-12 text-sky-500 fill-current"></i>
+                    </div>
+                    <h3 class="text-4xl font-black text-slate-800 font-jua mb-4">Excellent Job!</h3>
+                    <p class="text-slate-400 font-bold mb-12">You've finished all the media in this series.</p>
+                    <button onclick="closeUnifiedPlayer()" class="w-full py-6 bg-sky-500 text-white rounded-[32px] font-black shadow-lg shadow-sky-200 hover:scale-105 active:scale-95 transition-all">Back to Library</button>
+                `;
+            }
+            lucide.createIcons();
+        }
+
+        function playNextDirectly() {
+            playerCurrentIndex++;
+            loadPlayerMedia(playerCurrentIndex);
+        }
+
+        function playNext() {
+            if (playerCurrentIndex < playerMediaList.length - 1) {
+                playerCurrentIndex++;
+                loadPlayerMedia(playerCurrentIndex);
+            }
+        }
+
+        function playPrevious() {
+            if (playerCurrentIndex > 0) {
+                playerCurrentIndex--;
+                loadPlayerMedia(playerCurrentIndex);
+            }
+        }
+
+        function togglePlayerPlay() {
+            const media = playerMediaList[playerCurrentIndex].type === 'Audio Book' ? document.getElementById('playerAudio') : document.getElementById('playerVideo');
+            if (media.paused) { media.play(); updatePlayIcon(true); }
+            else { media.pause(); updatePlayIcon(false); }
+        }
+
+        function updatePlayIcon(isPlaying) {
+            const icon = document.getElementById('playerPlayIcon');
+            if(icon) {
+                icon.parentElement.innerHTML = `<i data-lucide="${isPlaying ? 'pause' : 'play'}" id="playerPlayIcon" class="w-9 h-9 fill-current ${isPlaying ? '' : 'ml-1'}"></i>`;
+                lucide.createIcons();
+            }
+        }
+
+        function handleProgressBarClick(e) {
+            const container = document.getElementById('playerProgressContainer');
+            const media = playerMediaList[playerCurrentIndex].type === 'Audio Book' ? document.getElementById('playerAudio') : document.getElementById('playerVideo');
+            const rect = container.getBoundingClientRect();
+            const pos = (e.clientX - rect.left) / rect.width;
+            media.currentTime = pos * media.duration;
+        }
+
+        function togglePlayerAutoPlay() {
+            isPlayerAutoPlay = !isPlayerAutoPlay;
+            const knob = document.getElementById('playerAutoPlayKnob');
+            const btn = document.getElementById('playerAutoPlayBtn');
+            if (isPlayerAutoPlay) {
+                knob.style.left = '28px';
+                btn.classList.add('bg-sky-500'); btn.classList.remove('bg-slate-600');
+            } else {
+                knob.style.left = '4px';
+                btn.classList.remove('bg-sky-500'); btn.classList.add('bg-slate-600');
+            }
+        }
+
+        function toggleFullscreen() {
+            const playerArea = document.getElementById('theaterModal');
+            const icon = document.getElementById('playerFullscreenIcon');
+            if (!document.fullscreenElement) {
+                playerArea.requestFullscreen().then(() => {
+                    icon.setAttribute('data-lucide', 'minimize');
+                    lucide.createIcons();
+                }).catch(err => {
+                    console.log(`Error attempting to enable full-screen mode: ${err.message}`);
+                });
+            } else {
+                document.exitFullscreen().then(() => {
+                    icon.setAttribute('data-lucide', 'maximize');
                     lucide.createIcons();
                 });
-            </script>
+            }
+        }
+
+        function startVisualizer() {
+            const viz = document.getElementById('playerVisualizer');
+            viz.innerHTML = '';
+            for(let i=0; i<30; i++) {
+                const bar = document.createElement('div');
+                bar.className = 'w-1.5 bg-sky-400 rounded-full transition-all duration-200';
+                bar.style.height = '4px';
+                viz.appendChild(bar);
+            }
+            clearInterval(playerVisualizerInterval);
+            playerVisualizerInterval = setInterval(() => {
+                viz.childNodes.forEach(bar => {
+                    bar.style.height = `${Math.random() * 40 + 5}px`;
+                });
+            }, 150);
+        }
+
+        function togglePlayerMute() {
+            const video = document.getElementById('playerVideo');
+            const audio = document.getElementById('playerAudio');
+            video.muted = !video.muted;
+            audio.muted = !audio.muted;
+            const icon = document.getElementById('playerVolumeIcon');
+            icon.setAttribute('data-lucide', video.muted ? 'volume-x' : 'volume-2');
+            lucide.createIcons();
+        }
+
+        function prepareAndPlayMedia(index, listJson) {
+            const items = JSON.parse(decodeURIComponent(listJson));
+            playerMediaList = items;
+            playerCurrentIndex = index;
+            openUnifiedPlayer(null, index);
+        }
+
+        // --- Home Screen Initializer ---
+        document.addEventListener('DOMContentLoaded', () => {
+            try {
+                renderBooks();
+                renderHero();
+                updateSettingsUI();
+                lucide.createIcons();
+                console.log('App Initialized Successfully');
+            } catch (e) {
+                console.error('Initialization error:', e);
+            }
+        });
+    </script>
 </body>
 
 </html>

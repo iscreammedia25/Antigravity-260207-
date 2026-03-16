@@ -14,6 +14,7 @@ import { getReadingHistory } from '@/utils/storage';
 export default function Home() {
     const userName = "Ami";
     const [view, setView] = useState<'home' | 'watch' | 'read' | 'library'>('home');
+    const [libraryTab, setLibraryTab] = useState<{ zone: string, subTab: string } | null>(null);
     const [currentBook, setCurrentBook] = useState<Book | null>(null);
     const [isDemoMode, setIsDemoMode] = useState(true);
 
@@ -229,6 +230,11 @@ export default function Home() {
                                 onViewInfo={(book, origin) => {
                                     setSelectedBook(book);
                                     setModalOrigin(origin || 'recommendation');
+                                    if (origin === 'history') {
+                                        setLibraryTab({ zone: 'Book Zone', subTab: 'Reading History' });
+                                    } else {
+                                        setLibraryTab({ zone: 'Book Zone', subTab: 'All Books' });
+                                    }
                                 }}
                                 isDemoMode={isDemoMode}
                                 isFlashing={isFlashing}
@@ -244,12 +250,23 @@ export default function Home() {
                                             onViewInfo={(book, origin) => {
                                                 setSelectedBook(book);
                                                 setModalOrigin(origin || 'recommendation');
+                                                if (origin === 'history') {
+                                                    setLibraryTab({ zone: 'Book Zone', subTab: 'Reading History' });
+                                                } else {
+                                                    setLibraryTab({ zone: 'Book Zone', subTab: 'All Books' });
+                                                }
                                             }}
-                                            onSeeAll={() => setView('library')}
+                                            onSeeAll={() => {
+                                                setLibraryTab({ zone: 'Book Zone', subTab: 'All Books' });
+                                                setView('library');
+                                            }}
                                         />
                                     </div>
                                     <div className="flex min-h-[300px]">
-                                        <MultiSection />
+                                        <MultiSection onNavigate={(tab) => {
+                                            setLibraryTab({ zone: 'Media Zone', subTab: tab });
+                                            setView('library');
+                                        }} />
                                     </div>
                                 </div>
                             </div>
@@ -395,14 +412,21 @@ export default function Home() {
 
             {view === 'library' && (
                 <LibrarySection
+                    key={libraryTab ? `${libraryTab.zone}-${libraryTab.subTab}` : 'default-library'}
                     userName={userName}
                     onStartLearning={startLearning}
                     onViewInfo={(book, origin) => {
                         setSelectedBook(book);
                         setModalOrigin(origin || 'recommendation');
+                        if (origin === 'history') {
+                            setLibraryTab({ zone: 'Book Zone', subTab: 'Reading History' });
+                        } else {
+                            setLibraryTab({ zone: 'Book Zone', subTab: 'All Books' });
+                        }
                     }}
                     onClose={() => setView('home')}
                     isFullPage={true}
+                    initialTab={libraryTab}
                 />
             )}
 

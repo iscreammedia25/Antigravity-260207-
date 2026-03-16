@@ -43,6 +43,7 @@ export default function Home() {
 
     const [isFlashing, setIsFlashing] = useState(false);
     const [isPlayingInline, setIsPlayingInline] = useState(false);
+    const inlineVideoRef = React.useRef<HTMLVideoElement>(null);
 
     React.useEffect(() => {
         setIsPlayingInline(false);
@@ -327,9 +328,12 @@ export default function Home() {
                                         >
                                             {isPlayingInline ? (
                                                 <video
+                                                    ref={inlineVideoRef}
+                                                    id="inline-video"
                                                     className="absolute inset-0 w-full h-full object-cover z-20"
                                                     controls
                                                     autoPlay
+                                                    playsInline
                                                     src={selectedBook.videoUrl}
                                                 />
                                             ) : (
@@ -355,24 +359,37 @@ export default function Home() {
                                                 </>
                                             )}
 
-                                            <button
-                                                className="absolute bottom-4 right-4 w-12 h-12 bg-black/50 hover:bg-black/70 rounded-full flex items-center justify-center text-white backdrop-blur-sm transition-all shadow-lg z-30 cursor-pointer"
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    const elem = e.currentTarget.closest('.video-container');
-                                                    if (elem) {
-                                                        if (!document.fullscreenElement) {
-                                                            elem.requestFullscreen().catch(err => {
-                                                                console.error(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
-                                                            });
-                                                        } else {
-                                                            document.exitFullscreen();
+                                            {isPlayingInline && (
+                                                <button
+                                                    className="absolute bottom-4 right-4 w-12 h-12 bg-black/50 hover:bg-black/70 rounded-full flex items-center justify-center text-white backdrop-blur-sm transition-all shadow-lg z-30 cursor-pointer"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        const video = inlineVideoRef.current;
+
+                                                        if (video) {
+                                                            if (!document.fullscreenElement) {
+                                                                if (video.requestFullscreen) {
+                                                                    video.requestFullscreen().catch((err: any) => {
+                                                                        console.error(`Error attempting to enable full-screen mode: ${err.message}`);
+                                                                    });
+                                                                } else if ((video as any).webkitRequestFullscreen) {
+                                                                    (video as any).webkitRequestFullscreen();
+                                                                } else if ((video as any).msRequestFullscreen) {
+                                                                    (video as any).msRequestFullscreen();
+                                                                } else if ((video as any).webkitEnterFullscreen) {
+                                                                    (video as any).webkitEnterFullscreen();
+                                                                }
+                                                            } else {
+                                                                if (document.exitFullscreen) {
+                                                                    document.exitFullscreen();
+                                                                }
+                                                            }
                                                         }
-                                                    }
-                                                }}
-                                            >
-                                                <Maximize className="w-6 h-6" />
-                                            </button>
+                                                    }}
+                                                >
+                                                    <Maximize className="w-6 h-6" />
+                                                </button>
+                                            )}
                                         </div>
 
                                         {/* Bottom: Details */}

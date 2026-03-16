@@ -689,7 +689,7 @@
 
                             <!-- The video element itself, initially hidden -->
                             <video id="inlineVideo" class="absolute inset-0 w-full h-full object-cover z-20 hidden"
-                                controls src="https://www.w3schools.com/html/mov_bbb.mp4"></video>
+                                playsinline controls src="https://www.w3schools.com/html/mov_bbb.mp4"></video>
 
                             <div id="inlineVideoThumbnailWrapper"
                                 class="absolute inset-0 flex items-center justify-center">
@@ -708,7 +708,7 @@
                                 </div>
                             </div>
 
-                            <button onclick="toggleFullscreen(event)"
+                            <button onclick="toggleInlineFullscreen(event)"
                                 class="absolute bottom-4 right-4 w-12 h-12 bg-black/50 hover:bg-black/70 rounded-full flex items-center justify-center text-white backdrop-blur-sm transition-all shadow-lg z-30 cursor-pointer">
                                 <i data-lucide="maximize" class="w-6 h-6"></i>
                             </button>
@@ -1203,19 +1203,19 @@
 
             <script>
                 const booksData = [
-                    { id: 'missing-planet', title: 'The Missing Planet', src: './public/Image/Cover/The Missing Planet.png', lexile: '250~300', wordCount: 120, category: 'Space 🚀', summary: 'A brave little astronaut goes on a mission to find a planet that disappeared from the star maps. Join the cosmic adventure!', keywords: ['planet', 'space', 'astronaut', 'star'], isBookmarked: false, videoUrl: './public/Video/the_silent_stick_watch.mp4' },
-                    { id: 'rainbow', title: 'Rainbow', src: './public/Image/Cover/Rainbow.png', lexile: '150~200', wordCount: 85, category: 'Nature 🌈', summary: 'Follow the beautiful colors across the sky after a rainy day. Learn how rainbows are made of light and magic!', keywords: ['color', 'rain', 'sky', 'sun'], isBookmarked: false, videoUrl: './public/Video/the_silent_stick_watch.mp4' },
-                    { id: 'two-friends', title: 'Two Friends', src: './public/Image/Cover/Two Friends.png', lexile: '200~250', wordCount: 110, category: 'Friendship 🤝', summary: 'A story about a rabbit and a turtle who discover that being different is what makes their friendship so special.', keywords: ['friends', 'together', 'help', 'game'], isBookmarked: false, videoUrl: './public/Video/the_silent_stick_watch.mp4' },
-                    { id: 'silent-seed', title: 'The Silent Seed', src: './public/Image/Cover/The Silent Seed.png', lexile: '300~350', wordCount: 145, category: 'Science 🔬', summary: 'Deep under the ground, a tiny seed waits silently for the perfect moment to grow into a magnificent tree.', keywords: ['grow', 'wait', 'ground', 'leaf'], isBookmarked: false, videoUrl: './public/Video/the_silent_stick_watch.mp4' },
-                    { id: 'silent-stick', title: 'The Silent Stick', src: './public/Image/Cover/The Silent Stick.png', lexile: '250~320', wordCount: 130, category: 'Adventure 🗺️', summary: 'A magic stick that doesn\'t make a sound helps a quiet boy find his way through a mysterious forest.', keywords: ['magic', 'quiet', 'forest', 'path'], isBookmarked: false, videoUrl: './public/Video/the_silent_stick_watch.mp4' },
-                    { id: 'broken-branch', title: 'The Broken Branch', src: './public/Image/Cover/The Broken Branch.png', lexile: '280~340', wordCount: 135, category: 'Nature 🌳', summary: 'When a strong wind breaks a branch, the forest animals work together to make it a new home for a bird family.', keywords: ['tree', 'wind', 'home', 'birds'], isBookmarked: false, videoUrl: './public/Video/the_silent_stick_watch.mp4' },
-                    { id: 'pea', title: 'The Pea', src: './public/Image/Cover/The Pea.png', lexile: '180~230', wordCount: 95, category: 'Food 🫛', summary: 'One tiny green pea rolls off the plate and travels across the kitchen floor. Where will it end up?', keywords: ['green', 'roll', 'kitchen', 'floor'], isBookmarked: false, videoUrl: './public/Video/the_silent_stick_watch.mp4' },
-                    { id: 'milo', title: 'Milo and the Lost Color', src: './public/Image/Cover/Milo and the Lost Color.png', lexile: '320~380', wordCount: 160, category: 'Animals 🐶', summary: 'Milo is a dog with a very big imagination. Every time he goes for a walk, he sees a world full of dragons.', keywords: ['dog', 'dream', 'adventure', 'wild'], isBookmarked: false, videoUrl: './public/Video/milo_and_the_lost_color_watch.mp4' },
-                    { id: 'rainbow-cloud', title: 'Rainbow Cloud', src: './public/Image/Cover/The Rainbow Cloud.png', lexile: '350~400', wordCount: 180, category: 'Fantasy ✨', summary: 'A magical cloud that rains colors instead of water changes everything in the gray city of Grumbletown.', keywords: ['magic', 'cloud', 'color', 'happy'], isBookmarked: true, videoUrl: './public/Video/the_rainbow_cloud_watch.mp4' },
-                    { id: 'cindellar', title: 'Cindellar', src: './public/Image/Cover/Cindellar.png', lexile: '380~450', wordCount: 210, category: 'Classic 🏰', summary: 'A new retelling of the classic fairy tale with a focus on being kind to yourself and others.', keywords: ['princess', 'kind', 'dance', 'shoe'], isBookmarked: false, videoUrl: './public/Video/the_silent_stick_watch.mp4' },
-                    { id: 'flying-trunk', title: 'The Flying Trunk', src: './public/Image/Cover/The Fyling Trunk.png', lexile: '340~390', wordCount: 175, category: 'Adventure 🗺️', summary: 'Travel the world in a magic trunk that can fly over mountains and oceans.', keywords: ['fly', 'travel', 'ocean', 'magic'], isBookmarked: false, videoUrl: './public/Video/the_silent_stick_watch.mp4' },
-                    { id: 'rapunzel', title: 'The Rapunzel', src: './public/Image/Cover/The Rapunzel.png', lexile: '360~410', wordCount: 190, category: 'Classic 🏰', summary: 'A story about inner strength and finding your own voice from high up in a stone tower.', keywords: ['hair', 'tower', 'voice', 'strong'], isBookmarked: false, videoUrl: './public/Video/the_silent_stick_watch.mp4' },
-                    { id: 'ugly-dukling', title: 'The Ugly Dukling', src: './public/Image/Cover/The Ugly Dukling.png', lexile: '300~360', wordCount: 155, category: 'Animals Swan', summary: 'Discover how being different can lead to finding where you truly belong.', keywords: ['different', 'belong', 'lake', 'swan'], isBookmarked: false, videoUrl: './public/Video/the_silent_stick_watch.mp4' },
+                    { id: 'missing-planet', title: 'The Missing Planet', src: './public/Image/Cover/The Missing Planet.png', lexile: '250~300', wordCount: 120, category: 'Space 🚀', summary: 'A brave little astronaut goes on a mission to find a planet that disappeared from the star maps. Join the cosmic adventure!', keywords: ['planet', 'space', 'astronaut', 'star'], isBookmarked: false, isUnread: true, videoUrl: './public/Video/the_silent_stick_watch.mp4' },
+                    { id: 'rainbow', title: 'Rainbow', src: './public/Image/Cover/Rainbow.png', lexile: '150~200', wordCount: 85, category: 'Nature 🌈', summary: 'Follow the beautiful colors across the sky after a rainy day. Learn how rainbows are made of light and magic!', keywords: ['color', 'rain', 'sky', 'sun'], isBookmarked: false, isUnread: false, videoUrl: './public/Video/the_silent_stick_watch.mp4' },
+                    { id: 'two-friends', title: 'Two Friends', src: './public/Image/Cover/Two Friends.png', lexile: '200~250', wordCount: 110, category: 'Friendship 🤝', summary: 'A story about a rabbit and a turtle who discover that being different is what makes their friendship so special.', keywords: ['friends', 'together', 'help', 'game'], isBookmarked: false, isUnread: true, videoUrl: './public/Video/the_silent_stick_watch.mp4' },
+                    { id: 'silent-seed', title: 'The Silent Seed', src: './public/Image/Cover/The Silent Seed.png', lexile: '300~350', wordCount: 145, category: 'Science 🔬', summary: 'Deep under the ground, a tiny seed waits silently for the perfect moment to grow into a magnificent tree.', keywords: ['grow', 'wait', 'ground', 'leaf'], isBookmarked: false, isUnread: true, videoUrl: './public/Video/the_silent_stick_watch.mp4' },
+                    { id: 'silent-stick', title: 'The Silent Stick', src: './public/Image/Cover/The Silent Stick.png', lexile: '250~320', wordCount: 130, category: 'Adventure 🗺️', summary: 'A magic stick that doesn\'t make a sound helps a quiet boy find his way through a mysterious forest.', keywords: ['magic', 'quiet', 'forest', 'path'], isBookmarked: false, isUnread: false, videoUrl: './public/Video/the_silent_stick_watch.mp4' },
+                    { id: 'broken-branch', title: 'The Broken Branch', src: './public/Image/Cover/The Broken Branch.png', lexile: '280~340', wordCount: 135, category: 'Nature 🌳', summary: 'When a strong wind breaks a branch, the forest animals work together to make it a new home for a bird family.', keywords: ['tree', 'wind', 'home', 'birds'], isBookmarked: false, isUnread: true, videoUrl: './public/Video/the_silent_stick_watch.mp4' },
+                    { id: 'pea', title: 'The Pea', src: './public/Image/Cover/The Pea.png', lexile: '180~230', wordCount: 95, category: 'Food 🫛', summary: 'One tiny green pea rolls off the plate and travels across the kitchen floor. Where will it end up?', keywords: ['green', 'roll', 'kitchen', 'floor'], isBookmarked: false, isUnread: false, videoUrl: './public/Video/the_silent_stick_watch.mp4' },
+                    { id: 'milo', title: 'Milo and the Lost Color', src: './public/Image/Cover/Milo and the Lost Color.png', lexile: '320~380', wordCount: 160, category: 'Animals 🐶', summary: 'Milo is a dog with a very big imagination. Every time he goes for a walk, he sees a world full of dragons.', keywords: ['dog', 'dream', 'adventure', 'wild'], isBookmarked: false, isUnread: true, videoUrl: './public/Video/milo_and_the_lost_color_watch.mp4' },
+                    { id: 'rainbow-cloud', title: 'Rainbow Cloud', src: './public/Image/Cover/The Rainbow Cloud.png', lexile: '350~400', wordCount: 180, category: 'Fantasy ✨', summary: 'A magical cloud that rains colors instead of water changes everything in the gray city of Grumbletown.', keywords: ['magic', 'cloud', 'color', 'happy'], isBookmarked: true, isUnread: false, videoUrl: './public/Video/the_rainbow_cloud_watch.mp4' },
+                    { id: 'cindellar', title: 'Cindellar', src: './public/Image/Cover/Cindellar.png', lexile: '380~450', wordCount: 210, category: 'Classic 🏰', summary: 'A new retelling of the classic fairy tale with a focus on being kind to yourself and others.', keywords: ['princess', 'kind', 'dance', 'shoe'], isBookmarked: false, isUnread: true, videoUrl: './public/Video/the_silent_stick_watch.mp4' },
+                    { id: 'flying-trunk', title: 'The Flying Trunk', src: './public/Image/Cover/The Fyling Trunk.png', lexile: '340~390', wordCount: 175, category: 'Adventure 🗺️', summary: 'Travel the world in a magic trunk that can fly over mountains and oceans.', keywords: ['fly', 'travel', 'ocean', 'magic'], isBookmarked: false, isUnread: false, videoUrl: './public/Video/the_silent_stick_watch.mp4' },
+                    { id: 'rapunzel', title: 'The Rapunzel', src: './public/Image/Cover/The Rapunzel.png', lexile: '360~410', wordCount: 190, category: 'Classic 🏰', summary: 'A story about inner strength and finding your own voice from high up in a stone tower.', keywords: ['hair', 'tower', 'voice', 'strong'], isBookmarked: false, isUnread: true, videoUrl: './public/Video/the_silent_stick_watch.mp4' },
+                    { id: 'ugly-dukling', title: 'The Ugly Dukling', src: './public/Image/Cover/The Ugly Dukling.png', lexile: '300~360', wordCount: 155, category: 'Animals Swan', summary: 'Discover how being different can lead to finding where you truly belong.', keywords: ['different', 'belong', 'lake', 'swan'], isBookmarked: false, isUnread: true, videoUrl: './public/Video/the_silent_stick_watch.mp4' },
                 ];
 
                 // --- Global State ---
@@ -1251,14 +1251,40 @@
 
 
 
-                const mockMediaData = booksData.map(book => {
+                const mockMediaData = booksData.map((book, idx) => {
+                    const themes = ['ocean', 'space', 'forest', 'city', 'candy'];
+                    const theme = themes[idx % themes.length];
                     return {
                         baseId: book.id,
                         bookTitle: book.title,
                         items: [
-                            { id: `${book.id}__greeting`, type: 'Greeting', title: `${book.title} Greeting`, src: book.src, rt: '01:20', isUnplayed: Math.random() > 0.5 },
-                            { id: `${book.id}__movie`, type: 'Movie Book', title: `${book.title} Movie`, src: book.src, rt: '05:45', isUnplayed: Math.random() > 0.5 },
-                            { id: `${book.id}__audio`, type: 'Audio Book', title: `${book.title} Audio`, src: book.src, rt: '04:30', isUnplayed: Math.random() > 0.5 }
+                            { 
+                                id: `${book.id}__greeting`, 
+                                type: 'Greeting', 
+                                title: `${book.title} Greeting`, 
+                                src: 'https://vjs.zencdn.net/v/oceans.mp4', 
+                                thumb: `https://api.dicebear.com/7.x/shapes/svg?seed=${book.id}_g`, 
+                                rt: '01:20', 
+                                isUnplayed: Math.random() > 0.5 
+                            },
+                            { 
+                                id: `${book.id}__movie`, 
+                                type: 'Movie Book', 
+                                title: `${book.title} Movie`, 
+                                src: 'https://www.w3schools.com/html/mov_bbb.mp4', 
+                                thumb: `https://api.dicebear.com/7.x/shapes/svg?seed=${book.id}_m`, 
+                                rt: '05:45', 
+                                isUnplayed: Math.random() > 0.5 
+                            },
+                            { 
+                                id: `${book.id}__audio`, 
+                                type: 'Audio Book', 
+                                title: `${book.title} Audio`, 
+                                src: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3', 
+                                thumb: book.src, // 도서 표지 사용
+                                rt: '04:30', 
+                                isUnplayed: Math.random() > 0.5 
+                            }
                         ]
                     };
                 });
@@ -1559,16 +1585,33 @@
                     lucide.createIcons();
                 }
 
-                function toggleFullscreen(e) {
+                function toggleInlineFullscreen(e) {
                     e.stopPropagation();
-                    const elem = e.currentTarget.closest('.video-container');
-                    if (elem) {
+                    const container = e.currentTarget.closest('.video-container');
+                    const video = container ? container.querySelector('video') : null;
+                    const targetElem = video || container;
+                    
+                    if (targetElem) {
                         if (!document.fullscreenElement) {
-                            elem.requestFullscreen().catch(err => {
-                                console.error(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
-                            });
+                            if (targetElem.requestFullscreen) {
+                                targetElem.requestFullscreen().catch(err => {
+                                    console.error(`Error attempting to enable full-screen mode: ${err.message}`);
+                                });
+                            } else if (targetElem.webkitRequestFullscreen) {
+                                targetElem.webkitRequestFullscreen();
+                            } else if (targetElem.msRequestFullscreen) {
+                                targetElem.msRequestFullscreen();
+                            } else if (targetElem.webkitEnterFullscreen) {
+                                targetElem.webkitEnterFullscreen();
+                            }
                         } else {
-                            document.exitFullscreen();
+                            if (document.exitFullscreen) {
+                                document.exitFullscreen();
+                            } else if (document.webkitExitFullscreen) {
+                                document.webkitExitFullscreen();
+                            } else if (document.msExitFullscreen) {
+                                document.msExitFullscreen();
+                            }
                         }
                     }
                 }
@@ -3205,27 +3248,28 @@
                         }
                         html += `</div>`;
                     } else {
-                        // Single grid view
-                        let items = [];
+                        // Single grid view for Greeting, Movie Book, Audio Book
+                        let filteredItems = [];
                         groupsToRender.forEach(group => {
-                            items.push(...group.items.filter(item => item.type === currentActiveSubTab));
+                            const matched = group.items.filter(item => item.type === currentActiveSubTab);
+                            filteredItems.push(...matched);
                         });
 
                         if (mediaShowUnplayedOnly) {
-                            items = items.filter(item => item.isUnplayed);
+                            filteredItems = filteredItems.filter(item => item.isUnplayed);
                         }
 
-                        if (items.length > 0) {
+                        if (filteredItems.length > 0) {
                             html += `
-                            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-x-6 gap-y-10 animate-in fade-in">
-                                ${renderMediaCardsList(items, true)}
+                            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-8 gap-y-12 animate-in fade-in">
+                                ${renderMediaCardsList(filteredItems, true)}
                             </div>
                             `;
                         } else {
                             html += `
                             <div class="flex flex-col items-center justify-center py-20 opacity-40 w-full animate-in fade-in">
                                 <i data-lucide="search-x" class="w-24 h-24 mb-6"></i>
-                                <h2 class="text-3xl font-black">No Media Found</h2>
+                                <h2 class="text-3xl font-black">No ${currentActiveSubTab} Found</h2>
                             </div>`;
                         }
                     }
@@ -3239,7 +3283,7 @@
                     return items.map((item, idx) => `
                         <div class="group cursor-pointer ${isGrid ? 'w-full' : 'w-64 shrink-0'} flex flex-col gap-3 transition-all duration-300 transform origin-left" onclick="prepareAndPlayMedia(${idx}, '${itemsJson}')">
                             <div class="aspect-video bg-slate-100 rounded-3xl overflow-hidden shadow-sm group-hover:shadow-xl group-hover:-translate-y-1.5 transition-all duration-300 relative border-4 border-white ring-1 ring-slate-100">
-                                <img src="${item.src}" class="w-full h-full object-cover">
+                                <img src="${item.thumb}" class="w-full h-full object-cover">
                                 <div class="absolute inset-0 bg-slate-900/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                                     <div class="w-16 h-16 bg-white/95 backdrop-blur-md rounded-full flex items-center justify-center scale-75 group-hover:scale-100 transition-transform duration-300 shadow-2xl">
                                         <i data-lucide="play" class="w-8 h-8 ml-1 text-sky-500 fill-current"></i>
@@ -3248,7 +3292,7 @@
                                 <div class="absolute bottom-3 right-3 px-2.5 py-1 bg-black/70 backdrop-blur-md rounded-lg text-white font-black text-xs tabular-nums tracking-wider shadow-sm border border-white/20">
                                     ${item.rt}
                                 </div>
-                                ${item.isUnplayed ? '<div class="absolute top-3 left-3 px-3 py-1 bg-[#fbbf24] text-[#0f172a] font-black text-[9px] uppercase tracking-widest rounded-full shadow-md z-10 border-2 border-transparent group-hover:border-white/50 transition-colors">NEW</div>' : ''}
+                                ${item.isUnplayed ? '<div class="absolute top-3 right-3 px-3 py-1 bg-[#fbbf24] text-[#0f172a] font-black text-[9px] uppercase tracking-widest rounded-full shadow-md z-10 border-2 border-transparent group-hover:border-white/50 transition-colors">UNPLAYED</div>' : ''}
                             </div>
                             <div class="px-1">
                                 <h4 class="text-[15px] font-bold text-slate-700 line-clamp-1 group-hover:text-sky-500 transition-colors font-jua">${item.title}</h4>
@@ -3315,6 +3359,14 @@
                         currentUnread = myLibraryShowUnreadOnly;
                     }
 
+                    if (currentUnread) {
+                        displayBooks = displayBooks.filter(book => {
+                            const baseId = book.id.split('__')[0];
+                            const originalBook = booksData.find(b => b.id === baseId);
+                            return originalBook && originalBook.isUnread;
+                        });
+                    }
+
                     if (currentSort === 'ABC') {
                         displayBooks.sort((a, b) => a.title.localeCompare(b.title));
                     } else if (currentSort === 'ZYX') {
@@ -3334,9 +3386,9 @@
                         <div class="group ${isCarousel ? 'w-48 shrink-0' : 'w-full'} book-card-container">
                             <div class="aspect-[3/4] rounded-2xl overflow-hidden shadow-sm group-hover:shadow-xl group-hover:-translate-y-2 transition-all duration-300 border-2 border-slate-50 relative cursor-pointer" onclick="openModal('${baseId}', 'library')">
                                 <img src="${book.src}" class="w-full h-full object-cover">
-                                ${currentUnread && Math.random() > 0.5 ? '<div class="absolute top-3 left-3 px-3 py-1 bg-[#fbbf24] text-[#0f172a] font-black text-[10px] uppercase tracking-wider rounded-full shadow-sm z-10">Unread</div>' : ''}
+                                ${originalBook.isUnread ? '<div class="absolute top-3 right-3 px-3 py-1 bg-[#fbbf24] text-[#0f172a] font-black text-[10px] uppercase tracking-wider rounded-full shadow-sm z-10">Unread</div>' : ''}
                                 
-                                <button onclick="handleHeartClick(event, '${baseId}')" class="absolute bottom-3 right-3 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-md border hover:scale-110 active:scale-95 transition-all z-20">
+                                <button onclick="handleHeartClick(event, '${baseId}')" class="absolute top-3 left-3 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-md border hover:scale-110 active:scale-95 transition-all z-20">
                                     <i data-lucide="heart" class="w-5 h-5 ${isFavorited ? 'fill-current text-rose-500' : 'text-slate-300'} transition-colors"></i>
                                 </button>
                             </div>
@@ -3420,12 +3472,7 @@
                 let isPlayerAutoPlay = true;
                 let playerCountdownTimer = null;
                 let playerVisualizerInterval = null;
-
-                const playerMediaData = [
-                    { id: '1', type: 'Greeting', title: 'Hello Space!', src: 'https://vjs.zencdn.net/v/oceans.mp4', thumb: 'https://api.dicebear.com/7.x/shapes/svg?seed=1' },
-                    { id: '2', type: 'Movie Book', title: 'The Silent Stick', src: 'https://www.w3schools.com/html/mov_bbb.mp4', thumb: 'https://api.dicebear.com/7.x/shapes/svg?seed=2' },
-                    { id: '3', type: 'Audio Book', title: 'Cosmic Journey', src: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3', thumb: 'https://api.dicebear.com/7.x/shapes/svg?seed=3' }
-                ];
+                let isMiniCountdownRunning = false;
             </script>
 
 
@@ -3466,15 +3513,15 @@
                 <div id="playerAudioUI" class="w-full h-full hidden flex flex-col items-center justify-center bg-[#0f172a]">
                     <audio id="playerAudio"></audio>
                     <div class="relative z-10">
-                        <div class="w-72 h-88 bg-white p-4 rounded-[40px] shadow-[0_0_80px_rgba(56,189,248,0.2)] transform hover:rotate-2 transition-transform duration-500">
-                            <img id="playerAudioThumbnail" src="" class="w-full h-full object-cover rounded-[28px]" alt="" />
+                        <div class="w-80 h-[460px] bg-white p-5 rounded-[48px] shadow-[0_40px_100px_rgba(0,0,0,0.5)] transform hover:rotate-2 hover:scale-105 transition-all duration-700">
+                            <img id="playerAudioThumbnail" src="" class="w-full h-full object-cover rounded-[32px]" alt="" />
                         </div>
                     </div>
                     <!-- Visualizer -->
                     <div id="playerVisualizer" class="absolute bottom-24 flex items-end gap-1.5 h-12 opacity-50"></div>
                 </div>
 
-                <!-- Bridge UI Overlay -->
+                <!-- Bridge UI Overlay (Full Screen) - Now used only as fallback or legacy -->
                 <div id="playerBridgeUI" class="absolute inset-0 bg-black/80 backdrop-blur-sm z-[60] hidden flex items-center justify-center">
                     <div class="flex flex-col items-center">
                         <div class="relative w-32 h-32 mb-8">
@@ -3485,6 +3532,19 @@
                             <span id="countdownText" class="absolute inset-0 flex items-center justify-center text-4xl font-black text-white">3</span>
                         </div>
                         <h3 class="text-2xl font-black text-white drop-shadow-lg">Next episode starting...</h3>
+                    </div>
+                </div>
+
+                <!-- Mini Countdown Badge (Bottom Right) -->
+                <div id="playerMiniCountdown" class="absolute bottom-32 right-8 bg-black/60 backdrop-blur-xl border border-white/20 text-white px-6 py-4 rounded-3xl z-[65] hidden flex items-center gap-4 animate-in fade-in slide-in-from-right-4 duration-300 shadow-2xl">
+                    <div class="flex flex-col">
+                        <span class="text-[10px] font-black uppercase tracking-widest text-sky-400 opacity-80">Next starts in</span>
+                        <span id="miniCountdownText" class="text-3xl font-black leading-none">3</span>
+                    </div>
+                    <div class="w-10 h-10 border-4 border-white/10 rounded-full flex items-center justify-center relative">
+                         <svg class="w-full h-full -rotate-90 scale-110" viewBox="0 0 32 32">
+                            <circle id="miniCountdownCircle" cx="16" cy="16" r="14" class="stroke-sky-400 fill-none" stroke-width="3" stroke-dasharray="88" stroke-dashoffset="0" stroke-linecap="round" />
+                        </svg>
                     </div>
                 </div>
 
@@ -3532,7 +3592,7 @@
                                 <i data-lucide="volume-2" id="playerVolumeIcon" class="w-6 h-6"></i>
                             </button>
                         </div>
-                        <button onclick="toggleFullscreen()" class="w-14 h-14 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center text-white transition-all active:scale-90 border border-white/10">
+                        <button onclick="togglePlayerFullscreen()" class="w-14 h-14 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center text-white transition-all active:scale-90 border border-white/10">
                             <i data-lucide="maximize" id="playerFullscreenIcon" class="w-7 h-7"></i>
                         </button>
                     </div>
@@ -3545,8 +3605,10 @@
         // --- Unified Player Engine ---
         // (Globals moved to first script tag)
 
-        function openUnifiedPlayer(listType, startIndex = 0) {
-            playerMediaList = playerMediaData; // In real case, filter by listType
+        function openUnifiedPlayer(items, startIndex = 0) {
+            if (items) {
+                playerMediaList = items;
+            }
             playerCurrentIndex = startIndex;
             
             const playerOverlay = document.getElementById('unifiedMediaPlayer');
@@ -3577,6 +3639,8 @@
                 document.getElementById('unifiedMediaPlayer').classList.add('hidden');
                 clearInterval(playerCountdownTimer);
                 clearInterval(playerVisualizerInterval);
+                isMiniCountdownRunning = false;
+                document.getElementById('playerMiniCountdown').classList.add('hidden');
             }, 400);
         }
 
@@ -3590,8 +3654,14 @@
             // UI Setup
             document.getElementById('playerMediaTitle').innerText = media.title;
             document.getElementById('playerMediaTypeLabel').innerText = media.type;
-            document.getElementById('playerBgBlur').style.backgroundImage = `url(${media.thumb})`;
-            document.getElementById('playerBgBlur').style.backgroundSize = 'cover';
+            
+            // Premium background: use thumbnail with heavy blur
+            const bgBlur = document.getElementById('playerBgBlur');
+            bgBlur.style.backgroundImage = `url(${media.thumb})`;
+            bgBlur.style.backgroundSize = 'cover';
+            bgBlur.style.backgroundPosition = 'center';
+            bgBlur.classList.remove('opacity-0');
+            bgBlur.classList.add('opacity-40');
             
             // Reset UI
             video.classList.add('hidden');
@@ -3606,7 +3676,9 @@
             const currentMediaEl = (media.type === 'Audio Book') ? audio : video;
 
             if (media.type === 'Audio Book') {
-                document.getElementById('playerAudioUI').classList.remove('hidden');
+                const audioUI = document.getElementById('playerAudioUI');
+                audioUI.classList.remove('hidden');
+                audioUI.classList.add('flex'); // Ensure flex is on
                 document.getElementById('playerAudioThumbnail').src = media.thumb;
                 audio.src = media.src;
                 audio.load();
@@ -3633,7 +3705,48 @@
                 document.getElementById('playerCurrentTime').innerText = formatTime(currentMediaEl.currentTime);
                 const knob = document.getElementById('playerProgressKnob');
                 if(knob) knob.style.left = `${prog}%`;
+
+                // Mini Countdown Logic (Video only)
+                if (isPlayerAutoPlay && media.type !== 'Audio Book') {
+                    const timeLeft = currentMediaEl.duration - currentMediaEl.currentTime;
+                    if (timeLeft <= 3.5 && !isMiniCountdownRunning) {
+                        startMiniCountdown();
+                    }
+                }
             };
+            
+            // Initial reset
+            isMiniCountdownRunning = false;
+            document.getElementById('playerMiniCountdown').classList.add('hidden');
+        }
+
+        function startMiniCountdown() {
+            if (isMiniCountdownRunning) return;
+            isMiniCountdownRunning = true;
+            
+            const mini = document.getElementById('playerMiniCountdown');
+            const miniText = document.getElementById('miniCountdownText');
+            const miniCircle = document.getElementById('miniCountdownCircle');
+            
+            mini.classList.remove('hidden');
+            
+            let count = 3;
+            miniText.innerText = count;
+            miniCircle.style.strokeDashoffset = 0;
+            
+            clearInterval(playerCountdownTimer);
+            playerCountdownTimer = setInterval(() => {
+                count -= 0.1;
+                const displayCount = Math.ceil(count);
+                if (count <= 0) {
+                    clearInterval(playerCountdownTimer);
+                    mini.classList.add('hidden');
+                } else {
+                    miniText.innerText = displayCount;
+                    // dasharray is 88
+                    miniCircle.style.strokeDashoffset = (88 * (3 - count)) / 3;
+                }
+            }, 100);
         }
 
         function formatTime(seconds) {
@@ -3644,8 +3757,13 @@
         }
 
         function handleMediaEnd() {
-            if (isPlayerAutoPlay && playerCurrentIndex < playerMediaList.length - 1) {
-                startBridge();
+            if (isPlayerAutoPlay) {
+                // Implement looping within the current list
+                playerCurrentIndex++;
+                if (playerCurrentIndex >= playerMediaList.length) {
+                    playerCurrentIndex = 0; // Back to start
+                }
+                loadPlayerMedia(playerCurrentIndex);
             } else {
                 showEndScreen();
             }
@@ -3719,14 +3837,14 @@
 
         function playNextDirectly() {
             playerCurrentIndex++;
+            if (playerCurrentIndex >= playerMediaList.length) playerCurrentIndex = 0;
             loadPlayerMedia(playerCurrentIndex);
         }
 
         function playNext() {
-            if (playerCurrentIndex < playerMediaList.length - 1) {
-                playerCurrentIndex++;
-                loadPlayerMedia(playerCurrentIndex);
-            }
+            playerCurrentIndex++;
+            if (playerCurrentIndex >= playerMediaList.length) playerCurrentIndex = 0;
+            loadPlayerMedia(playerCurrentIndex);
         }
 
         function playPrevious() {
@@ -3771,7 +3889,7 @@
             }
         }
 
-        function toggleFullscreen() {
+        function togglePlayerFullscreen() {
             const playerArea = document.getElementById('theaterModal');
             const icon = document.getElementById('playerFullscreenIcon');
             if (!document.fullscreenElement) {
@@ -3816,11 +3934,31 @@
             lucide.createIcons();
         }
 
+        function startMiniCountdown() {
+            const el = document.getElementById('playerMiniCountdown');
+            const text = document.getElementById('miniCountdownText');
+            if(!el || !text) return;
+            
+            isMiniCountdownRunning = true;
+            el.classList.remove('hidden');
+            
+            let count = 3;
+            text.innerText = count;
+            
+            const timer = setInterval(() => {
+                count--;
+                if (count <= 0) {
+                    clearInterval(timer);
+                    el.classList.add('hidden');
+                } else {
+                    text.innerText = count;
+                }
+            }, 1000);
+        }
+
         function prepareAndPlayMedia(index, listJson) {
             const items = JSON.parse(decodeURIComponent(listJson));
-            playerMediaList = items;
-            playerCurrentIndex = index;
-            openUnifiedPlayer(null, index);
+            openUnifiedPlayer(items, index);
         }
 
         // --- Home Screen Initializer ---

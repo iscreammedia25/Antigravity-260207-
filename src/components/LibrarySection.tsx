@@ -195,14 +195,15 @@ const mockMediaData = BOOKS_DATA.map(book => {
     const hash = book.id.length;
     // Map to Unified Player's MediaItem format
     const greeting: MediaItem = { 
-        id: `${book.id}__greeting`, bookId: book.id, type: 'Greeting', title: `${book.title} Greeting`, 
-        src: 'https://vjs.zencdn.net/v/oceans.mp4', // Test video
+        id: `${book.id}__greeting`, bookId: book.id, type: 'Greeting', title: book.title, 
+        src: book.videoUrl || 'https://vjs.zencdn.net/v/oceans.mp4', 
         thumbnail: book.src, duration: '01:20', isUnplayed: hash % 2 === 0, bookTitle: book.title 
     };
     const movie: MediaItem = { 
         id: `${book.id}__movie`, bookId: book.id, type: 'Movie Book', title: `${book.title} Movie`, 
-        src: '/Video/the_silent_stick_watch.mp4', 
-        thumbnail: book.src, duration: '05:45', isUnplayed: hash % 3 === 0, bookTitle: book.title 
+        src: book.videoUrl || '/Video/the_silent_stick_watch.mp4', 
+        thumbnail: book.id === 'silent-stick' ? '/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC01.png' : book.src, 
+        duration: '05:45', isUnplayed: hash % 3 === 0, bookTitle: book.title 
     };
     const audio: MediaItem = { 
         id: `${book.id}__audio`, bookId: book.id, type: 'Audio Book', title: `${book.title} Audio`, 
@@ -230,8 +231,22 @@ const MediaZoneContent = ({ activeSubTab, mediaSortBy, setMediaSortBy, mediaShow
         return items.map((item, idx) => (
             <div key={item.id} className={`group cursor-pointer ${isGrid ? 'w-full' : 'w-64 shrink-0'} flex flex-col gap-3 transition-all duration-300 transform origin-left focus:outline-none`}
                 onClick={() => onPlayMedia(items, idx)}>
-                <div className="aspect-video bg-slate-100 rounded-3xl overflow-hidden shadow-sm group-hover:shadow-xl group-hover:-translate-y-1.5 transition-all duration-300 relative border-4 border-white ring-1 ring-slate-100 pointer-events-none">
-                    <img src={item.thumbnail} className="w-full h-full object-cover" alt="" />
+                <div className="aspect-video bg-slate-900/5 rounded-3xl overflow-hidden shadow-sm group-hover:shadow-xl group-hover:-translate-y-1.5 transition-all duration-300 relative border-4 border-white ring-1 ring-slate-100 pointer-events-none flex items-center justify-center">
+                    {item.type === 'Greeting' ? (
+                        <video 
+                            src={`${item.src}#t=0.001`} 
+                            className="w-full h-full object-cover" 
+                            preload="metadata"
+                            muted
+                            playsInline
+                        />
+                    ) : item.type === 'Audio Book' ? (
+                        <div className="w-full h-full bg-slate-50 flex items-center justify-center p-4">
+                            <img src={item.thumbnail} className="h-full w-auto object-contain shadow-md rounded-lg" alt="" />
+                        </div>
+                    ) : (
+                        <img src={item.thumbnail} className="w-full h-full object-cover" alt="" />
+                    )}
                     <div className="absolute inset-0 bg-slate-900/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
                         <div className="w-16 h-16 bg-white/95 backdrop-blur-md rounded-full flex items-center justify-center scale-75 group-hover:scale-100 transition-transform duration-300 shadow-2xl">
                             <svg className="w-8 h-8 ml-1 text-sky-500 fill-current" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
@@ -245,7 +260,9 @@ const MediaZoneContent = ({ activeSubTab, mediaSortBy, setMediaSortBy, mediaShow
                     )}
                 </div>
                 <div className="px-1 pointer-events-none">
-                    <h4 className="text-[15px] font-bold text-slate-700 line-clamp-1 group-hover:text-sky-500 transition-colors font-jua">{item.title}</h4>
+                    <h4 className="text-[15px] font-bold text-slate-700 line-clamp-1 group-hover:text-sky-500 transition-colors font-jua">
+                        {item.type === 'Greeting' ? item.title : item.title}
+                    </h4>
                     <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest mt-1.5 flex items-center gap-1.5">
                         {item.type}
                     </p>
@@ -300,10 +317,12 @@ const MediaZoneContent = ({ activeSubTab, mediaSortBy, setMediaSortBy, mediaShow
                         if (items.length === 0) return null;
 
                         return (
-                            <div key={group.baseId} className="animate-in fade-in slide-in-from-bottom-2 duration-500 bg-white/5 p-6 rounded-[32px] shadow-sm border-2 border-white/5 flex gap-6 overflow-hidden relative">
-                                <div className="w-48 shrink-0 flex flex-col justify-center border-r-2 border-white/5 pr-6">
-                                    <h3 className="text-2xl font-black text-white font-jua leading-tight mb-2">{group.bookTitle}</h3>
-                                    <p className="text-sm font-bold text-slate-500 uppercase tracking-widest">{items.length} Series</p>
+                            <div key={group.baseId} className="animate-in fade-in slide-in-from-bottom-2 duration-500 bg-white/5 p-6 rounded-[40px] shadow-sm border-2 border-white/5 flex gap-8 overflow-hidden relative group/row">
+                                <div className="w-36 shrink-0 flex flex-col items-center justify-center border-r-2 border-white/5 pr-8">
+                                    <div className="w-full aspect-[3/4] rounded-2xl overflow-hidden shadow-2xl border-2 border-white/10 group-hover/row:scale-105 transition-transform duration-300">
+                                        <img src={BOOKS_DATA.find(b => b.id === group.baseId)?.src} alt={group.bookTitle} className="w-full h-full object-cover" />
+                                    </div>
+                                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-4 text-center">{items.length} Series</p>
                                 </div>
                                 <div className="flex gap-6 overflow-x-auto custom-scrollbar pb-2 flex-1">
                                     {items.map((item, idx) => (
@@ -312,8 +331,22 @@ const MediaZoneContent = ({ activeSubTab, mediaSortBy, setMediaSortBy, mediaShow
                                                  e.stopPropagation();
                                                  onPlayMedia(items, idx);
                                              }}>
-                                            <div className="aspect-video bg-slate-100 rounded-3xl overflow-hidden shadow-sm group-hover:shadow-xl group-hover:-translate-y-1.5 transition-all duration-300 relative border-4 border-white ring-1 ring-slate-100 pointer-events-none">
-                                                <img src={item.thumbnail} className="w-full h-full object-cover" alt="" />
+                                            <div className="aspect-video bg-slate-900/5 rounded-3xl overflow-hidden shadow-sm group-hover:shadow-xl group-hover:-translate-y-1.5 transition-all duration-300 relative border-4 border-white ring-1 ring-slate-100 pointer-events-none flex items-center justify-center">
+                                                {item.type === 'Greeting' ? (
+                                                    <video 
+                                                        src={`${item.src}#t=0.001`} 
+                                                        className="w-full h-full object-cover" 
+                                                        preload="metadata"
+                                                        muted
+                                                        playsInline
+                                                    />
+                                                ) : item.type === 'Audio Book' ? (
+                                                    <div className="w-full h-full bg-slate-50 flex items-center justify-center p-4">
+                                                        <img src={item.thumbnail} className="h-full w-auto object-contain shadow-md rounded-lg" alt="" />
+                                                    </div>
+                                                ) : (
+                                                    <img src={item.thumbnail} className="w-full h-full object-cover" alt="" />
+                                                )}
                                                 <div className="absolute inset-0 bg-slate-900/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
                                                     <div className="w-16 h-16 bg-white/95 backdrop-blur-md rounded-full flex items-center justify-center scale-75 group-hover:scale-100 transition-transform duration-300 shadow-2xl">
                                                         <svg className="w-8 h-8 ml-1 text-sky-500 fill-current" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
@@ -327,7 +360,9 @@ const MediaZoneContent = ({ activeSubTab, mediaSortBy, setMediaSortBy, mediaShow
                                                 )}
                                             </div>
                                             <div className="px-1">
-                                                <h4 className="text-[15px] font-bold text-slate-700 line-clamp-1 group-hover:text-sky-500 transition-colors font-jua">{item.title}</h4>
+                                                <h4 className="text-[15px] font-bold text-slate-700 line-clamp-1 group-hover:text-sky-500 transition-colors font-jua">
+                                                    {item.type === 'Greeting' ? item.title : item.title}
+                                                </h4>
                                                 <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest mt-1.5 flex items-center gap-1.5">
                                                     {item.type}
                                                 </p>
@@ -365,8 +400,22 @@ const MediaZoneContent = ({ activeSubTab, mediaSortBy, setMediaSortBy, mediaShow
                                         e.stopPropagation();
                                         onPlayMedia(items, idx);
                                     }}>
-                                    <div className="aspect-video bg-slate-100 rounded-3xl overflow-hidden shadow-sm group-hover:shadow-xl group-hover:-translate-y-1.5 transition-all duration-300 relative border-4 border-white ring-1 ring-slate-100 pointer-events-none">
-                                        <img src={item.thumbnail} className="w-full h-full object-cover" alt="" />
+                                    <div className="aspect-video bg-slate-900/5 rounded-3xl overflow-hidden shadow-sm group-hover:shadow-xl group-hover:-translate-y-1.5 transition-all duration-300 relative border-4 border-white ring-1 ring-slate-100 pointer-events-none flex items-center justify-center">
+                                        {item.type === 'Greeting' ? (
+                                            <video 
+                                                src={`${item.src}#t=0.001`} 
+                                                className="w-full h-full object-cover" 
+                                                preload="metadata"
+                                                muted
+                                                playsInline
+                                            />
+                                        ) : item.type === 'Audio Book' ? (
+                                            <div className="w-full h-full bg-slate-50 flex items-center justify-center p-4">
+                                                <img src={item.thumbnail} className="h-full w-auto object-contain shadow-md rounded-lg" alt="" />
+                                            </div>
+                                        ) : (
+                                            <img src={item.thumbnail} className="w-full h-full object-cover" alt="" />
+                                        )}
                                         <div className="absolute inset-0 bg-slate-900/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                                             <div className="w-16 h-16 bg-white/95 backdrop-blur-md rounded-full flex items-center justify-center scale-75 group-hover:scale-100 transition-transform duration-300 shadow-2xl">
                                                 <svg className="w-8 h-8 ml-1 text-sky-500 fill-current" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
@@ -380,7 +429,9 @@ const MediaZoneContent = ({ activeSubTab, mediaSortBy, setMediaSortBy, mediaShow
                                         )}
                                     </div>
                                     <div className="px-1">
-                                        <h4 className="text-[15px] font-bold text-slate-700 line-clamp-1 group-hover:text-sky-500 transition-colors font-jua">{item.title}</h4>
+                                        <h4 className="text-[15px] font-bold text-slate-700 line-clamp-1 group-hover:text-sky-500 transition-colors font-jua">
+                                            {item.type === 'Greeting' ? item.title : item.title}
+                                        </h4>
                                         <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest mt-1.5 flex items-center gap-1.5">
                                             {item.type}
                                         </p>

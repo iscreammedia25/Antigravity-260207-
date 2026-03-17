@@ -1254,15 +1254,23 @@
                 const mockMediaData = booksData.map((book, idx) => {
                     const themes = ['ocean', 'space', 'forest', 'city', 'candy'];
                     const theme = themes[idx % themes.length];
+                    
+                    // Rule 3: Movie Book thumbnail for 'The Silent Stick'
+                    let movieThumb = `https://api.dicebear.com/7.x/shapes/svg?seed=${book.id}_m`;
+                    if (book.id === 'silent-stick') {
+                        movieThumb = './public/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC01.png';
+                    }
+
                     return {
                         baseId: book.id,
                         bookTitle: book.title,
+                        bookSrc: book.src, // 3:4 cover for All Media left side (Rule 1)
                         items: [
                             { 
                                 id: `${book.id}__greeting`, 
                                 type: 'Greeting', 
-                                title: `${book.title} Greeting`, 
-                                src: 'https://vjs.zencdn.net/v/oceans.mp4', 
+                                title: book.title, // Rule 2: Title matches book title
+                                src: book.videoUrl || 'https://vjs.zencdn.net/v/oceans.mp4', 
                                 thumb: `https://api.dicebear.com/7.x/shapes/svg?seed=${book.id}_g`, 
                                 rt: '01:20', 
                                 isUnplayed: Math.random() > 0.5 
@@ -1271,8 +1279,8 @@
                                 id: `${book.id}__movie`, 
                                 type: 'Movie Book', 
                                 title: `${book.title} Movie`, 
-                                src: 'https://www.w3schools.com/html/mov_bbb.mp4', 
-                                thumb: `https://api.dicebear.com/7.x/shapes/svg?seed=${book.id}_m`, 
+                                src: book.videoUrl || 'https://www.w3schools.com/html/mov_bbb.mp4', 
+                                thumb: movieThumb, 
                                 rt: '05:45', 
                                 isUnplayed: Math.random() > 0.5 
                             },
@@ -1281,7 +1289,7 @@
                                 type: 'Audio Book', 
                                 title: `${book.title} Audio`, 
                                 src: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3', 
-                                thumb: book.src, // 도서 표지 사용
+                                thumb: book.src, // 도서 표지 사용 (Rule 4)
                                 rt: '04:30', 
                                 isUnplayed: Math.random() > 0.5 
                             }
@@ -3229,11 +3237,14 @@
 
                             html += `
                             <div class="animate-in fade-in slide-in-from-bottom-2 duration-500 bg-white p-6 rounded-[32px] shadow-sm border-[3px] border-slate-100 flex gap-6 overflow-hidden relative">
-                                <div class="w-48 shrink-0 flex flex-col justify-center border-r-2 border-slate-100 pr-6">
-                                    <h3 class="text-2xl font-black text-slate-700 font-jua leading-tight mb-2">${group.bookTitle}</h3>
-                                    <p class="text-sm font-bold text-slate-400 uppercase tracking-widest">${items.length} Series</p>
+                                <!-- Rule 1: Left Book Info Area -> Book Cover (3:4 ratio) -->
+                                <div class="w-32 md:w-40 shrink-0 border-r-2 border-slate-100 pr-6">
+                                    <div class="aspect-[3/4] rounded-2xl overflow-hidden shadow-sm hover:scale-105 transition-all duration-300 border-2 border-slate-100">
+                                        <img src="${group.bookSrc}" class="w-full h-full object-cover">
+                                    </div>
+                                    <h3 class="mt-4 text-sm font-black text-slate-700 font-jua leading-tight text-center line-clamp-2">${group.bookTitle}</h3>
                                 </div>
-                                <div class="library-scroll-container flex gap-6 overflow-x-auto pb-4 cursor-grab active:cursor-grabbing select-none flex-1">
+                                <div class="library-scroll-container flex gap-6 overflow-x-auto pb-4 cursor-grab active:cursor-grabbing select-none flex-1 items-center">
                                     ${renderMediaCardsList(items)}
                                 </div>
                             </div>
@@ -3280,10 +3291,25 @@
 
                 function renderMediaCardsList(items, isGrid = false) {
                     const itemsJson = encodeURIComponent(JSON.stringify(items));
-                    return items.map((item, idx) => `
+                    return items.map((item, idx) => {
+                        let thumbnailHtml = `<img src="${item.thumb}" class="w-full h-full object-cover">`;
+                        
+                        // Rule 2: Greeting Media Thumbnail (Actual first frame of video)
+                        if (item.type === 'Greeting') {
+                            thumbnailHtml = `<video src="${item.src}#t=0.001" class="w-full h-full object-cover" preload="metadata" muted playsinline></video>`;
+                        } 
+                        // Rule 4: Audio Book Thumbnail (Maintain aspect ratio within 16:9)
+                        else if (item.type === 'Audio Book') {
+                            thumbnailHtml = `
+                            <div class="w-full h-full bg-slate-50 flex items-center justify-center p-3">
+                                <img src="${item.thumb}" class="h-full w-auto object-contain">
+                            </div>`;
+                        }
+
+                        return `
                         <div class="group cursor-pointer ${isGrid ? 'w-full' : 'w-64 shrink-0'} flex flex-col gap-3 transition-all duration-300 transform origin-left" onclick="prepareAndPlayMedia(${idx}, '${itemsJson}')">
                             <div class="aspect-video bg-slate-100 rounded-3xl overflow-hidden shadow-sm group-hover:shadow-xl group-hover:-translate-y-1.5 transition-all duration-300 relative border-4 border-white ring-1 ring-slate-100">
-                                <img src="${item.thumb}" class="w-full h-full object-cover">
+                                ${thumbnailHtml}
                                 <div class="absolute inset-0 bg-slate-900/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                                     <div class="w-16 h-16 bg-white/95 backdrop-blur-md rounded-full flex items-center justify-center scale-75 group-hover:scale-100 transition-transform duration-300 shadow-2xl">
                                         <i data-lucide="play" class="w-8 h-8 ml-1 text-sky-500 fill-current"></i>
@@ -3302,7 +3328,7 @@
                                 </p>
                             </div>
                         </div>
-                    `).join('');
+                    `;}).join('');
                 }
 
                 function handleHeartClick(event, bookId) {

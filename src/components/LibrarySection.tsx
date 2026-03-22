@@ -199,10 +199,13 @@ const mockMediaData = BOOKS_DATA.map(book => {
         src: book.videoUrl || 'https://vjs.zencdn.net/v/oceans.mp4', 
         thumbnail: book.src, duration: '01:20', isUnplayed: hash % 2 === 0, bookTitle: book.title 
     };
+    const folderPath = book.src.replace('/Cover/', '/Book/').replace('.png', '');
+    const movieThumb = `${folderPath}/${book.id}_SC00_I.png`;
+
     const movie: MediaItem = { 
         id: `${book.id}__movie`, bookId: book.id, type: 'Movie Book', title: `${book.title} Movie`, 
         src: book.videoUrl || '/Video/the_silent_stick_watch.mp4', 
-        thumbnail: book.id === 'silent-stick' ? '/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC01.png' : book.src, 
+        thumbnail: movieThumb, 
         duration: '05:45', isUnplayed: hash % 3 === 0, bookTitle: book.title 
     };
     const audio: MediaItem = { 
@@ -245,7 +248,7 @@ const MediaZoneContent = ({ activeSubTab, mediaSortBy, setMediaSortBy, mediaShow
                             <img src={item.thumbnail} className="h-full w-auto object-contain shadow-md rounded-lg" alt="" />
                         </div>
                     ) : (
-                        <img src={item.thumbnail} className="w-full h-full object-cover" alt="" />
+                        <img src={item.thumbnail} onError={(e: any) => { e.currentTarget.src = `https://api.dicebear.com/7.x/shapes/svg?seed=${item.id}`; }} className="w-full h-full object-cover" alt="" />
                     )}
                     <div className="absolute inset-0 bg-slate-900/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
                         <div className="w-16 h-16 bg-white/95 backdrop-blur-md rounded-full flex items-center justify-center scale-75 group-hover:scale-100 transition-transform duration-300 shadow-2xl">
@@ -345,7 +348,7 @@ const MediaZoneContent = ({ activeSubTab, mediaSortBy, setMediaSortBy, mediaShow
                                                         <img src={item.thumbnail} className="h-full w-auto object-contain shadow-md rounded-lg" alt="" />
                                                     </div>
                                                 ) : (
-                                                    <img src={item.thumbnail} className="w-full h-full object-cover" alt="" />
+                                                    <img src={item.thumbnail} onError={(e: any) => { e.currentTarget.src = `https://api.dicebear.com/7.x/shapes/svg?seed=${item.id}`; }} className="w-full h-full object-cover" alt="" />
                                                 )}
                                                 <div className="absolute inset-0 bg-slate-900/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
                                                     <div className="w-16 h-16 bg-white/95 backdrop-blur-md rounded-full flex items-center justify-center scale-75 group-hover:scale-100 transition-transform duration-300 shadow-2xl">
@@ -414,7 +417,7 @@ const MediaZoneContent = ({ activeSubTab, mediaSortBy, setMediaSortBy, mediaShow
                                                 <img src={item.thumbnail} className="h-full w-auto object-contain shadow-md rounded-lg" alt="" />
                                             </div>
                                         ) : (
-                                            <img src={item.thumbnail} className="w-full h-full object-cover" alt="" />
+                                            <img src={item.thumbnail} onError={(e: any) => { e.currentTarget.src = `https://api.dicebear.com/7.x/shapes/svg?seed=${item.id}`; }} className="w-full h-full object-cover" alt="" />
                                         )}
                                         <div className="absolute inset-0 bg-slate-900/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                                             <div className="w-16 h-16 bg-white/95 backdrop-blur-md rounded-full flex items-center justify-center scale-75 group-hover:scale-100 transition-transform duration-300 shadow-2xl">

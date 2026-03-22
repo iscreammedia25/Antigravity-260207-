@@ -793,13 +793,13 @@
                             <span class="settings-label block text-left">Text Size</span>
                             <div class="flex gap-4 settings-btn-group">
                                 <button onclick="setTextSize('small')" id="text-small" class="flex-1">
-                                    <span class="text-sm">작게</span>
+                                    <span class="text-sm">?게</span>
                                 </button>
                                 <button onclick="setTextSize('medium')" id="text-medium" class="flex-1 active">
                                     <span class="text-base">보통</span>
                                 </button>
                                 <button onclick="setTextSize('large')" id="text-large" class="flex-1">
-                                    <span class="text-xl font-black">크게</span>
+                                    <span class="text-xl font-black">?게</span>
                                 </button>
                             </div>
                         </div>
@@ -1202,21 +1202,25 @@
             </div>
 
             <script>
+                
                 const booksData = [
-                    { id: 'missing-planet', title: 'The Missing Planet', src: './public/Image/Cover/The Missing Planet.png', lexile: '250~300', wordCount: 120, category: 'Space 🚀', summary: 'A brave little astronaut goes on a mission to find a planet that disappeared from the star maps. Join the cosmic adventure!', keywords: ['planet', 'space', 'astronaut', 'star'], isBookmarked: false, isUnread: true, videoUrl: './public/Video/the_silent_stick_watch.mp4' },
-                    { id: 'rainbow', title: 'Rainbow', src: './public/Image/Cover/Rainbow.png', lexile: '150~200', wordCount: 85, category: 'Nature 🌈', summary: 'Follow the beautiful colors across the sky after a rainy day. Learn how rainbows are made of light and magic!', keywords: ['color', 'rain', 'sky', 'sun'], isBookmarked: false, isUnread: false, videoUrl: './public/Video/the_silent_stick_watch.mp4' },
-                    { id: 'two-friends', title: 'Two Friends', src: './public/Image/Cover/Two Friends.png', lexile: '200~250', wordCount: 110, category: 'Friendship 🤝', summary: 'A story about a rabbit and a turtle who discover that being different is what makes their friendship so special.', keywords: ['friends', 'together', 'help', 'game'], isBookmarked: false, isUnread: true, videoUrl: './public/Video/the_silent_stick_watch.mp4' },
-                    { id: 'silent-seed', title: 'The Silent Seed', src: './public/Image/Cover/The Silent Seed.png', lexile: '300~350', wordCount: 145, category: 'Science 🔬', summary: 'Deep under the ground, a tiny seed waits silently for the perfect moment to grow into a magnificent tree.', keywords: ['grow', 'wait', 'ground', 'leaf'], isBookmarked: false, isUnread: true, videoUrl: './public/Video/the_silent_stick_watch.mp4' },
-                    { id: 'silent-stick', title: 'The Silent Stick', src: './public/Image/Cover/The Silent Stick.png', lexile: '250~320', wordCount: 130, category: 'Adventure 🗺️', summary: 'A magic stick that doesn\'t make a sound helps a quiet boy find his way through a mysterious forest.', keywords: ['magic', 'quiet', 'forest', 'path'], isBookmarked: false, isUnread: false, videoUrl: './public/Video/the_silent_stick_watch.mp4' },
-                    { id: 'broken-branch', title: 'The Broken Branch', src: './public/Image/Cover/The Broken Branch.png', lexile: '280~340', wordCount: 135, category: 'Nature 🌳', summary: 'When a strong wind breaks a branch, the forest animals work together to make it a new home for a bird family.', keywords: ['tree', 'wind', 'home', 'birds'], isBookmarked: false, isUnread: true, videoUrl: './public/Video/the_silent_stick_watch.mp4' },
-                    { id: 'pea', title: 'The Pea', src: './public/Image/Cover/The Pea.png', lexile: '180~230', wordCount: 95, category: 'Food 🫛', summary: 'One tiny green pea rolls off the plate and travels across the kitchen floor. Where will it end up?', keywords: ['green', 'roll', 'kitchen', 'floor'], isBookmarked: false, isUnread: false, videoUrl: './public/Video/the_silent_stick_watch.mp4' },
-                    { id: 'milo', title: 'Milo and the Lost Color', src: './public/Image/Cover/Milo and the Lost Color.png', lexile: '320~380', wordCount: 160, category: 'Animals 🐶', summary: 'Milo is a dog with a very big imagination. Every time he goes for a walk, he sees a world full of dragons.', keywords: ['dog', 'dream', 'adventure', 'wild'], isBookmarked: false, isUnread: true, videoUrl: './public/Video/milo_and_the_lost_color_watch.mp4' },
-                    { id: 'rainbow-cloud', title: 'Rainbow Cloud', src: './public/Image/Cover/The Rainbow Cloud.png', lexile: '350~400', wordCount: 180, category: 'Fantasy ✨', summary: 'A magical cloud that rains colors instead of water changes everything in the gray city of Grumbletown.', keywords: ['magic', 'cloud', 'color', 'happy'], isBookmarked: true, isUnread: false, videoUrl: './public/Video/the_rainbow_cloud_watch.mp4' },
-                    { id: 'cindellar', title: 'Cindellar', src: './public/Image/Cover/Cindellar.png', lexile: '380~450', wordCount: 210, category: 'Classic 🏰', summary: 'A new retelling of the classic fairy tale with a focus on being kind to yourself and others.', keywords: ['princess', 'kind', 'dance', 'shoe'], isBookmarked: false, isUnread: true, videoUrl: './public/Video/the_silent_stick_watch.mp4' },
-                    { id: 'flying-trunk', title: 'The Flying Trunk', src: './public/Image/Cover/The Fyling Trunk.png', lexile: '340~390', wordCount: 175, category: 'Adventure 🗺️', summary: 'Travel the world in a magic trunk that can fly over mountains and oceans.', keywords: ['fly', 'travel', 'ocean', 'magic'], isBookmarked: false, isUnread: false, videoUrl: './public/Video/the_silent_stick_watch.mp4' },
-                    { id: 'rapunzel', title: 'The Rapunzel', src: './public/Image/Cover/The Rapunzel.png', lexile: '360~410', wordCount: 190, category: 'Classic 🏰', summary: 'A story about inner strength and finding your own voice from high up in a stone tower.', keywords: ['hair', 'tower', 'voice', 'strong'], isBookmarked: false, isUnread: true, videoUrl: './public/Video/the_silent_stick_watch.mp4' },
-                    { id: 'ugly-dukling', title: 'The Ugly Dukling', src: './public/Image/Cover/The Ugly Dukling.png', lexile: '300~360', wordCount: 155, category: 'Animals Swan', summary: 'Discover how being different can lead to finding where you truly belong.', keywords: ['different', 'belong', 'lake', 'swan'], isBookmarked: false, isUnread: true, videoUrl: './public/Video/the_silent_stick_watch.mp4' },
+                    { id: 'OG00XX_missing_planet', title: 'The Missing Planet', src: './public/Image/Cover/OG00XX(The Missing Planet).png', lexile: '250~300', wordCount: 120, category: 'Space', summary: 'A brave little astronaut goes on a mission to find a planet that disappeared from the star maps. Join the cosmic adventure!', keywords: ['planet', 'space', 'astronaut', 'star'], isBookmarked: false, isUnread: true, videoUrl: '' },
+                    { id: 'OG00XX_rainbow', title: 'Rainbow', src: './public/Image/Cover/OG00XX(Rainbow).png', lexile: '150~200', wordCount: 85, category: 'Nature', summary: 'Follow the beautiful colors across the sky after a rainy day. Learn how rainbows are made of light and magic!', keywords: ['color', 'rain', 'sky', 'sun'], isBookmarked: false, isUnread: false, videoUrl: '' },
+                    { id: 'OG00XX_two_friends', title: 'Two Friends', src: './public/Image/Cover/OG00XX(Two Friends).png', lexile: '200~250', wordCount: 110, category: 'Friendship', summary: 'A story about a rabbit and a turtle who discover that being different is what makes their friendship so special.', keywords: ['friends', 'together', 'help', 'game'], isBookmarked: false, isUnread: true, videoUrl: '' },
+                    { id: 'OG00XX_silent_seed', title: 'The Silent Seed', src: './public/Image/Cover/OG00XX(The Silent Seed).png', lexile: '300~350', wordCount: 145, category: 'Science', summary: 'Deep under the ground, a tiny seed waits silently for the perfect moment to grow into a magnificent tree.', keywords: ['grow', 'wait', 'ground', 'leaf'], isBookmarked: false, isUnread: true, videoUrl: '' },
+                    { id: 'OG0046', title: 'The Silent Stick', src: './public/Image/Cover/OG0046(The Silent Stick).png', lexile: '250~320', wordCount: 130, category: 'Adventure', summary: "A magic stick that doesn't make a sound helps a quiet boy find his way through a mysterious forest.", keywords: ['magic', 'quiet', 'forest', 'path'], isBookmarked: false, isUnread: false, videoUrl: './public/Video/Book/Intro/OG0046(The Silent Stick)/OG0046(The Silent Stick)_Intro.mp4' },
+                    { id: 'OG00XX_broken_branch', title: 'The Broken Branch', src: './public/Image/Cover/OG00XX(The Broken Branch).png', lexile: '280~340', wordCount: 135, category: 'Nature', summary: 'When a strong wind breaks a branch, the forest animals work together to make it a new home for a bird family.', keywords: ['tree', 'wind', 'home', 'birds'], isBookmarked: false, isUnread: true, videoUrl: '' },
+                    { id: 'CS00XX_pea', title: 'The Pea', src: './public/Image/Cover/CS00XX(The Pea).png', lexile: '180~230', wordCount: 95, category: 'Food', summary: 'One tiny green pea rolls off the plate and travels across the kitchen floor. Where will it end up?', keywords: ['green', 'roll', 'kitchen', 'floor'], isBookmarked: false, isUnread: false, videoUrl: '' },
+                    { id: 'OG0021', title: 'Milo and the Lost Color', src: './public/Image/Cover/OG0021(Milo and the Lost Color).png', lexile: '320~380', wordCount: 160, category: 'Animals', summary: 'Milo is a dog with a very big imagination. Every time he goes for a walk, he sees a world full of dragons.', keywords: ['dog', 'dream', 'adventure', 'wild'], isBookmarked: false, isUnread: true, videoUrl: './public/Video/Book/Intro/OG0021(Milo and the Lost Color)/OG0021(Milo and the Lost Color)_Intro.mp4' },
+                    { id: 'OG0050', title: 'The Rainbow Cloud in the Box', src: './public/Image/Cover/OG0050(The Rainbow Cloud in the Box).png', lexile: '350~400', wordCount: 180, category: 'Fantasy', summary: 'A magical cloud that rains colors instead of water changes everything in the gray city of Grumbletown.', keywords: ['magic', 'cloud', 'color', 'happy'], isBookmarked: true, isUnread: false, videoUrl: './public/Video/Book/Intro/OG0050(The Rainbow Cloud in the Box)/OG0050(The Rainbow Cloud in the Box)_Intro.mp4' },
+                    { id: 'CS00XX_cindellar', title: 'Cinderella', src: './public/Image/Cover/CS00XX(Cinderella).png', lexile: '380~450', wordCount: 210, category: 'Classic', summary: 'A new retelling of the classic fairy tale with a focus on being kind to yourself and others.', keywords: ['princess', 'kind', 'dance', 'shoe'], isBookmarked: false, isUnread: true, videoUrl: '' },
+                    { id: 'CS00XX_flying_trunk', title: 'The Flying Trunk', src: './public/Image/Cover/CS00XX(The Fyling Trunk).png', lexile: '340~390', wordCount: 175, category: 'Adventure', summary: 'Travel the world in a magic trunk that can fly over mountains and oceans.', keywords: ['fly', 'travel', 'ocean', 'magic'], isBookmarked: false, isUnread: false, videoUrl: '' },
+                    { id: 'CS00XX_rapunzel', title: 'The Rapunzel', src: './public/Image/Cover/CS00XX(The Rapunzel).png', lexile: '360~410', wordCount: 190, category: 'Classic', summary: 'A story about inner strength and finding your own voice from high up in a stone tower.', keywords: ['hair', 'tower', 'voice', 'strong'], isBookmarked: false, isUnread: true, videoUrl: '' },
+                    { id: 'CS00XX_ugly_dukling', title: 'The Ugly Dukling', src: './public/Image/Cover/CS00XX(The Ugly Dukling).png', lexile: '300~360', wordCount: 155, category: 'Animals', summary: 'Discover how being different can lead to finding where you truly belong.', keywords: ['different', 'belong', 'lake', 'swan'], isBookmarked: false, isUnread: true, videoUrl: '' },
+                    { id: 'CS0003', title: 'Hans in Luck', src: './public/Image/Cover/CS0003(Hans in Luck).png', lexile: '200~280', wordCount: 115, category: 'Adventure', summary: 'Hans trades his way home, finding happiness in everything he gets along the way.', keywords: ['hans', 'luck', 'trade', 'happy'], isBookmarked: false, isUnread: false, videoUrl: './public/Video/Book/Intro/CS0003(Hans in Luck)/CS0003(Hans in Luck)_Intro.mp4' },
+                    { id: 'CS00XX_thumbelina', title: 'Thumbelina', src: './public/Image/Cover/CS00XX(Thumbelina).png', lexile: '280~340', wordCount: 140, category: 'Adventure', summary: 'A tiny girl discovers a world larger than life and finds where she truly belongs.', keywords: ['tiny', 'thumb-sized', 'adventure', 'flower'], isBookmarked: false, isUnread: true, videoUrl: '' },
                 ];
+
 
                 // --- Global State ---
                 let currentModalBookId = null;
@@ -1255,11 +1259,9 @@
                     const themes = ['ocean', 'space', 'forest', 'city', 'candy'];
                     const theme = themes[idx % themes.length];
                     
-                    // Rule 3: Movie Book thumbnail for 'The Silent Stick'
-                    let movieThumb = `https://api.dicebear.com/7.x/shapes/svg?seed=${book.id}_m`;
-                    if (book.id === 'silent-stick') {
-                        movieThumb = './public/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC01.png';
-                    }
+                    // Rule 3: Movie Book thumbnail uses SC00 image
+                    const folderPath = book.src.replace('Cover', 'Book').replace('.png', '');
+                    let movieThumb = `${folderPath}/${book.id}_SC00_I.png`;
 
                     return {
                         baseId: book.id,
@@ -1289,7 +1291,7 @@
                                 type: 'Audio Book', 
                                 title: `${book.title} Audio`, 
                                 src: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3', 
-                                thumb: book.src, // 도서 표지 사용 (Rule 4)
+                                thumb: book.src, // ?서 ?? ?용 (Rule 4)
                                 rt: '04:30', 
                                 isUnplayed: Math.random() > 0.5 
                             }
@@ -1297,11 +1299,13 @@
                     };
                 });
 
+                
                 let mockHistory = [
-                    { id: 'milo', title: 'Milo and the Lost Color', src: './public/Image/Cover/Milo and the Lost Color.png', progress: 50, phase: 'quiz', completedPhases: ['watch', 'read'] },
-                    { id: 'silent-stick', title: 'The Silent Stick', src: './public/Image/Cover/The Silent Stick.png', progress: 0, phase: 'watch', completedPhases: [] },
-                    { id: 'empty-placeholder', title: '', src: '', progress: 0, phase: '', completedPhases: [], isPlaceholder: true }
+                    { id: 'OG0046', title: 'The Silent Stick', src: './public/Image/Cover/OG0046(The Silent Stick).png', progress: 0, phase: 'watch', completedPhases: [] },
+                    { id: 'CS00XX_pea', title: 'The Pea', src: './public/Image/Cover/CS00XX(The Pea).png', progress: 100, phase: 'completed', completedPhases: ['watch', 'read', 'quiz', 'speak'] },
+                    { id: 'OG0021', title: 'Milo and the Lost Color', src: './public/Image/Cover/OG0021(Milo and the Lost Color).png', progress: 80, phase: 'read', completedPhases: ['watch'] },
                 ];
+
 
                 // Global State
                 let currentPhase = 'home'; // 'home' or 'read'
@@ -1319,17 +1323,57 @@
                 let currentDifficulty = 'Original';
                 let isDifficultyOpen = false;
                 let isTextFading = false;
+                
                 const scenesData = [
-                    { book_id: "silent-stick", scene_no: "SC01", script: "The frozen lake lay still, a big area of gray ice beneath a heavy winter sky.", image_url: "./public/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC01.png" },
-                    { book_id: "silent-stick", scene_no: "SC02", script: "He hit the puck with force, but his old stick broke suddenly upon impact.", image_url: "./public/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC02.png" },
-                    { book_id: "silent-stick", scene_no: "SC03", script: "Two pieces of wood lay on the ice, showing the end of his practice.", image_url: "./public/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC03.png" },
-                    { book_id: "silent-stick", scene_no: "SC04", script: "Ren worked for hours, cutting the skin to show the hard wood under.", image_url: "./public/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC04.png" },
-                    { book_id: "silent-stick", scene_no: "SC05", script: "When he tested it, the puck flew in strange circles due to the wood’s natural shape.", image_url: "./public/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC05.png" },
-                    { book_id: "silent-stick", scene_no: "SC06", script: "Jax glanced at Ren’s rough branch and offered a cold smile, saying nothing.", image_url: "./public/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC06.png" },
-                    { book_id: "silent-stick", scene_no: "SC07", script: "Jax controlled the ice, his speed pushing Ren back toward his own goal.", image_url: "./public/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC07.png" },
-                    { book_id: "silent-stick", scene_no: "SC08", script: "The puck turned around the confused player, going quietly into the net as the whistle blew.", image_url: "./public/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC08.png" },
-                    { book_id: "silent-stick", scene_no: "SC09", script: "Ren smiled at his rough stick and skated away silently.", image_url: "./public/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC09.png" }
+                    { book_id: "OG0046", scene_no: "SC01", script: "The frozen lake lay still, \na big area of gray ice \nbeneath a heavy winter sky.", image_url: "./public/Image/Book/OG0046(The Silent Stick)/OG0046_SC01_I.png", full_audio: "./public/Audio/Book/OG0046(The Silent Stick)/OG0046_SC01_A.mp3" },
+                    { book_id: "OG0046", scene_no: "SC02", script: "He hit the puck with force, \nbut his old stick broke \nsuddenly upon impact.", image_url: "./public/Image/Book/OG0046(The Silent Stick)/OG0046_SC02_I.png", full_audio: "./public/Audio/Book/OG0046(The Silent Stick)/OG0046_SC02_A.mp3" },
+                    { book_id: "OG0046", scene_no: "SC03", script: "Two pieces of wood lay on the ice, \nshowing the end of his practice.", image_url: "./public/Image/Book/OG0046(The Silent Stick)/OG0046_SC03_I.png", full_audio: "./public/Audio/Book/OG0046(The Silent Stick)/OG0046_SC03_A.mp3" },
+                    { book_id: "OG0046", scene_no: "SC04", script: "Ren worked for hours, \ncutting the skin to show \nthe hard wood under.", image_url: "./public/Image/Book/OG0046(The Silent Stick)/OG0046_SC04_I.png", full_audio: "./public/Audio/Book/OG0046(The Silent Stick)/OG0046_SC04_A.mp3" },
+                    { book_id: "OG0046", scene_no: "SC05", script: "When he tested it, \nthe puck flew in strange circles \ndue to the wood’s natural shape.", image_url: "./public/Image/Book/OG0046(The Silent Stick)/OG0046_SC05_I.png", full_audio: "./public/Audio/Book/OG0046(The Silent Stick)/OG0046_SC05_A.mp3" },
+                    { book_id: "OG0046", scene_no: "SC06", script: "Jax glanced at Ren’s rough branch \nand offered a cold smile, saying nothing.", image_url: "./public/Image/Book/OG0046(The Silent Stick)/OG0046_SC06_I.png", full_audio: "./public/Audio/Book/OG0046(The Silent Stick)/OG0046_SC06_A.mp3" },
+                    { book_id: "OG0046", scene_no: "SC07", script: "Jax controlled the ice, \nhis speed pushing Ren \nback toward his own goal.", image_url: "./public/Image/Book/OG0046(The Silent Stick)/OG0046_SC07_I.png", full_audio: "./public/Audio/Book/OG0046(The Silent Stick)/OG0046_SC07_A.mp3" },
+                    { book_id: "OG0046", scene_no: "SC08", script: "The puck turned around the confused player, \ngoing quietly into the net as the whistle blew.", image_url: "./public/Image/Book/OG0046(The Silent Stick)/OG0046_SC08_I.png", full_audio: "./public/Audio/Book/OG0046(The Silent Stick)/OG0046_SC08_A.mp3" },
+                    { book_id: "OG0046", scene_no: "SC09", script: "Ren smiled at his rough stick \nand skated away silently.", image_url: "./public/Image/Book/OG0046(The Silent Stick)/OG0046_SC09_I.png", full_audio: "./public/Audio/Book/OG0046(The Silent Stick)/OG0046_SC09_A.mp3" },
+                    { book_id: "OG0021", scene_no: "SC01", script: "Milo is a little chameleon. He loves to change colors—green, blue, red!", image_url: "./public/Image/Book/OG0021(Milo and the Lost Color)/OG0021_SC01_I.png", full_audio: "" },
+                    { book_id: "OG0021", scene_no: "SC02", script: "But one morning, he wakes up gray. “Oh no! Where is my color?” Milo says. He looks at his tail. It’s still gray. He feels sad and shy.", image_url: "./public/Image/Book/OG0021(Milo and the Lost Color)/OG0021_SC02_I.png", full_audio: "" },
+                    { book_id: "OG0021", scene_no: "SC03", script: "Milo walks into the forest. He sees a yellow butterfly. “Can I borrow your color?” he asks.", image_url: "./public/Image/Book/OG0021(Milo and the Lost Color)/OG0021_SC03_I.png", full_audio: "" },
+                    { book_id: "OG0021", scene_no: "SC04", script: "The butterfly smiles. “My color is for flying!” Milo smiles back. “Then I will keep looking.” He waves goodbye.", image_url: "./public/Image/Book/OG0021(Milo and the Lost Color)/OG0021_SC04_I.png", full_audio: "" },
+                    { book_id: "OG0021", scene_no: "SC05", script: "He meets a red flower. “Can I have your color?” Milo asks. The flower says, “My color helps the bees.”", image_url: "./public/Image/Book/OG0021(Milo and the Lost Color)/OG0021_SC05_I.png", full_audio: "" },
+                    { book_id: "OG0021", scene_no: "SC06", script: "Milo is sad. “Everyone has their own color.” He sits by a blue pond. A small tear drops into the water.", image_url: "./public/Image/Book/OG0021(Milo and the Lost Color)/OG0021_SC06_I.png", full_audio: "" },
+                    { book_id: "OG0021", scene_no: "SC07", script: "The pond shines! Milo sees many colors in the water—red, yellow, blue, green. They mix and dance like rainbows.", image_url: "./public/Image/Book/OG0021(Milo and the Lost Color)/OG0021_SC07_I.png", full_audio: "" },
+                    { book_id: "OG0021", scene_no: "SC08", script: "Milo laughs. “Maybe my color is inside me!” He takes a deep breath and closes his eyes. His body starts to glow.", image_url: "./public/Image/Book/OG0021(Milo and the Lost Color)/OG0021_SC08_I.png", full_audio: "" },
+                    { book_id: "OG0021", scene_no: "SC09", script: "Green! Then blue! Then red again! Milo’s colors come back, brighter than before. He feels happy and warm.", image_url: "./public/Image/Book/OG0021(Milo and the Lost Color)/OG0021_SC09_I.png", full_audio: "" },
+                    { book_id: "OG0021", scene_no: "SC10", script: "Milo runs home. He looks in the mirror. “I found my color—me!” he says proudly.", image_url: "./public/Image/Book/OG0021(Milo and the Lost Color)/OG0021_SC10_I.png", full_audio: "" },
+                    { book_id: "OG0050", scene_no: "SC01", script: "On the quiet planet of Tiny Rock, two friends named Podo and Didi spent their evenings watching the universe. One of the two friends, Didi was always searching for excitement.", image_url: "./public/Image/Book/OG0050(The Rainbow Cloud in the Box)/OG0050_SC01_I.png", full_audio: "" },
+                    { book_id: "OG0050", scene_no: "SC02", script: "Suddenly, a breathtaking rainbow cloud floated near their rock. It was a swirling cloud of stardust, glowing with vibrant shades of violet, orange, and emerald green.", image_url: "./public/Image/Book/OG0050(The Rainbow Cloud in the Box)/OG0050_SC02_I.png", full_audio: "" },
+                    { book_id: "OG0050", scene_no: "SC03", script: "\"It is the most beautiful thing I have ever seen!\" exclaimed Didi. \"I must have it. I will capture a piece to keep on my shelf.\"", image_url: "./public/Image/Book/OG0050(The Rainbow Cloud in the Box)/OG0050_SC03_I.png", full_audio: "" },
+                    { book_id: "OG0050", scene_no: "SC04", script: "Podo frowned gently. \"I do not think you can own a cloud, Didi,\" he warned. \"Its beauty comes from its movement.\"", image_url: "./public/Image/Book/OG0050(The Rainbow Cloud in the Box)/OG0050_SC04_I.png", full_audio: "" },
+                    { book_id: "OG0050", scene_no: "SC05", script: "Ignoring his friend, Didi grabbed a net and caught a portion of the cloud into a pristine crystal box. “Got it!” he shouted triumphantly.", image_url: "./public/Image/Book/OG0050(The Rainbow Cloud in the Box)/OG0050_SC05_I.png", full_audio: "" },
+                    { book_id: "OG0050", scene_no: "SC06", script: "He rushed inside to display his treasure. But as he set the box down, the vibrant light began to dim. The swirling colors stopped moving.", image_url: "./public/Image/Book/OG0050(The Rainbow Cloud in the Box)/OG0050_SC06_I.png", full_audio: "" },
+                    { book_id: "OG0050", scene_no: "SC07", script: "The captured cloud transformed before their eyes. It became a stagnant, dark gray clump of moisture, looking like a dirty raincloud.", image_url: "./public/Image/Book/OG0050(The Rainbow Cloud in the Box)/OG0050_SC07_I.png", full_audio: "" },
+                    { book_id: "OG0050", scene_no: "SC08", script: "\"This is terrible,\" Didi groaned, tapping the glass. \"It looks like smoke. Where did the magic go?\"", image_url: "./public/Image/Book/OG0050(The Rainbow Cloud in the Box)/OG0050_SC08_I.png", full_audio: "" },
+                    { book_id: "OG0050", scene_no: "SC09", script: "\"The magic was in the freedom,\" Podo said wisely. \"By trapping it, you extinguished its light. It is suffocating in there.\"", image_url: "./public/Image/Book/OG0050(The Rainbow Cloud in the Box)/OG0050_SC09_I.png", full_audio: "" },
+                    { book_id: "OG0050", scene_no: "SC10", script: "Didi realized his mistake. He looked at the dull box and then at the vast, open sky. He picked up the box and ran back outside.", image_url: "./public/Image/Book/OG0050(The Rainbow Cloud in the Box)/OG0050_SC10_I.png", full_audio: "" },
+                    { book_id: "OG0050", scene_no: "SC11", script: "With a hopeful heart, Didi unlatched the crystal box. The gray wisp floated tentatively into the void.", image_url: "./public/Image/Book/OG0050(The Rainbow Cloud in the Box)/OG0050_SC11_I.png", full_audio: "" },
+                    { book_id: "OG0050", scene_no: "SC12", script: "Instantly, the vacuum of space revitalized it. The gray turned back into brilliant violet and emerald. It joined the rest of the cloud, swirling happily.", image_url: "./public/Image/Book/OG0050(The Rainbow Cloud in the Box)/OG0050_SC12_I.png", full_audio: "" },
+                    { book_id: "OG0050", scene_no: "SC13", script: "\"It is a masterpiece again,\" Didi whispered, watching it drift away. \"Indeed,\" agreed Podo. \"And now we can enjoy it together, right where it belongs.\" They watched it fly free and smiled.", image_url: "./public/Image/Book/OG0050(The Rainbow Cloud in the Box)/OG0050_SC13_I.png", full_audio: "" },
+                    { book_id: "OG0050", scene_no: "SC14", script: "Rainbow Cloud 14", image_url: "./public/Image/Book/OG0050(The Rainbow Cloud in the Box)/OG0050_SC14_I.png", full_audio: "" },
+                    { book_id: "CS0003", scene_no: "SC01", script: "Hans works hard for seven years. His master gives him a big piece of gold as pay. Hans puts the gold on his shoulder and starts to walk home to his mother.", image_url: "./public/Image/Book/CS0003(Hans in Luck)/CS0003_SC01_I.png", full_audio: "" },
+                    { book_id: "CS0003", scene_no: "SC02", script: "The gold is very heavy. Hans sees a man on a horse. \"Riding looks easy,\" says Hans.", image_url: "./public/Image/Book/CS0003(Hans in Luck)/CS0003_SC02_I.png", full_audio: "" },
+                    { book_id: "CS0003", scene_no: "SC03", script: "The man stops and says, \"Give me your gold, and I will give you my horse.\" Hans is happy to trade.", image_url: "./public/Image/Book/CS0003(Hans in Luck)/CS0003_SC03_I.png", full_audio: "" },
+                    { book_id: "CS0003", scene_no: "SC04", script: "He gets on the horse, but the horse runs too fast. He falls to the ground. A farmer with a cow helps him stand up.", image_url: "./public/Image/Book/CS0003(Hans in Luck)/CS0003_SC04_I.png", full_audio: "" },
+                    { book_id: "CS0003", scene_no: "SC05", script: "\"Horses are dangerous,\" says Hans. \"I like your cow. It gives milk every day.\" The farmer smiles and says, \"I will trade my cow for your horse.\" Hans agrees right away.", image_url: "./public/Image/Book/CS0003(Hans in Luck)/CS0003_SC05_I.png", full_audio: "" },
+                    { book_id: "CS0003", scene_no: "SC06", script: "Hans walks with the cow. He feels very thirsty and tries to get milk. But no milk comes out. The cow kicks Hans, and he falls down.", image_url: "./public/Image/Book/CS0003(Hans in Luck)/CS0003_SC06_I.png", full_audio: "" },
+                    { book_id: "CS0003", scene_no: "SC07", script: "A man with a pig sees him. \"That cow is too old to give milk,\" says the man. \"Your pig looks young and good,\" says Hans. \"I can trade my pig for the cow,\" says the man. Hans likes the idea.", image_url: "./public/Image/Book/CS0003(Hans in Luck)/CS0003_SC07_I.png", full_audio: "" },
+                    { book_id: "CS0003", scene_no: "SC08", script: "Later, Hans meets a boy with a white goose. Hans tells the boy about his lucky trades. The boy says, \"My goose is very heavy. The meat will be good.\" \"My pig is good too,\" says Hans.", image_url: "./public/Image/Book/CS0003(Hans in Luck)/CS0003_SC08_I.png", full_audio: "" },
+                    { book_id: "CS0003", scene_no: "SC09", script: "Then the boy says, \"Is that pig yours? A rich man is looking for his lost pig. Someone stole it. You may be in trouble.\" Hans feels afraid. \"Please help me,\" he says. \"Take this pig and give me your goose.\"", image_url: "./public/Image/Book/CS0003(Hans in Luck)/CS0003_SC09_I.png", full_audio: "" },
+                    { book_id: "CS0003", scene_no: "SC10", script: "Hans thinks he is very lucky with the big goose. In the next village, he sees a man with a stone. The man sings while he works. \"You look happy,\" says Hans.", image_url: "./public/Image/Book/CS0003(Hans in Luck)/CS0003_SC10_I.jpg", full_audio: "" },
+                    { book_id: "CS0003", scene_no: "SC11", script: "The man says, \"My work brings me money. You can do this work too.\" \"How can I do that?\" asks Hans. \"You just need a stone,\" says the man. \"Take this goose and give me your stone,\" says Hans.", image_url: "./public/Image/Book/CS0003(Hans in Luck)/CS0003_SC11_I.jpg", full_audio: "" },
+                    { book_id: "CS0003", scene_no: "SC12", script: "\"Now I will be rich,\" Hans thinks. But the stone is very heavy. Soon Hans feels tired and hungry.", image_url: "./public/Image/Book/CS0003(Hans in Luck)/CS0003_SC12_I.png", full_audio: "" },
+                    { book_id: "CS0003", scene_no: "SC13", script: "He stops at a well to drink water. He puts the stone on the edge. By accident, he pushes the stone. Splash! It falls into the deep water.", image_url: "./public/Image/Book/CS0003(Hans in Luck)/CS0003_SC13_I.png", full_audio: "" },
+                    { book_id: "CS0003", scene_no: "SC14", script: "He jumps for joy. \"Thank my lucky stars!\" he shouts. \"The heavy stone is gone. I am free from this heavy load.\" \nNow he has no gold, no horse, and no stone. But he is the happiest man in the world.", image_url: "./public/Image/Book/CS0003(Hans in Luck)/CS0003_SC14_I.png", full_audio: "" }
                 ];
+
 
                 function toggleMode() {
                     isHistoryMode = !isHistoryMode;
@@ -1354,7 +1398,7 @@
 
                     const isHistory = isHistoryMode;
                     const items = isHistory ? mockHistory : [
-                        freshHeroBook || booksData.find(b => b.id === 'silent-stick')
+                        freshHeroBook || booksData.find(b => b.id === 'OG0046')
                     ];
 
                     const userName = "Ami";
@@ -1569,7 +1613,7 @@
                             if (origin === 'library') {
                                 startLearning();
                             } else {
-                                const currentHeroId = freshHeroBook ? freshHeroBook.id : 'silent-stick';
+                                const currentHeroId = freshHeroBook ? freshHeroBook.id : 'OG0046';
                                 const isCurrentHero = !isHistoryMode && bookId === currentHeroId;
 
                                 if (!isInHistory && !isCurrentHero) {
@@ -1705,6 +1749,12 @@
                     const phaseContainer = document.getElementById('phase-read');
                     const book = booksData.find(b => b.id === currentModalBookId);
                     const filteredScenes = mockScenes.filter(s => s.id === currentModalBookId);
+                    
+                    // Generate SC00 background image URL
+                    const bgImageUrl = filteredScenes.length > 0 && filteredScenes[0].image_url 
+                        ? filteredScenes[0].image_url.replace(/SC\d+/i, 'SC00') 
+                        : book.src;
+
                     setPhase('read');
                     currentPhase = 'read';
                     if (currentReadStep === 'selection') {
@@ -1712,7 +1762,7 @@
                     <div class="relative z-10 flex-1 flex flex-col items-center justify-center animate-in fade-in duration-500 min-h-screen">
                         <!-- Backdrop -->
                         <div class="absolute inset-0">
-                            <img src="./public/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC01.png" class="w-full h-full object-cover opacity-60 brightness-75" />
+                            <img src="${bgImageUrl}" class="w-full h-full object-cover opacity-60 brightness-75" onerror="this.src='./public/Image/Book/OG0046(The Silent Stick)/OG0046_SC00_I.png'" />
                             <div class="absolute inset-0 bg-black/40"></div>
                         </div>
 
@@ -1747,7 +1797,7 @@
                         phaseContainer.innerHTML = `
                     <div class="relative z-10 flex-1 flex flex-col animate-in fade-in duration-500 min-h-screen">
                         <div class="absolute inset-0">
-                            <img src="./public/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC01.png" class="w-full h-full object-cover" />
+                            <img src="${bgImageUrl}" class="w-full h-full object-cover" onerror="this.src='./public/Image/Book/OG0046(The Silent Stick)/OG0046_SC00_I.png'" />
                         </div>
                         <div class="absolute top-20 left-1/2 -translate-x-1/2 px-16 py-6 bg-white/70 backdrop-blur-md rounded-[32px] shadow-2xl border-4 border-white/20">
                             <h1 class="text-7xl font-black text-slate-900 font-fredoka tracking-tight">${book.title}</h1>
@@ -1796,12 +1846,9 @@
                         if (currentDifficulty === 'Easy') script = `[Easy]\n${baseScript}`;
                         if (currentDifficulty === 'Difficult') script = `[Difficult]\n${baseScript}`;
 
-                        const sentences = script.split(/(?<=[.!?]) +/);
-                        const sentencesHtml = sentences.map((sentence, idx) => `
-                    <span onclick="event.stopPropagation(); playSentenceAudio(${idx})" class="cursor-pointer hover:text-orange-300 transition-colors pointer-events-auto inline-block mr-3 mb-2 ${playingSentenceIndex === idx ? 'text-orange-400 drop-shadow-[0_0_15px_rgba(251,146,60,0.8)] scale-105' : ''}">
-                        ${sentence}
-                    </span>
-                `).join('');
+                        const cleanScript = script.replace(/\\n/g, ' ').replace(/\n/g, ' ');
+                        const sentences = cleanScript.split(/(?<=[.!?]) +/).filter(s => s.trim().length > 0);
+                        const sentencesHtml = sentences.map((sentence, idx) => `<span onclick="event.stopPropagation(); playSentenceAudio(${idx})" class="cursor-pointer hover:text-orange-300 transition-colors pointer-events-auto inline-block ${playingSentenceIndex === idx ? 'text-orange-400 drop-shadow-[0_0_15px_rgba(251,146,60,0.8)] scale-105' : ''}">${sentence.trim()}</span>`).join('\n');
 
                         const dotsHtml = filteredScenes.map((_, index) => `
                     <div class="w-3 h-3 rounded-full transition-all duration-300 ${index === currentSceneIndex ? 'bg-[#FF6B00] scale-125 shadow-[0_0_10px_#FF6B00]' : 'bg-white/40'}"></div>
@@ -2035,9 +2082,9 @@
                             setTimeout(() => {
                                 // Final desired order: Left(Silent-Stick), Center(Rainbow-Cloud), Right(Milo)
                                 mockHistory = [
-                                    { id: 'silent-stick', title: 'The Silent Stick', src: './public/Image/Cover/The Silent Stick.png', progress: 0, phase: 'watch', completedPhases: [] },
+                                    { id: 'OG0046', title: 'The Silent Stick', src: './public/Image/Cover/OG0046(The Silent Stick).png', progress: 0, phase: 'watch', completedPhases: [] },
                                     { ...book, progress: 0, phase: 'watch', completedPhases: [] },
-                                    { id: 'milo', title: 'Milo and the Lost Color', src: './public/Image/Cover/Milo and the Lost Color.png', progress: 50, phase: 'quiz', completedPhases: ['watch', 'read'] }
+                                    { id: 'OG0021', title: 'Milo and the Lost Color', src: './public/Image/Cover/OG0021(Milo and the Lost Color).png', progress: 50, phase: 'quiz', completedPhases: ['watch', 'read'] }
                                 ];
                                 currentHeroIndex = 1; // Center the new book
                                 isHeroCTAFlashing = true;
@@ -2085,6 +2132,12 @@
                     if (shouldStartRead) {
                         const relevantScenes = scenesData.filter(s => s.book_id === book.id);
                         if (relevantScenes.length > 0) {
+                            isReadUnlocked = true; // Unlock Read phase
+                            const readTab = document.getElementById('tab-read');
+                            if (readTab) {
+                                readTab.classList.remove('opacity-50', 'cursor-not-allowed');
+                                readTab.innerHTML = '<i data-lucide="book-open" class="w-4 h-4"></i> Read';
+                            }
                             currentPhase = 'read';
                             currentSceneIndex = 0;
 
@@ -2103,7 +2156,7 @@
                     document.getElementById('studyBookTitle').innerText = book.title;
                     const video = document.getElementById('studyVideo');
                     // Ensure path is correct and call load() to reset the player
-                    video.src = book.videoUrl || "./public/Video/The_silent_stick_watch.mp4";
+                    video.src = book.videoUrl || "./public/Video/Book/Intro/OG0046(The Silent Stick)/OG0046(The Silent Stick)_Intro.mp4";
                     video.load();
 
                     setPhase('watch');
@@ -2312,16 +2365,53 @@
                 };
 
                 const mockScenes = [
-                    { id: 'silent-stick', scene_no: "SC01", script: "The frozen lake lay still, \na big area of gray ice \nbeneath a heavy winter sky.", image_url: "./public/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC01.png", full_audio: "./public/Audio/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC01.mp3" },
-                    { id: 'silent-stick', scene_no: "SC02", script: "He hit the puck with force, \nbut his old stick broke \nsuddenly upon impact.", image_url: "./public/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC02.png", full_audio: "./public/Audio/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC02.mp3" },
-                    { id: 'silent-stick', scene_no: "SC03", script: "Two pieces of wood lay on the ice, \nshowing the end of his practice.", image_url: "./public/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC03.png", full_audio: "./public/Audio/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC03.mp3" },
-                    { id: 'silent-stick', scene_no: "SC04", script: "Ren worked for hours, \ncutting the skin to show \nthe hard wood under.", image_url: "./public/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC04.png", full_audio: "./public/Audio/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC04.mp3" },
-                    { id: 'silent-stick', scene_no: "SC05", script: "When he tested it, \nthe puck flew in strange circles \ndue to the wood’s natural shape.", image_url: "./public/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC05.png", full_audio: "./public/Audio/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC05.mp3" },
-                    { id: 'silent-stick', scene_no: "SC06", script: "Jax glanced at Ren’s rough branch \nand offered a cold smile, saying nothing.", image_url: "./public/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC06.png", full_audio: "./public/Audio/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC06.mp3" },
-                    { id: 'silent-stick', scene_no: "SC07", script: "Jax controlled the ice, \nhis speed pushing Ren \nback toward his own goal.", image_url: "./public/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC07.png", full_audio: "./public/Audio/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC07.mp3" },
-                    { id: 'silent-stick', scene_no: "SC08", script: "The puck turned around the confused player, \ngoing quietly into the net as the whistle blew.", image_url: "./public/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC08.png", full_audio: "./public/Audio/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC08.mp3" },
-                    { id: 'silent-stick', scene_no: "SC09", script: "Ren smiled at his rough stick \nand skated away silently.", image_url: "./public/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC09.png", full_audio: "./public/Audio/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC09.mp3" }
+                    // OG0046
+                    { id: 'OG0046', scene_no: 'SC01', script: "The frozen lake lay still, \na big area of gray ice \nbeneath a heavy winter sky.", image_url: './public/Image/Book/OG0046(The Silent Stick)/OG0046_SC01_I.png', audio_url: '' },
+                    { id: 'OG0046', scene_no: 'SC02', script: "He hit the puck with force, \nbut his old stick broke \nsuddenly upon impact.", image_url: './public/Image/Book/OG0046(The Silent Stick)/OG0046_SC02_I.png', audio_url: '' },
+                    { id: 'OG0046', scene_no: 'SC03', script: "Two pieces of wood lay on the ice, \nshowing the end of his practice.", image_url: './public/Image/Book/OG0046(The Silent Stick)/OG0046_SC03_I.png', audio_url: '' },
+                    { id: 'OG0046', scene_no: 'SC04', script: "Ren worked for hours, \ncutting the skin to show \nthe hard wood under.", image_url: './public/Image/Book/OG0046(The Silent Stick)/OG0046_SC04_I.png', audio_url: '' },
+                    { id: 'OG0046', scene_no: 'SC05', script: "When he tested it, \nthe puck flew in strange circles \ndue to the wood’s natural shape.", image_url: './public/Image/Book/OG0046(The Silent Stick)/OG0046_SC05_I.png', audio_url: '' },
+                    { id: 'OG0046', scene_no: 'SC06', script: "Jax glanced at Ren’s rough branch \nand offered a cold smile, saying nothing.", image_url: './public/Image/Book/OG0046(The Silent Stick)/OG0046_SC06_I.png', audio_url: '' },
+                    { id: 'OG0046', scene_no: 'SC07', script: "Jax controlled the ice, \nhis speed pushing Ren \nback toward his own goal.", image_url: './public/Image/Book/OG0046(The Silent Stick)/OG0046_SC07_I.png', audio_url: '' },
+                    { id: 'OG0046', scene_no: 'SC08', script: "The puck turned around the confused player, \ngoing quietly into the net as the whistle blew.", image_url: './public/Image/Book/OG0046(The Silent Stick)/OG0046_SC08_I.png', audio_url: '' },
+                    { id: 'OG0046', scene_no: 'SC09', script: "Ren smiled at his rough stick \nand skated away silently.", image_url: './public/Image/Book/OG0046(The Silent Stick)/OG0046_SC09_I.png', audio_url: '' },
+                    
+                    // OG0021
+                    { id: 'OG0021', scene_no: 'SC01', script: "Milo is a little chameleon. He loves to change colors—green, blue, red!", image_url: './public/Image/Book/OG0021(Milo and the Lost Color)/OG0021_SC01_I.png', audio_url: '' },
+                    { id: 'OG0021', scene_no: 'SC02', script: "But one morning, he wakes up gray. “Oh no! Where is my color?” Milo says. He looks at his tail. It’s still gray. He feels sad and shy.", image_url: './public/Image/Book/OG0021(Milo and the Lost Color)/OG0021_SC02_I.png', audio_url: '' },
+                    { id: 'OG0021', scene_no: 'SC03', script: "Milo walks into the forest. He sees a yellow butterfly. “Can I borrow your color?” he asks.", image_url: './public/Image/Book/OG0021(Milo and the Lost Color)/OG0021_SC03_I.png', audio_url: '' },
+                    { id: 'OG0021', scene_no: 'SC04', script: "The butterfly smiles. “My color is for flying!” Milo smiles back. “Then I will keep looking.” He waves goodbye.", image_url: './public/Image/Book/OG0021(Milo and the Lost Color)/OG0021_SC04_I.png', audio_url: '' },
+                    { id: 'OG0021', scene_no: 'SC05', script: "He meets a red flower. “Can I have your color?” Milo asks. The flower says, “My color helps the bees.”", image_url: './public/Image/Book/OG0021(Milo and the Lost Color)/OG0021_SC05_I.png', audio_url: '' },
+                    { id: 'OG0021', scene_no: 'SC06', script: "Milo is sad. “Everyone has their own color.” He sits by a blue pond. A small tear drops into the water.", image_url: './public/Image/Book/OG0021(Milo and the Lost Color)/OG0021_SC06_I.png', audio_url: '' },
+                    { id: 'OG0021', scene_no: 'SC07', script: "The pond shines! Milo sees many colors in the water—red, yellow, blue, green. They mix and dance like rainbows.", image_url: './public/Image/Book/OG0021(Milo and the Lost Color)/OG0021_SC07_I.png', audio_url: '' },
+                    { id: 'OG0021', scene_no: 'SC08', script: "Milo laughs. “Maybe my color is inside me!” He takes a deep breath and closes his eyes. His body starts to glow.", image_url: './public/Image/Book/OG0021(Milo and the Lost Color)/OG0021_SC08_I.png', audio_url: '' },
+                    { id: 'OG0021', scene_no: 'SC09', script: "Green! Then blue! Then red again! Milo’s colors come back, brighter than before. He feels happy and warm.", image_url: './public/Image/Book/OG0021(Milo and the Lost Color)/OG0021_SC09_I.png', audio_url: '' },
+                    { id: 'OG0021', scene_no: 'SC10', script: "Milo runs home. He looks in the mirror. “I found my color—me!” he says proudly.", image_url: './public/Image/Book/OG0021(Milo and the Lost Color)/OG0021_SC10_I.png', audio_url: '' },
+                    
+                    // OG0050
+                    { id: 'OG0050', scene_no: 'SC01', script: "On the quiet planet of Tiny Rock, two friends named Podo and Didi spent their evenings watching the universe. One of the two friends, Didi was always searching for excitement.", image_url: './public/Image/Book/OG0050(The Rainbow Cloud in the Box)/OG0050_SC01_I.png', audio_url: '' },
+                    { id: 'OG0050', scene_no: 'SC02', script: "Suddenly, a breathtaking rainbow cloud floated near their rock. It was a swirling cloud of stardust, glowing with vibrant shades of violet, orange, and emerald green.", image_url: './public/Image/Book/OG0050(The Rainbow Cloud in the Box)/OG0050_SC02_I.png', audio_url: '' },
+                    { id: 'OG0050', scene_no: 'SC03', script: "\"It is the most beautiful thing I have ever seen!\" exclaimed Didi. \"I must have it. I will capture a piece to keep on my shelf.\"", image_url: './public/Image/Book/OG0050(The Rainbow Cloud in the Box)/OG0050_SC03_I.png', audio_url: '' },
+                    { id: 'OG0050', scene_no: 'SC04', script: "Podo frowned gently. \"I do not think you can own a cloud, Didi,\" he warned. \"Its beauty comes from its movement.\"", image_url: './public/Image/Book/OG0050(The Rainbow Cloud in the Box)/OG0050_SC04_I.png', audio_url: '' },
+                    { id: 'OG0050', scene_no: 'SC05', script: "Ignoring his friend, Didi grabbed a net and caught a portion of the cloud into a pristine crystal box. “Got it!” he shouted triumphantly.", image_url: './public/Image/Book/OG0050(The Rainbow Cloud in the Box)/OG0050_SC05_I.png', audio_url: '' },
+                    { id: 'OG0050', scene_no: 'SC06', script: "He rushed inside to display his treasure. But as he set the box down, the vibrant light began to dim. The swirling colors stopped moving.", image_url: './public/Image/Book/OG0050(The Rainbow Cloud in the Box)/OG0050_SC06_I.png', audio_url: '' },
+                    { id: 'OG0050', scene_no: 'SC07', script: "The captured cloud transformed before their eyes. It became a stagnant, dark gray clump of moisture, looking like a dirty raincloud.", image_url: './public/Image/Book/OG0050(The Rainbow Cloud in the Box)/OG0050_SC07_I.png', audio_url: '' },
+                    { id: 'OG0050', scene_no: 'SC08', script: "\"This is terrible,\" Didi groaned, tapping the glass. \"It looks like smoke. Where did the magic go?\"", image_url: './public/Image/Book/OG0050(The Rainbow Cloud in the Box)/OG0050_SC08_I.png', audio_url: '' },
+                    { id: 'OG0050', scene_no: 'SC09', script: "\"The magic was in the freedom,\" Podo said wisely. \"By trapping it, you extinguished its light. It is suffocating in there.\"", image_url: './public/Image/Book/OG0050(The Rainbow Cloud in the Box)/OG0050_SC09_I.png', audio_url: '' },
+                    
+                    // CS0003
+                    { id: 'CS0003', scene_no: 'SC01', script: "Hans works hard for seven years. His master gives him a big piece of gold as pay. Hans puts the gold on his shoulder and starts to walk home to his mother.", image_url: './public/Image/Book/CS0003(Hans in Luck)/CS0003_SC01_I.png', audio_url: '' },
+                    { id: 'CS0003', scene_no: 'SC02', script: "The gold is very heavy. Hans sees a man on a horse. \"Riding looks easy,\" says Hans.", image_url: './public/Image/Book/CS0003(Hans in Luck)/CS0003_SC02_I.png', audio_url: '' },
+                    { id: 'CS0003', scene_no: 'SC03', script: "The man stops and says, \"Give me your gold, and I will give you my horse.\" Hans is happy to trade.", image_url: './public/Image/Book/CS0003(Hans in Luck)/CS0003_SC03_I.png', audio_url: '' },
+                    { id: 'CS0003', scene_no: 'SC04', script: "He gets on the horse, but the horse runs too fast. He falls to the ground. A farmer with a cow helps him stand up.", image_url: './public/Image/Book/CS0003(Hans in Luck)/CS0003_SC04_I.png', audio_url: '' },
+                    { id: 'CS0003', scene_no: 'SC05', script: "\"Horses are dangerous,\" says Hans. \"I like your cow. It gives milk every day.\" The farmer smiles and says, \"I will trade my cow for your horse.\" Hans agrees right away.", image_url: './public/Image/Book/CS0003(Hans in Luck)/CS0003_SC05_I.png', audio_url: '' },
+                    { id: 'CS0003', scene_no: 'SC06', script: "Hans walks with the cow. He feels very thirsty and tries to get milk. But no milk comes out. The cow kicks Hans, and he falls down.", image_url: './public/Image/Book/CS0003(Hans in Luck)/CS0003_SC06_I.png', audio_url: '' },
+                    { id: 'CS0003', scene_no: 'SC07', script: "A man with a pig sees him. \"That cow is too old to give milk,\" says the man. \"Your pig looks young and good,\" says Hans. \"I can trade my pig for the cow,\" says the man. Hans likes the idea.", image_url: './public/Image/Book/CS0003(Hans in Luck)/CS0003_SC07_I.png', audio_url: '' },
+                    { id: 'CS0003', scene_no: 'SC08', script: "Later, Hans meets a boy with a white goose. Hans tells the boy about his lucky trades. The boy says, \"My goose is very heavy. The meat will be good.\" \"My pig is good too,\" says Hans.", image_url: './public/Image/Book/CS0003(Hans in Luck)/CS0003_SC08_I.png', audio_url: '' },
+                    { id: 'CS0003', scene_no: 'SC09', script: "Then the boy says, \"Is that pig yours? A rich man is looking for his lost pig. Someone stole it. You may be in trouble.\" Hans feels afraid. \"Please help me,\" he says. \"Take this pig and give me your goose.\"", image_url: './public/Image/Book/CS0003(Hans in Luck)/CS0003_SC09_I.png', audio_url: '' },
+                    { id: 'CS0003', scene_no: 'SC10', script: "Hans thinks he is very lucky with the big goose. In the next village, he sees a man with a stone. The man sings while he works. \"You look happy,\" says Hans.", image_url: './public/Image/Book/CS0003(Hans in Luck)/CS0003_SC10_I.png', audio_url: '' }
                 ];
+
 
                 // [NEW] Helper for text positioning
                 function getTextPositionClass(index) {
@@ -2491,7 +2581,18 @@
                     overlay.className = 'fixed inset-0 z-[110] bg-black/80 backdrop-blur-sm flex items-center justify-center animate-in fade-in duration-500 cursor-pointer';
                     overlay.onclick = () => {
                         overlay.remove();
-                        showSpeakSelectionModal();
+                        // Direct transition to Speak phase (skipping the scene selection modal)
+                        if (!unlockedPhases.includes('speak')) unlockedPhases.push('speak');
+                        isReadUnlocked = true;
+                        const speakBtn = document.querySelector('button[onclick="setPhase(\\\'speak\\\')"]');
+                        if (speakBtn) {
+                            speakBtn.removeAttribute('disabled');
+                            speakBtn.classList.remove('opacity-50', 'cursor-not-allowed', 'text-slate-400');
+                            speakBtn.classList.add('text-slate-700');
+                            speakBtn.click(); 
+                        } else {
+                            setPhase('speak'); 
+                        }
                     };
                     overlay.innerHTML = `
                 <div class="relative flex flex-col items-center justify-center animate-in zoom-in-50 duration-500">
@@ -2507,166 +2608,6 @@
                     document.body.appendChild(overlay);
                 }
 
-                // [NEW] Scene Selection Modal
-                function showSpeakSelectionModal() {
-                    const overlay = document.createElement('div');
-                    overlay.id = 'speakSelectionModal';
-                    overlay.className = 'fixed inset-0 z-[120] bg-black/60 backdrop-blur-md flex items-center justify-center animate-in fade-in duration-300';
-
-                    // Generate Scene Checkboxes
-                    const sceneGridHtml = mockScenes.map((scene, idx) => `
-                <div class="relative group cursor-pointer" onclick="toggleSceneSelection(${idx})">
-                    <div class="aspect-video bg-slate-100 rounded-xl overflow-hidden border-4 transition-all duration-200 ${idx === 0 ? 'border-orange-500 ring-4 ring-orange-200' : 'border-slate-200 group-hover:border-orange-300'}" id="scene-card-${idx}">
-                        <img src="${scene.image_url}" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
-                        
-                        <!-- Checkbox Overlay -->
-                        <div class="absolute top-2 right-2 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-lg border-2 ${idx === 0 ? 'border-orange-500 bg-orange-500 text-white' : 'border-slate-300 text-transparent'}" id="scene-check-${idx}">
-                            <i data-lucide="check" class="w-5 h-5 font-bold"></i>
-                        </div>
-                        
-                        <!-- Scene Label -->
-                        <div class="absolute bottom-0 inset-x-0 bg-black/50 text-white text-center py-1 text-sm font-bold backdrop-blur-sm">
-                            Scene ${idx + 1}
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-
-                    overlay.innerHTML = `
-                <div class="bg-white rounded-[40px] p-8 w-[90%] max-w-5xl shadow-2xl animate-in slide-in-from-bottom-10 duration-500 relative">
-                    <!-- Close Button -->
-                    <button onclick="document.getElementById('speakSelectionModal').remove()" class="absolute top-6 right-6 p-2 rounded-full hover:bg-slate-100 transition-colors">
-                        <i data-lucide="x" class="w-8 h-8 text-slate-400"></i>
-                    </button>
-
-                    <!-- Header -->
-                    <div class="text-center mb-8">
-                        <h2 class="text-4xl font-black text-slate-800 font-fredoka mb-2">Scenes you want to Read Aloud</h2>
-                        <div class="flex items-center justify-center gap-2">
-                             <label class="flex items-center gap-2 cursor-pointer select-none">
-                                <div class="w-6 h-6 border-2 border-slate-300 rounded-md flex items-center justify-center transition-colors text-white" id="selectAllCheck" onclick="toggleSelectAll()">
-                                    <i data-lucide="check" class="w-4 h-4"></i>
-                                </div>
-                                <span class="text-slate-500 font-bold text-lg">All</span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- Scene Grid -->
-                    <div class="grid grid-cols-2 md:grid-cols-3 gap-6 max-h-[60vh] overflow-y-auto p-2">
-                        ${sceneGridHtml}
-                    </div>
-
-                    <!-- Footer Action -->
-                    <div class="mt-8 flex justify-center">
-                        <button onclick="confirmSpeakSelection()" class="px-16 py-4 bg-white border-4 border-slate-200 text-slate-700 rounded-full text-2xl font-black font-fredoka hover:bg-orange-500 hover:text-white hover:border-orange-500 transition-all shadow-xl hover:shadow-orange-200 active:scale-95">
-                            OK
-                        </button>
-                    </div>
-                </div>
-            `;
-                    document.body.appendChild(overlay);
-                    lucide.createIcons();
-                }
-
-                // [NEW] Selection Logic
-                let selectedScenes = [0]; // Default first scene selected
-
-                function toggleSceneSelection(idx) {
-                    const index = selectedScenes.indexOf(idx);
-                    const card = document.getElementById(`scene-card-${idx}`);
-                    const check = document.getElementById(`scene-check-${idx}`);
-
-                    if (index > -1) {
-                        selectedScenes.splice(index, 1);
-                        // Visual Uncheck
-                        card.classList.remove('border-orange-500', 'ring-4', 'ring-orange-200');
-                        card.classList.add('border-slate-200');
-                        check.classList.remove('border-orange-500', 'bg-orange-500', 'text-white');
-                        check.classList.add('border-slate-300', 'text-transparent');
-                    } else {
-                        selectedScenes.push(idx);
-                        // Visual Check
-                        card.classList.add('border-orange-500', 'ring-4', 'ring-orange-200');
-                        card.classList.remove('border-slate-200');
-                        check.classList.add('border-orange-500', 'bg-orange-500', 'text-white');
-                        check.classList.remove('border-slate-300', 'text-transparent');
-                    }
-                    updateSelectAllState();
-                }
-
-                function toggleSelectAll() {
-                    const isAll = selectedScenes.length === mockScenes.length;
-                    const selectAllCheck = document.getElementById('selectAllCheck');
-
-                    if (isAll) {
-                        selectedScenes = [];
-                        // Uncheck all UI
-                        mockScenes.forEach((_, i) => {
-                            const card = document.getElementById(`scene-card-${i}`);
-                            const check = document.getElementById(`scene-check-${i}`);
-                            card.classList.remove('border-orange-500', 'ring-4', 'ring-orange-200');
-                            card.classList.add('border-slate-200');
-                            check.classList.remove('border-orange-500', 'bg-orange-500', 'text-white');
-                            check.classList.add('border-slate-300', 'text-transparent');
-                        });
-                        selectAllCheck.classList.remove('bg-orange-500', 'border-orange-500');
-                        selectAllCheck.classList.add('border-slate-300');
-                    } else {
-                        selectedScenes = mockScenes.map((_, i) => i);
-                        // Check all UI
-                        mockScenes.forEach((_, i) => {
-                            const card = document.getElementById(`scene-card-${i}`);
-                            const check = document.getElementById(`scene-check-${i}`);
-                            card.classList.add('border-orange-500', 'ring-4', 'ring-orange-200');
-                            card.classList.remove('border-slate-200');
-                            check.classList.add('border-orange-500', 'bg-orange-500', 'text-white');
-                            check.classList.remove('border-slate-300', 'text-transparent');
-                        });
-                        selectAllCheck.classList.add('bg-orange-500', 'border-orange-500');
-                        selectAllCheck.classList.remove('border-slate-300');
-                    }
-                }
-
-                function updateSelectAllState() {
-                    const isAll = selectedScenes.length === mockScenes.length;
-                    const selectAllCheck = document.getElementById('selectAllCheck');
-                    if (isAll) {
-                        selectAllCheck.classList.add('bg-orange-500', 'border-orange-500');
-                        selectAllCheck.classList.remove('border-slate-300');
-                    } else {
-                        selectAllCheck.classList.remove('bg-orange-500', 'border-orange-500');
-                        selectAllCheck.classList.add('border-slate-300');
-                    }
-                }
-
-                function confirmSpeakSelection() {
-                    if (selectedScenes.length === 0) {
-                        alert("Please select at least one scene!");
-                        return;
-                    }
-                    document.getElementById('speakSelectionModal').remove();
-
-                    // Unlock and Switch to Speak Mode
-                    if (!unlockedPhases.includes('speak')) {
-                        unlockedPhases.push('speak');
-                    }
-
-                    // Since Speak logic isn't fully implemented in this prototype, 
-                    // we'll simulate the switch by unlocking and updating the UI
-                    isReadUnlocked = true; // Ensure Read remains unlocked
-
-                    // Visual update for GNB
-                    const speakBtn = document.querySelector('button[onclick="setPhase(\'speak\')"]');
-                    if (speakBtn) {
-                        speakBtn.removeAttribute('disabled');
-                        speakBtn.classList.remove('opacity-50', 'cursor-not-allowed', 'text-slate-400');
-                        speakBtn.classList.add('text-slate-700');
-                        speakBtn.click(); // Trigger phase switch
-                    } else {
-                        setPhase('speak'); // Fallback
-                    }
-                }
 
                 function goToReadStep(step) {
                     currentReadStep = step;
@@ -3292,7 +3233,7 @@
                 function renderMediaCardsList(items, isGrid = false) {
                     const itemsJson = encodeURIComponent(JSON.stringify(items));
                     return items.map((item, idx) => {
-                        let thumbnailHtml = `<img src="${item.thumb}" class="w-full h-full object-cover">`;
+                        let thumbnailHtml = `<img src="${item.thumb}" onerror="this.src='https://api.dicebear.com/7.x/shapes/svg?seed=${item.id}'" class="w-full h-full object-cover">`;
                         
                         // Rule 2: Greeting Media Thumbnail (Actual first frame of video)
                         if (item.type === 'Greeting') {

@@ -97,10 +97,18 @@ const ReadSection: React.FC<ReadSectionProps> = ({ book, onClose }) => {
         setFilteredScenes(scenes);
     }, [book.id]);
 
-    // Auto-play audio on scene change
+    // Auto-play audio on scene change or stop if narration off
     useEffect(() => {
-        if (readStep === 'viewing' && narrationOn && !isSettingsOpen) {
-            playFullSceneAudio();
+        if (readStep === 'viewing') {
+            if (narrationOn && !isSettingsOpen) {
+                playFullSceneAudio();
+            } else {
+                // If narration is off or settings open, ensure previous audio is stopped
+                if (audioRef.current) {
+                    audioRef.current.pause();
+                    setIsSceneAudioPlaying(false);
+                }
+            }
         }
     }, [currentSceneIndex, readStep]);
 
@@ -137,18 +145,29 @@ const ReadSection: React.FC<ReadSectionProps> = ({ book, onClose }) => {
 
     const playFullSceneAudio = () => {
         const scene = filteredScenes[currentSceneIndex];
-        if (!scene || !scene.full_audio) return;
+        if (!scene) return;
+
+        let audioUrl = scene.full_audio;
+        // Special case for Milo book (OG0021)
+        if (book.id === 'OG0021') {
+            const sceneNum = String(currentSceneIndex + 1).padStart(2, '0');
+            // Pattern: OG0021_SC01_N_A.mp3 (Original), OG0021_SC01_E_A.mp3 (Easy), OG0021_SC01_D_A.mp3 (Difficult)?
+            // For now, let's keep the logic ready as per user's request.
+            const diffSuffix = difficulty === 'Easy' ? '_E' : difficulty === 'Difficult' ? '_D' : '';
+            // Since there are no actual diff files yet, we fallback to Original if file not found (handled by browser/audio error)
+            // But user said "로직만 설정해둬", so we can use a conditional if files would exist.
+            audioUrl = `/Audio/OG0021(Milo and the Lost Color)/OG0021_SC${sceneNum}_N_A.mp3`;
+            
+            // Logic placeholder:
+            // if (difficulty !== 'Original') audioUrl = audioUrl.replace('_N_A.mp3', `_N${diffSuffix}_A.mp3`);
+        }
+        
+        if (!audioUrl) return;
+
         if (audioRef.current) audioRef.current.pause();
         if (unlockTimeoutRef.current) clearTimeout(unlockTimeoutRef.current);
-
-        // If narration is off, we still pause but don't start new audio
-        if (!narrationOn) {
-            setIsSceneAudioPlaying(false);
-            setUnlockedReadAloudScenes(prev => new Set(prev).add(currentSceneIndex));
-            return;
-        }
-
-        const audio = new Audio(scene.full_audio);
+        
+        const audio = new Audio(audioUrl);
         audioRef.current = audio;
 
         // Apply playback speed
@@ -187,11 +206,22 @@ const ReadSection: React.FC<ReadSectionProps> = ({ book, onClose }) => {
     };
 
     const playSentenceAudio = (index: number) => {
-        if (!narrationOn) return;
         const scene = filteredScenes[currentSceneIndex];
-        if (!scene || !scene.full_audio) return;
+        if (!scene) return;
+
+        let audioUrl = scene.full_audio;
+        // Special case for Milo book (OG0021)
+        if (book.id === 'OG0021') {
+            const sceneNum = String(currentSceneIndex + 1).padStart(2, '0');
+            audioUrl = `/Audio/OG0021(Milo and the Lost Color)/OG0021_SC${sceneNum}_N_A.mp3`;
+            // Logic placeholder for difficulty based sentence audio
+            // if (difficulty !== 'Original') ...
+        }
+        
+        if (!audioUrl) return;
+
         if (audioRef.current) audioRef.current.pause();
-        const audio = new Audio(scene.full_audio);
+        const audio = new Audio(audioUrl);
         audioRef.current = audio;
 
         // Apply playback speed
@@ -235,7 +265,13 @@ const ReadSection: React.FC<ReadSectionProps> = ({ book, onClose }) => {
 
                     <div className="flex items-center gap-6">
                         <button
-                            onClick={onClose}
+                            onClick={() => {
+                                if (audioRef.current) {
+                                    audioRef.current.pause();
+                                    audioRef.current = null;
+                                }
+                                onClose();
+                            }}
                             className="w-14 h-14 bg-slate-50 rounded-2xl border-4 border-white flex items-center justify-center text-slate-400 hover:bg-red-50 hover:text-red-500 hover:border-red-100 transition-all active:scale-95 group"
                         >
                             <X size={32} className="group-hover:rotate-90 transition-transform" />
@@ -356,7 +392,7 @@ const ReadSection: React.FC<ReadSectionProps> = ({ book, onClose }) => {
                                 <button
                                     onClick={(e) => {
                                         e.stopPropagation();
-                                        setIsDifficultyOpen(!isDifficultyOpen);
+                                        setIsDifficultyOpen(prev => !prev);
                                     }}
                                     className="flex items-center gap-3 px-6 py-4 rounded-3xl font-black text-xl shadow-xl transition-all border-4 bg-white/95 text-slate-800 border-white/20 backdrop-blur-md hover:bg-white active:scale-95 pointer-events-auto"
                                 >
@@ -384,8 +420,19 @@ const ReadSection: React.FC<ReadSectionProps> = ({ book, onClose }) => {
 
                         {filteredScenes[currentSceneIndex] && (
                             <div className={`absolute z-50 p-12 max-w-[1400px] transition-all duration-500 flex items-start gap-8 pointer-events-none ${getTextPositionClass(currentSceneIndex).replace('items-start', '').replace('items-end', '')} ${getTextPositionClass(currentSceneIndex).includes('left-') ? 'ml-32' : ''} ${getTextPositionClass(currentSceneIndex).includes('right-') ? 'mr-32' : ''}`}>
-                                <button onClick={(e) => { e.stopPropagation(); playFullSceneAudio(); }} className={`mt-40 w-14 h-14 bg-[#FF6B00] rounded-full shadow-lg flex items-center justify-center text-white hover:bg-[#FF8500] hover:scale-110 transition-all pointer-events-auto flex-shrink-0 ${isSceneAudioPlaying ? 'ring-4 ring-orange-300' : ''}`}>
-                                    <Play size={28} fill="currentColor" className="ml-1" />
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        if (isSceneAudioPlaying && audioRef.current) {
+                                            audioRef.current.pause();
+                                            setIsSceneAudioPlaying(false);
+                                        } else {
+                                            playFullSceneAudio();
+                                        }
+                                    }}
+                                    className={`mt-4 w-14 h-14 bg-[#FF6B00] rounded-full shadow-lg flex items-center justify-center text-white hover:bg-[#FF8500] hover:scale-110 transition-all pointer-events-auto flex-shrink-0 ${isSceneAudioPlaying ? 'ring-4 ring-orange-300' : ''}`}
+                                >
+                                    {isSceneAudioPlaying ? <div className="flex gap-1"><div className="w-1.5 h-6 bg-white rounded-full"></div><div className="w-1.5 h-6 bg-white rounded-full"></div></div> : <Play size={28} fill="currentColor" className="ml-1" />}
                                 </button>
                                 <div className={`flex-1 pointer-events-auto transition-opacity duration-300 ${isTextFading ? 'opacity-0' : 'opacity-100'}`}>
                                     <p className={`font-black text-white leading-[1.3] drop-shadow-2xl font-fredoka whitespace-pre-line ${getTextPositionClass(currentSceneIndex).includes('text-right') ? 'text-right' : 'text-left'} ${textSize === 'small' ? 'text-2xl md:text-3xl lg:text-4xl' :
@@ -571,19 +618,19 @@ const ReadSection: React.FC<ReadSectionProps> = ({ book, onClose }) => {
                                                     onClick={() => setTextSize('small')}
                                                     className={`flex-1 py-4 rounded-[16px] font-black border-2 transition-all ${textSize === 'small' ? 'bg-white text-black border-white shadow-xl' : 'bg-black text-white border-white/20 hover:border-white/40'}`}
                                                 >
-                                                    <span className="text-sm">작게</span>
+                                                    <span style={{ fontSize: '1rem' }}>TEXT</span>
                                                 </button>
                                                 <button
                                                     onClick={() => setTextSize('medium')}
                                                     className={`flex-1 py-4 rounded-[16px] font-black border-2 transition-all ${textSize === 'medium' ? 'bg-white text-black border-white shadow-xl' : 'bg-black text-white border-white/20 hover:border-white/40'}`}
                                                 >
-                                                    <span className="text-base">보통</span>
+                                                    <span style={{ fontSize: '1.4rem' }}>TEXT</span>
                                                 </button>
                                                 <button
                                                     onClick={() => setTextSize('large')}
                                                     className={`flex-1 py-4 rounded-[16px] font-black border-2 transition-all ${textSize === 'large' ? 'bg-white text-black border-white shadow-xl' : 'bg-black text-white border-white/20 hover:border-white/40'}`}
                                                 >
-                                                    <span className="text-xl">크게</span>
+                                                    <span style={{ fontSize: '2rem' }}>TEXT</span>
                                                 </button>
                                             </div>
                                         </div>

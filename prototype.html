@@ -742,7 +742,7 @@
 
             <!-- Settings Overlay -->
             <div id="settingsOverlay"
-                class="fixed inset-0 z-[12000] flex items-center justify-center hidden pointer-events-auto bg-transparent"
+                class="fixed inset-0 z-[40000] flex items-center justify-center hidden pointer-events-auto bg-transparent"
                 onclick="toggleSettings()">
                 <div class="glass-popup w-[560px] rounded-[60px] p-16 relative z-10 text-white font-fredoka pointer-events-auto animate-in fade-in zoom-in-95 duration-300"
                     onclick="event.stopPropagation()">
@@ -793,13 +793,13 @@
                             <span class="settings-label block text-left">Text Size</span>
                             <div class="flex gap-4 settings-btn-group">
                                 <button onclick="setTextSize('small')" id="text-small" class="flex-1">
-                                    <span class="text-sm">?게</span>
+                                    <span class="text-sm">TEXT</span>
                                 </button>
                                 <button onclick="setTextSize('medium')" id="text-medium" class="flex-1 active">
-                                    <span class="text-base">보통</span>
+                                    <span class="text-xl font-bold">TEXT</span>
                                 </button>
                                 <button onclick="setTextSize('large')" id="text-large" class="flex-1">
-                                    <span class="text-xl font-black">?게</span>
+                                    <span class="text-4xl font-black">TEXT</span>
                                 </button>
                             </div>
                         </div>
@@ -1844,7 +1844,7 @@
 
                         let script = baseScript;
                         if (currentDifficulty === 'Easy') script = `[Easy]\n${baseScript}`;
-                        if (currentDifficulty === 'Difficult') script = `[Difficult]\n${baseScript}`;
+                        else if (currentDifficulty === 'Difficult') script = `[Difficult]\n${baseScript}`;
 
                         const cleanScript = script.replace(/\\n/g, ' ').replace(/\n/g, ' ');
                         const sentences = cleanScript.split(/(?<=[.!?]) +/).filter(s => s.trim().length > 0);
@@ -1900,8 +1900,9 @@
                         <!-- Shared Text Overlay -->
                         <div class="absolute z-50 p-12 max-w-[1400px] transition-all duration-500 ease-in-out flex items-start gap-8 pointer-events-none ${positionClass.replace('items-start', '').replace('items-end', '')} ${positionClass.includes('left-') ? 'ml-32' : ''} ${positionClass.includes('right-') ? 'mr-32' : ''}">
                             <!-- Play Button -->
-                            <button onclick="event.stopPropagation(); playFullSceneAudio()" class="mt-40 w-14 h-14 bg-[#FF6B00] rounded-full shadow-[0_4px_15px_rgba(255,107,0,0.5)] flex items-center justify-center text-white hover:bg-[#FF8500] hover:scale-110 active:scale-95 transition-all pointer-events-auto flex-shrink-0 ${isSceneAudioPlaying ? 'ring-4 ring-orange-300' : ''}">
-                                <i data-lucide="play" class="w-8 h-8 ${isSceneAudioPlaying ? 'fill-current' : ''}"></i>
+                            <button onclick="event.stopPropagation(); if(isSceneAudioPlaying && currentAudio) { currentAudio.pause(); isSceneAudioPlaying=false; renderReadPhase(); } else { playFullSceneAudio(); }" 
+                                class="mt-4 w-14 h-14 bg-[#FF6B00] rounded-full shadow-[0_4px_15px_rgba(255,107,0,0.5)] flex items-center justify-center text-white hover:bg-[#FF8500] hover:scale-110 active:scale-95 transition-all pointer-events-auto flex-shrink-0 ${isSceneAudioPlaying ? 'ring-4 ring-orange-300' : ''}">
+                                ${isSceneAudioPlaying ? '<div class="flex gap-1"><div class="w-1.5 h-6 bg-white rounded-full"></div><div class="w-1.5 h-6 bg-white rounded-full"></div></div>' : '<i data-lucide="play" class="w-8 h-8 ml-1 fill-current"></i>'}
                             </button>
 
                             <div class="flex-1 pointer-events-auto transition-opacity duration-300 ${isTextFading ? 'opacity-0' : 'opacity-100'}">
@@ -1965,6 +1966,7 @@
 
                 window.prevScene = function () {
                     if (currentSceneIndex > 0) {
+                        stopAudio();
                         currentSceneIndex--;
                         renderReadPhase();
                     }
@@ -2182,6 +2184,7 @@
                 function exitLearningMode() {
                     const video = document.getElementById('studyVideo');
                     video.pause();
+                    stopAudio(); // Ensure scene audio is stopped
                     document.getElementById('learningModeOverlay').classList.remove('active');
                     setTimeout(() => {
                         document.getElementById('learningModeOverlay').classList.add('hidden');
@@ -2443,19 +2446,28 @@
                 function playFullSceneAudio() {
                     const scenes = mockScenes.filter(s => s.id === currentModalBookId);
                     const scene = scenes[currentSceneIndex];
-                    if (!scene || !scene.full_audio) return;
+                    if (!scene) return;
+
+                    let audioUrl = scene.full_audio;
+                    // Special case for Milo book (OG0021)
+                    if (currentModalBookId === 'OG0021') {
+                        const sceneNum = String(currentSceneIndex + 1).padStart(2, '0');
+                        // Pattern: OG0021_SC01_N_A.mp3 (Original), OG0021_SC01_E_A.mp3 (Easy), OG0021_SC01_D_A.mp3 (Difficult)?
+                        // Logic placeholder as per user's request.
+                        const diffSuffix = currentDifficulty === 'Easy' ? '_E' : currentDifficulty === 'Difficult' ? '_D' : '';
+                        audioUrl = `./public/Audio/OG0021(Milo and the Lost Color)/OG0021_SC${sceneNum}_N_A.mp3`;
+                        
+                        // Placeholder for future implementation:
+                        // if (currentDifficulty !== 'Original') audioUrl = audioUrl.replace('_N_A.mp3', `_N${diffSuffix}_A.mp3`);
+                    }
+
+                    if (!audioUrl) return;
 
                     if (unlockReadAloudTimeout) clearTimeout(unlockReadAloudTimeout);
 
-                    if (!isNarrationOn) { // [NEW] Stop if narration is off and unlock Read Aloud
-                        unlockedReadAloudScenes.add(currentSceneIndex);
-                        renderReadPhase();
-                        return;
-                    }
-
                     if (currentAudio) currentAudio.pause();
 
-                    currentAudio = new Audio(scene.full_audio);
+                    currentAudio = new Audio(audioUrl);
 
                     // [NEW] Apply narration speed
                     const playbackRate = narrationSpeed === 'slow' ? 0.75 : narrationSpeed === 'fast' ? 1.5 : 1.0;
@@ -2499,14 +2511,24 @@
                 }
 
                 function playSentenceAudio(index) {
-                    if (!isNarrationOn) return; // [NEW] Stop if narration is off
                     const scenes = mockScenes.filter(s => s.id === currentModalBookId);
                     const scene = scenes[currentSceneIndex];
-                    if (!scene || !scene.full_audio) return;
+                    if (!scene) return;
+
+                    let audioUrl = scene.full_audio;
+                    // Special case for Milo book (OG0021)
+                    if (currentModalBookId === 'OG0021') {
+                        const sceneNum = String(currentSceneIndex + 1).padStart(2, '0');
+                        audioUrl = `./public/Audio/OG0021(Milo and the Lost Color)/OG0021_SC${sceneNum}_N_A.mp3`;
+                        // Logic placeholder for difficulty based sentence audio
+                        // if (currentDifficulty !== 'Original') ...
+                    }
+
+                    if (!audioUrl) return;
 
                     if (currentAudio) currentAudio.pause();
 
-                    currentAudio = new Audio(scene.full_audio);
+                    currentAudio = new Audio(audioUrl);
 
                     // [NEW] Apply narration speed
                     const playbackRate = narrationSpeed === 'slow' ? 0.75 : narrationSpeed === 'fast' ? 1.5 : 1.0;

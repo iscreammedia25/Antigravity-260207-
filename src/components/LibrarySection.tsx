@@ -171,6 +171,21 @@ const LibrarySection: React.FC<LibrarySectionProps> = ({ userName, onViewInfo, o
                                 <div className="w-full aspect-[3/4] bg-white/10 rounded-[40px] overflow-hidden relative group-hover:scale-105 transition-all duration-300 border-4 border-transparent group-hover:border-[#fbbf24]/50 shadow-2xl">
                                     <img src={book.src} alt={book.title} className="w-full h-full object-cover" />
                                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                                    
+                                    {/* Circular Heart Button */}
+                                    <button 
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            book.isBookmarked = !book.isBookmarked;
+                                            // Force re-render if needed, but for now we'll rely on the parent or next render
+                                            (e.currentTarget.querySelector('svg') as any).classList.toggle('fill-current');
+                                            (e.currentTarget.querySelector('svg') as any).classList.toggle('text-rose-500');
+                                            (e.currentTarget.querySelector('svg') as any).classList.toggle('text-slate-300');
+                                        }}
+                                        className="absolute bottom-4 right-4 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg border-2 border-white hover:scale-110 active:scale-95 transition-all z-20"
+                                    >
+                                        <Heart className={`w-5 h-5 transition-colors ${book.isBookmarked ? 'fill-current text-rose-500' : 'text-slate-300'}`} />
+                                    </button>
                                 </div>
                                 <h4 className="mt-4 text-center text-xl font-black text-slate-200 font-jua group-hover:text-[#fbbf24] transition-colors leading-tight px-2">{book.title}</h4>
                             </div>
@@ -205,7 +220,7 @@ const mockMediaData = BOOKS_DATA.map(book => {
     const movie: MediaItem = { 
         id: `${book.id}__movie`, bookId: book.id, type: 'Movie Book', title: `${book.title} Movie`, 
         src: book.videoUrl || '/Video/the_silent_stick_watch.mp4', 
-        thumbnail: movieThumb, 
+        thumbnail: `${folderPath}/${book.id}_SC01_I.png`, 
         duration: '05:45', isUnplayed: hash % 3 === 0, bookTitle: book.title 
     };
     const audio: MediaItem = { 
@@ -567,13 +582,25 @@ const OriginalLibrarySlider: React.FC<Pick<LibrarySectionProps, 'userName' | 'on
                         <div key={book.id} onClick={() => onViewInfo(book, 'recommendation')} className="w-36 md:w-40 flex-shrink-0 group cursor-pointer space-y-3 relative select-none">
                             <div className="aspect-[3/4] bg-slate-50 rounded-[32px] shadow-sm border-[4px] border-white group-hover:border-sky-300 transition-all group-hover:-translate-y-3 group-hover:shadow-2xl group-hover:shadow-sky-100 overflow-hidden relative">
                                 <img src={book.src} alt={book.title} className="w-full h-full object-cover pointer-events-none" />
-                                {book.isBookmarked && (
-                                    <div className="absolute top-0 left-4 z-10 transition-transform group-hover:scale-110">
-                                        <div className="w-10 h-12 flex items-center justify-center pt-1 pb-4 rounded-b-xl border-2 border-t-0 border-white shadow-md transition-all bg-rose-500 text-white">
-                                            <Heart className="w-6 h-6 fill-current" />
-                                        </div>
-                                    </div>
-                                )}
+                                {/* Heart Icon Badge/Button */}
+                                <div className="absolute bottom-3 right-3 z-10 transition-transform group-hover:scale-110">
+                                    <button 
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            book.isBookmarked = !book.isBookmarked;
+                                            // Force re-render simple toggle
+                                            const icon = e.currentTarget.querySelector('svg');
+                                            if (icon) {
+                                                icon.classList.toggle('fill-current');
+                                                e.currentTarget.classList.toggle('text-rose-500');
+                                                e.currentTarget.classList.toggle('text-slate-300');
+                                            }
+                                        }}
+                                        className={`w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-lg border-2 border-white transition-all active:scale-95 ${book.isBookmarked ? 'text-rose-500' : 'text-slate-300'}`}
+                                    >
+                                        <Heart className={`w-6 h-6 transition-colors ${book.isBookmarked ? 'fill-current' : ''}`} />
+                                    </button>
+                                </div>
                             </div>
                             <p className="text-[10px] font-black text-center text-slate-400 truncate px-4 uppercase tracking-[0.15em] group-hover:text-sky-400 transition-colors font-fredoka">{book.title}</p>
                         </div>

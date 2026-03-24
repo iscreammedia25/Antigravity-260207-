@@ -19,7 +19,7 @@ export interface SceneData {
     sent_audios?: string[];
 }
 
-export type LearningPhase = 'watch' | 'read' | 'quiz' | 'speak';
+export type LearningPhase = 'word' | 'read' | 'quiz' | 'speak';
 
 export interface ReadingHistory {
     bookId: string;

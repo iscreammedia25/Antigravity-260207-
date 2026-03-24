@@ -13,6 +13,54 @@ export interface Book {
 
 export const BOOKS_DATA: Book[] = [
     {
+        id: 'CS0003',
+        title: 'Hans in Luck',
+        src: '/Image/Cover/CS0003(Hans in Luck).png',
+        lexile: '200~280',
+        wordCount: 115,
+        category: 'Adventure 🗺️',
+        summary: 'Hans trades his way home, finding happiness in everything he gets along the way.',
+        keywords: ['hans', 'luck', 'trade', 'happy'],
+        isBookmarked: true,
+        videoUrl: '/Video/Book/Intro/CS0003(Hans in Luck)/CS0003(Hans in Luck)_Intro.mp4'
+    },
+    {
+        id: 'OG0021',
+        title: 'Milo and the Lost Color',
+        src: '/Image/Cover/OG0021(Milo and the Lost Color).png',
+        lexile: '320~380',
+        wordCount: 160,
+        category: 'Animals 🐶',
+        summary: 'Milo is a dog with a very big imagination. Every time he goes for a walk, he sees a world full of dragons.',
+        keywords: ['dog', 'dream', 'adventure', 'wild'],
+        isBookmarked: true,
+        videoUrl: '/Video/Book/Intro/OG0021(Milo and the Lost Color)/OG0021(Milo and the Lost Color)_Intro.mp4'
+    },
+    {
+        id: 'OG0046',
+        title: 'The Silent Stick',
+        src: '/Image/Cover/OG0046(The Silent Stick).png',
+        lexile: '250~320',
+        wordCount: 130,
+        category: 'Adventure 🗺️',
+        summary: "A magic stick that doesn't make a sound helps a quiet boy find his way through a mysterious forest.",
+        keywords: ['magic', 'quiet', 'forest', 'path'],
+        isBookmarked: true,
+        videoUrl: '/Video/Book/Intro/OG0046(The Silent Stick)/OG0046(The Silent Stick)_Intro.mp4'
+    },
+    {
+        id: 'OG0050',
+        title: 'The Rainbow Cloud in the Box',
+        src: '/Image/Cover/OG0050(The Rainbow Cloud in the Box).png',
+        lexile: '350~400',
+        wordCount: 180,
+        category: 'Fantasy ✨',
+        summary: 'A magical cloud that rains colors instead of water changes everything in the gray city of Grumbletown.',
+        keywords: ['magic', 'cloud', 'color', 'happy'],
+        isBookmarked: true,
+        videoUrl: '/Video/Book/Intro/OG0050(The Rainbow Cloud in the Box)/OG0050(The Rainbow Cloud in the Box)_Intro.mp4'
+    },
+    {
         id: 'OG00XX_missing_planet',
         title: 'The Missing Planet',
         src: '/Image/Cover/OG00XX(The Missing Planet).png',
@@ -61,18 +109,6 @@ export const BOOKS_DATA: Book[] = [
         videoUrl: ''
     },
     {
-        id: 'OG0046',
-        title: 'The Silent Stick',
-        src: '/Image/Cover/OG0046(The Silent Stick).png',
-        lexile: '250~320',
-        wordCount: 130,
-        category: 'Adventure 🗺️',
-        summary: "A magic stick that doesn't make a sound helps a quiet boy find his way through a mysterious forest.",
-        keywords: ['magic', 'quiet', 'forest', 'path'],
-        isBookmarked: false,
-        videoUrl: '/Video/Book/Intro/OG0046(The Silent Stick)/OG0046(The Silent Stick)_Intro.mp4'
-    },
-    {
         id: 'OG00XX_broken_branch',
         title: 'The Broken Branch',
         src: '/Image/Cover/OG00XX(The Broken Branch).png',
@@ -95,30 +131,6 @@ export const BOOKS_DATA: Book[] = [
         keywords: ['green', 'roll', 'kitchen', 'floor'],
         isBookmarked: false,
         videoUrl: ''
-    },
-    {
-        id: 'OG0021',
-        title: 'Milo and the Lost Color',
-        src: '/Image/Cover/OG0021(Milo and the Lost Color).png',
-        lexile: '320~380',
-        wordCount: 160,
-        category: 'Animals 🐶',
-        summary: 'Milo is a dog with a very big imagination. Every time he goes for a walk, he sees a world full of dragons.',
-        keywords: ['dog', 'dream', 'adventure', 'wild'],
-        isBookmarked: false,
-        videoUrl: '/Video/Book/Intro/OG0021(Milo and the Lost Color)/OG0021(Milo and the Lost Color)_Intro.mp4'
-    },
-    {
-        id: 'OG0050',
-        title: 'The Rainbow Cloud in the Box',
-        src: '/Image/Cover/OG0050(The Rainbow Cloud in the Box).png',
-        lexile: '350~400',
-        wordCount: 180,
-        category: 'Fantasy ✨',
-        summary: 'A magical cloud that rains colors instead of water changes everything in the gray city of Grumbletown.',
-        keywords: ['magic', 'cloud', 'color', 'happy'],
-        isBookmarked: true,
-        videoUrl: '/Video/Book/Intro/OG0050(The Rainbow Cloud in the Box)/OG0050(The Rainbow Cloud in the Box)_Intro.mp4'
     },
     {
         id: 'CS00XX_cindellar',
@@ -167,18 +179,6 @@ export const BOOKS_DATA: Book[] = [
         keywords: ['different', 'belong', 'lake', 'swan'],
         isBookmarked: false,
         videoUrl: ''
-    },
-    {
-        id: 'CS0003',
-        title: 'Hans in Luck',
-        src: '/Image/Cover/CS0003(Hans in Luck).png',
-        lexile: '200~280',
-        wordCount: 115,
-        category: 'Adventure 🗺️',
-        summary: 'Hans trades his way home, finding happiness in everything he gets along the way.',
-        keywords: ['hans', 'luck', 'trade', 'happy'],
-        isBookmarked: false,
-        videoUrl: '/Video/Book/Intro/CS0003(Hans in Luck)/CS0003(Hans in Luck)_Intro.mp4'
     },
     {
         id: 'CS00XX_thumbelina',

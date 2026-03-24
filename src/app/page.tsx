@@ -5,7 +5,7 @@ import { Bell, Menu, Play, Heart, X, Video, Maximize } from 'lucide-react';
 import HeroSection from '@/components/HeroSection';
 import LibrarySection from '@/components/LibrarySection';
 import MultiSection from '@/components/MultiSection';
-import WatchSection from '@/components/WatchSection';
+import WordSection from '@/components/WordSection';
 import ReadSection from '@/components/ReadSection';
 import { BOOKS_DATA, Book } from '@/data/books';
 import { ReadingHistory } from '@/types/learning';
@@ -13,23 +13,29 @@ import { getReadingHistory } from '@/utils/storage';
 
 export default function Home() {
     const userName = "Ami";
-    const [view, setView] = useState<'home' | 'watch' | 'read' | 'library'>('home');
+    const [view, setView] = useState<'home' | 'word' | 'read' | 'library'>('home');
     const [libraryTab, setLibraryTab] = useState<{ zone: string, subTab: string } | null>(null);
     const [currentBook, setCurrentBook] = useState<Book | null>(null);
     const [isDemoMode, setIsDemoMode] = useState(true);
 
-    // Mock History for Demo (Initial state: Silent Stick and Milo)
+    // Mock History for Demo (Initial state: Silent Stick, Hans, Milo)
     const mockHistory: ReadingHistory[] = [
         {
-            bookId: 'silent-stick',
-            currentPhase: 'read',
-            completedPhases: ['watch'],
+            bookId: 'OG0046',
+            currentPhase: 'word',
+            completedPhases: [],
             lastUpdateTime: Date.now() - 20000
         },
         {
-            bookId: 'milo',
+            bookId: 'CS0003',
+            currentPhase: 'read',
+            completedPhases: ['word'],
+            lastUpdateTime: Date.now() - 30000
+        },
+        {
+            bookId: 'OG0021',
             currentPhase: 'quiz',
-            completedPhases: ['watch', 'read'],
+            completedPhases: ['word', 'read'],
             lastUpdateTime: Date.now() - 10000
         }
     ];
@@ -39,7 +45,7 @@ export default function Home() {
     const [modalOrigin, setModalOrigin] = useState<'history' | 'recommendation'>('recommendation');
     const [isAddingBook, setIsAddingBook] = useState(false);
     const [animatingBook, setAnimatingBook] = useState<Book | null>(null);
-    const [freshHeroBook, setFreshHeroBook] = useState<Book | null>(null);
+    const [freshHeroBook, setFreshHeroBook] = useState<Book | null>(BOOKS_DATA.find(b => b.id === 'CS0003') || null);
 
     const [isFlashing, setIsFlashing] = useState(false);
     const [isPlayingInline, setIsPlayingInline] = useState(false);
@@ -146,7 +152,7 @@ export default function Home() {
                     // History Mode: Handle slot targeting
                     const newEntry: ReadingHistory = {
                         bookId: book.id,
-                        currentPhase: 'watch',
+                        currentPhase: 'word',
                         completedPhases: [],
                         lastUpdateTime: Date.now()
                     };
@@ -156,7 +162,7 @@ export default function Home() {
                     setReadingHistory(prev => {
                         const newHistory = [...prev];
                         while (newHistory.length <= finalTargetIndex) {
-                            newHistory.push({ bookId: '', currentPhase: 'watch' as any, completedPhases: [], lastUpdateTime: 0 });
+                            newHistory.push({ bookId: '', currentPhase: 'word', completedPhases: [], lastUpdateTime: 0 });
                         }
                         newHistory[finalTargetIndex] = newEntry;
                         return newHistory;
@@ -166,9 +172,9 @@ export default function Home() {
                     if (finalTargetIndex !== 1) {
                         setTimeout(() => {
                             setReadingHistory([
-                                { bookId: 'silent-stick', currentPhase: 'watch', completedPhases: [], lastUpdateTime: Date.now() - 1000 },
-                                { bookId: book.id, currentPhase: 'watch', completedPhases: [], lastUpdateTime: Date.now() },
-                                { bookId: 'milo', currentPhase: 'quiz', completedPhases: ['watch', 'read'], lastUpdateTime: Date.now() - 2000 }
+                                { bookId: 'silent-stick', currentPhase: 'word', completedPhases: [], lastUpdateTime: Date.now() - 1000 },
+                                { bookId: book.id, currentPhase: 'word', completedPhases: [], lastUpdateTime: Date.now() },
+                                { bookId: 'milo', currentPhase: 'quiz', completedPhases: ['word', 'read'], lastUpdateTime: Date.now() - 2000 }
                             ]);
                         }, 200); // eslint-disable-line no-magic-numbers
                     }
@@ -179,12 +185,14 @@ export default function Home() {
                 setTimeout(() => setIsFlashing(false), 5000);
 
                 // Auto-start learning after whoosh
+                const hasWordResources = ['milo', 'OG0021', 'hans-in-luck', 'CS0003'].includes(book.id);
                 setCurrentBook(book);
-                setView('watch');
+                setView(hasWordResources ? 'word' : 'read');
             }, 1000); // eslint-disable-line no-magic-numbers
         } else {
+            const hasWordResources = ['milo', 'OG0021', 'hans-in-luck', 'CS0003'].includes(book.id);
             setCurrentBook(book);
-            setView('watch');
+            setView(hasWordResources ? 'word' : 'read');
         }
     };
 
@@ -279,8 +287,8 @@ export default function Home() {
                         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
                             <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setSelectedBook(null)} />
                             <div className="card-bubble w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col relative z-50 animate-in zoom-in-95 duration-200">
-                                {/* Bookmark Ribbon - Stuck to Top */}
-                                <div className="absolute top-0 left-12 z-20 pointer-events-none">
+                                {/* Circular Bookmark Button */}
+                                <div className="absolute top-6 left-6 z-20 pointer-events-none">
                                     <button
                                         onClick={() => {
                                             if (selectedBook) {
@@ -288,19 +296,18 @@ export default function Home() {
                                                 if (originalBook) {
                                                     originalBook.isBookmarked = !originalBook.isBookmarked;
                                                     setSelectedBook({ ...originalBook });
-                                                    // Force a minimal re-render if needed, but the modal will update
                                                 }
                                             }
                                         }}
-                                        className={`w-16 h-24 flex items-center justify-center pt-2 pb-8 transition-all pointer-events-auto active:scale-95 shadow-xl rounded-b-3xl border-[6px] border-t-0 border-white bg-white ${selectedBook.isBookmarked ? 'text-rose-500' : 'text-slate-300'}`}
+                                        className={`w-14 h-14 flex items-center justify-center transition-all pointer-events-auto active:scale-95 shadow-xl rounded-full border-4 border-white bg-white ${selectedBook.isBookmarked ? 'text-rose-500' : 'text-slate-300'}`}
                                     >
-                                        <Heart className={`w-10 h-10 transition-colors ${selectedBook.isBookmarked ? 'fill-current' : ''}`} />
+                                        <Heart className={`w-8 h-8 transition-colors ${selectedBook.isBookmarked ? 'fill-current' : ''}`} />
                                     </button>
                                 </div>
 
                                 {/* Modal Header */}
                                 <div className="p-6 md:p-8 flex justify-between items-center border-b-[6px] border-slate-50">
-                                    <div className="w-16 h-12" /> {/* Spacer for Ribbon */}
+                                    <div className="w-14 h-14" /> {/* Spacer for Bookmark Button */}
                                     <h2 className="text-3xl md:text-4xl font-black text-slate-700 font-jua text-center flex-1 mx-4 truncate">
                                         {selectedBook.title}
                                     </h2>
@@ -338,13 +345,12 @@ export default function Home() {
                                                 />
                                             ) : (
                                                 <>
-                                                    <div
-                                                        className="absolute inset-0 group-hover:scale-105 transition-transform duration-700 ease-out"
-                                                        style={{
-                                                            backgroundImage: `url(${selectedBook.src})`,
-                                                            backgroundSize: 'cover',
-                                                            backgroundPosition: 'center',
-                                                        }}
+                                                    <video
+                                                        className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                                                        src={`${selectedBook.videoUrl}#t=0.001`}
+                                                        preload="metadata"
+                                                        muted
+                                                        playsInline
                                                     />
                                                     <div className="absolute inset-0 bg-slate-900/30 group-hover:bg-slate-900/20 transition-colors duration-300" />
                                                     <button
@@ -447,11 +453,12 @@ export default function Home() {
                 />
             )}
 
-            {view === 'watch' && currentBook && (
-                <WatchSection
+            {view === 'word' && currentBook && (
+                <WordSection
                     book={currentBook}
                     onNext={() => setView('read')}
                     onClose={() => setView('home')}
+                    onSwitchPhase={(phase) => setView(phase as any)}
                 />
             )}
 
@@ -459,6 +466,7 @@ export default function Home() {
                 <ReadSection
                     book={currentBook}
                     onClose={() => setView('home')}
+                    onSwitchPhase={(phase) => setView(phase as any)}
                 />
             )}
 

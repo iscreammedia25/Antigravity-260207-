@@ -21,34 +21,29 @@ const HeroSection: React.FC<HeroSectionProps> = ({ userName, readingHistory, fre
 
   // Prepare cards: Up to 3 history items OR 3 recommendations if Fresh mode
   const cards = isHistoryMode
-    ? (readingHistory.length === 2
-      ? [
-        { book: BOOKS_DATA.find(b => b.id === 'milo') || BOOKS_DATA[0], history: readingHistory.find(h => h.bookId === 'milo') || readingHistory[1] },
-        { book: BOOKS_DATA.find(b => b.id === 'silent-stick') || BOOKS_DATA[0], history: readingHistory.find(h => h.bookId === 'silent-stick') || readingHistory[0] },
-        { book: null as any, history: null as any } // Empty placeholder
-      ]
-      : readingHistory.slice(0, 3).map(h => ({
-        book: BOOKS_DATA.find(b => b.id === h.bookId) || BOOKS_DATA[0],
-        history: h
-      }))
-    )
+    ? readingHistory.slice(0, 3).map(h => ({
+      book: BOOKS_DATA.find(b => b.id === h.bookId) || BOOKS_DATA[0],
+      history: h
+    }))
     : [
-      { book: freshHeroBook || BOOKS_DATA.find(b => b.id === 'silent-stick') || BOOKS_DATA[0], history: null },
-      { book: BOOKS_DATA.find(b => b.id === 'missing-planet') || BOOKS_DATA[0], history: null },
-      { book: BOOKS_DATA.find(b => b.id === 'milo') || BOOKS_DATA[0], history: null },
+      { book: freshHeroBook || BOOKS_DATA.find(b => b.id === 'CS0003') || BOOKS_DATA[0], history: null },
+      { book: BOOKS_DATA.find(b => b.id === 'OG00XX_missing_planet') || BOOKS_DATA[0], history: null },
+      { book: BOOKS_DATA.find(b => b.id === 'OG0021') || BOOKS_DATA[0], history: null },
     ];
 
-  // Initialize to center (Silent Stick) on mode enter
+  // Reset index when mode changes or history loads
   React.useEffect(() => {
-    if (isHistoryMode) {
+    if (isHistoryMode && readingHistory.length >= 2) {
       setCurrentIndex(1);
+    } else if (!isHistoryMode) {
+      setCurrentIndex(0);
     }
-  }, [isHistoryMode]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [isHistoryMode, readingHistory.length]);
 
-  const currentCard = cards[currentIndex];
-  const { book, history } = currentCard || { book: BOOKS_DATA[0], history: null };
+  const currentCard = cards[currentIndex] || { book: BOOKS_DATA[0], history: null };
+  const { book, history } = currentCard;
 
-  const phases: LearningPhase[] = ['watch', 'read', 'quiz', 'speak'];
+  const phases: LearningPhase[] = ['word', 'read', 'quiz', 'speak'];
   const completedCount = history ? history.completedPhases.length : 0;
   const progressPercent = (completedCount / phases.length) * 100;
 

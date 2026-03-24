@@ -561,10 +561,6 @@ const LearningMode: React.FC<LearningModeProps> = ({
                                         <img src="/Image/Book/OG_0001(The Silent Stick)_lv4/OG_0001(The Silent Stick)_lv4_SC01.png" alt="scene-bg" className="w-full h-full object-cover" />
                                     </div>
 
-                                    <div className="absolute top-20 left-1/2 -translate-x-1/2 px-16 py-6 bg-white/70 backdrop-blur-md rounded-[32px] shadow-2xl border-4 border-white/20">
-                                        <h1 className="text-7xl font-black text-slate-900 font-fredoka tracking-tight">{book.title}</h1>
-                                    </div>
-
                                     <div className="absolute bottom-12 left-12 w-[580px] bg-white/70 backdrop-blur-md rounded-[48px] shadow-2xl p-12 flex flex-col gap-6 border-4 border-white/30">
                                         <div className="flex gap-4">
                                             <span className="px-5 py-2 bg-white rounded-2xl text-slate-900 font-black text-xl border-2 border-slate-200 uppercase tracking-tight">{readingMode}</span>

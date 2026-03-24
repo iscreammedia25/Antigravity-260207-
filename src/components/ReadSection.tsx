@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { X, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Play, Book as BookIcon, Check, Video, BookOpen, HelpCircle, MessageCircle, Settings, Volume2, Mic } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Play, Book as BookIcon, Check, Video, BookOpen, HelpCircle, MessageCircle, Settings, Volume2, Mic, RotateCw, Lock } from 'lucide-react';
 import { Book } from '../data/books';
 import { ReadingMode, ReadStep, SceneData } from '../types/learning';
 import { MOCK_BOOK_META, MOCK_SCENES_DATA } from '../data/mockData';
@@ -8,9 +8,10 @@ import { convertDriveLink } from '../utils/googleDrive';
 interface ReadSectionProps {
     book: Book;
     onClose: () => void;
+    onSwitchPhase?: (phase: string) => void;
 }
 
-const ReadSection: React.FC<ReadSectionProps> = ({ book, onClose }) => {
+const ReadSection: React.FC<ReadSectionProps> = ({ book, onClose, onSwitchPhase }) => {
     const [readStep, setReadStep] = useState<ReadStep>('selection');
     const [readingMode, setReadingMode] = useState<ReadingMode | null>(null);
     const [currentSceneIndex, setCurrentSceneIndex] = useState(0);
@@ -157,16 +158,16 @@ const ReadSection: React.FC<ReadSectionProps> = ({ book, onClose }) => {
             // Since there are no actual diff files yet, we fallback to Original if file not found (handled by browser/audio error)
             // But user said "로직만 설정해둬", so we can use a conditional if files would exist.
             audioUrl = `/Audio/OG0021(Milo and the Lost Color)/OG0021_SC${sceneNum}_N_A.mp3`;
-            
+
             // Logic placeholder:
             // if (difficulty !== 'Original') audioUrl = audioUrl.replace('_N_A.mp3', `_N${diffSuffix}_A.mp3`);
         }
-        
+
         if (!audioUrl) return;
 
         if (audioRef.current) audioRef.current.pause();
         if (unlockTimeoutRef.current) clearTimeout(unlockTimeoutRef.current);
-        
+
         const audio = new Audio(audioUrl);
         audioRef.current = audio;
 
@@ -217,7 +218,7 @@ const ReadSection: React.FC<ReadSectionProps> = ({ book, onClose }) => {
             // Logic placeholder for difficulty based sentence audio
             // if (difficulty !== 'Original') ...
         }
-        
+
         if (!audioUrl) return;
 
         if (audioRef.current) audioRef.current.pause();
@@ -250,7 +251,7 @@ const ReadSection: React.FC<ReadSectionProps> = ({ book, onClose }) => {
     };
 
     return (
-        <div className="fixed inset-0 z-[100] bg-black flex flex-col select-none overflow-hidden animate-in slide-in-from-bottom duration-500">
+        <div className="fixed inset-0 z-[100] bg-slate-900 flex flex-col select-none overflow-hidden transition-all duration-500">
             {/* GNB */}
             <div className={`fixed top-0 inset-x-0 z-50 transition-transform duration-300 ease-in-out ${isGnbVisible ? 'translate-y-0' : '-translate-y-full'}`}>
                 <nav className="h-24 bg-white/95 backdrop-blur-md border-b-2 border-slate-100 flex items-center justify-between px-8 shadow-xl relative">
@@ -261,6 +262,30 @@ const ReadSection: React.FC<ReadSectionProps> = ({ book, onClose }) => {
                         <h1 className="text-2xl font-black text-slate-700 font-jua truncate max-w-[300px]">
                             {book.title}
                         </h1>
+                    </div>
+
+                    <div className="flex bg-slate-100/80 backdrop-blur-sm p-1.5 rounded-[22px] border border-white/50 shadow-inner overflow-hidden">
+                        <button
+                            disabled={!['milo', 'OG0021', 'hans-in-luck', 'CS0003'].includes(book.id)}
+                            onClick={() => onSwitchPhase && onSwitchPhase('word')}
+                            className={`relative px-6 py-2.5 rounded-[18px] text-sm font-black transition-all flex items-center gap-2 group overflow-hidden ${!['milo', 'OG0021', 'hans-in-luck', 'CS0003'].includes(book.id) ? 'opacity-40 grayscale cursor-not-allowed text-slate-400' : 'text-slate-400 hover:text-slate-700'}`}
+                        >
+                            <RotateCw size={16} />
+                            Word
+                        </button>
+                        <button
+                            className="relative px-6 py-2.5 rounded-[18px] text-sm font-black transition-all flex items-center gap-2 group overflow-hidden bg-white text-orange-500 shadow-sm"
+                        >
+                            <BookOpen size={16} />
+                            Read
+                        </button>
+                        <button
+                            disabled
+                            className="relative px-6 py-2.5 rounded-[18px] text-sm font-black transition-all flex items-center gap-2 group overflow-hidden opacity-40 grayscale cursor-not-allowed text-slate-400"
+                        >
+                            <Lock size={16} />
+                            Quiz
+                        </button>
                     </div>
 
                     <div className="flex items-center gap-6">
@@ -309,7 +334,7 @@ const ReadSection: React.FC<ReadSectionProps> = ({ book, onClose }) => {
 
                 {/* Selection Step */}
                 {readStep === 'selection' && (
-                    <div className="relative z-10 flex-1 flex flex-col items-center justify-center animate-in fade-in duration-500">
+                    <div className="relative z-20 flex-1 flex flex-col items-center justify-center p-8">
                         <div className="relative z-20 w-full max-w-4xl bg-white rounded-[48px] shadow-2xl p-12 flex flex-col items-center gap-12">
                             <div className="flex gap-8 w-full">
                                 <button onClick={() => { setReadingMode('ebook'); setNarrationOn(false); setPageTurnOn(false); }} className={`flex-1 group transition-all duration-300`}>
@@ -337,9 +362,6 @@ const ReadSection: React.FC<ReadSectionProps> = ({ book, onClose }) => {
                 {/* Intro Step */}
                 {readStep === 'intro' && (
                     <div className="relative z-10 flex-1 flex flex-col animate-in fade-in duration-500">
-                        <div className="absolute top-20 left-1/2 -translate-x-1/2 px-16 py-6 bg-white/70 backdrop-blur-md rounded-[32px] shadow-2xl border-4 border-white/20">
-                            <h1 className="text-7xl font-black text-slate-900 font-fredoka tracking-tight">{book.title}</h1>
-                        </div>
                         <div className="absolute bottom-12 left-12 w-[580px] bg-white/70 backdrop-blur-md rounded-[48px] shadow-2xl p-12 flex flex-col gap-6 border-4 border-white/30">
                             <div className="flex gap-4">
                                 <span className="px-5 py-2 bg-white rounded-2xl text-slate-900 font-black text-xl border-2 border-slate-200 uppercase">{readingMode}</span>

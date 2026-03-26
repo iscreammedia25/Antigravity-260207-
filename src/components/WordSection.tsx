@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { X, ChevronRight, Volume2, RotateCw, BookOpen, Lock } from 'lucide-react';
+import { X, ChevronRight, Volume2, RotateCw, BookOpen, Lock, MessageCircle } from 'lucide-react';
 import { Book } from '../data/books';
 import { speakWithElevenLabs } from '../utils/elevenlabs';
 
@@ -100,7 +100,7 @@ const WordSection: React.FC<WordSectionProps> = ({ book, onNext, onClose, onSwit
                     return next;
                 });
                 setVisibleLabel(currentCard.wordLabel);
-            }, 2000);
+            }, 3000);
             return () => clearTimeout(timer);
         }
     }, [currentCardIndex, revealedIndices, currentCard.wordLabel]);
@@ -114,18 +114,18 @@ const WordSection: React.FC<WordSectionProps> = ({ book, onNext, onClose, onSwit
 
     // TTS Logic (Immediate on reveal front)
     const playTTS = async () => {
-        const voiceId = getVoiceId();
-        // Try ElevenLabs first
-        const audioUrl = await speakWithElevenLabs(currentCard.wordLabel, voiceId);
-        if (audioUrl) {
-            if (audioRef.current) audioRef.current.pause();
-            const audio = new Audio(audioUrl);
-            audioRef.current = audio;
-            audio.play().catch(e => console.error("ElevenLabs Play Error:", e));
-            return;
-        }
+        // const voiceId = getVoiceId();
+        // // Try ElevenLabs first
+        // const audioUrl = await speakWithElevenLabs(currentCard.wordLabel, voiceId);
+        // if (audioUrl) {
+        //     if (audioRef.current) audioRef.current.pause();
+        //     const audio = new Audio(audioUrl);
+        //     audioRef.current = audio;
+        //     audio.play().catch(e => console.error("ElevenLabs Play Error:", e));
+        //     return;
+        // }
 
-        // Fallback to Browser TTS
+        // Fallback to Browser TTS (Temporarily made Primary)
         if ('speechSynthesis' in window) {
             window.speechSynthesis.cancel();
             const utterance = new SpeechSynthesisUtterance(currentCard.wordLabel);
@@ -136,18 +136,18 @@ const WordSection: React.FC<WordSectionProps> = ({ book, onNext, onClose, onSwit
     };
 
     const playSubtitleTTS = async () => {
-        const voiceId = getVoiceId();
-        // Try ElevenLabs first
-        const audioUrl = await speakWithElevenLabs(currentCard.subtitle, voiceId);
-        if (audioUrl) {
-            if (audioRef.current) audioRef.current.pause();
-            const audio = new Audio(audioUrl);
-            audioRef.current = audio;
-            audio.play().catch(e => console.error("ElevenLabs Subtitle Play Error:", e));
-            return;
-        }
+        // const voiceId = getVoiceId();
+        // // Try ElevenLabs first
+        // const audioUrl = await speakWithElevenLabs(currentCard.subtitle, voiceId);
+        // if (audioUrl) {
+        //     if (audioRef.current) audioRef.current.pause();
+        //     const audio = new Audio(audioUrl);
+        //     audioRef.current = audio;
+        //     audio.play().catch(e => console.error("ElevenLabs Subtitle Play Error:", e));
+        //     return;
+        // }
 
-        // Fallback to Browser TTS
+        // Fallback to Browser TTS (Temporarily made Primary)
         if ('speechSynthesis' in window) {
             window.speechSynthesis.cancel();
             const utterance = new SpeechSynthesisUtterance(currentCard.subtitle);
@@ -158,11 +158,13 @@ const WordSection: React.FC<WordSectionProps> = ({ book, onNext, onClose, onSwit
     };
 
     useEffect(() => {
+        // [TTS Auto-play Restored]
+        // Automatic playback for Vocabulary word label (front) and subtitle (back)
         if (!isFlipped) {
-            // Tiny delay to ensure browser speech engine is ready
+            // Use 500ms delay on mount to ensure speech engine is ready
             const timer = setTimeout(() => {
                 playTTS();
-            }, 100);
+            }, 500);
             return () => clearTimeout(timer);
         } else {
             // Play subtitle TTS when flipped to back
@@ -239,14 +241,21 @@ const WordSection: React.FC<WordSectionProps> = ({ book, onNext, onClose, onSwit
                         className="relative px-6 py-2.5 rounded-[18px] text-sm font-black transition-all flex items-center gap-2 group overflow-hidden bg-white text-orange-500 shadow-sm"
                     >
                         <RotateCw size={16} />
-                        Word
+                        Vocabulary
                     </button>
                     <button 
                         onClick={onNext}
                         className="relative px-6 py-2.5 rounded-[18px] text-sm font-black transition-all flex items-center gap-2 group overflow-hidden text-slate-400 hover:text-slate-700"
                     >
                         <BookOpen size={16} />
-                        Read
+                        Reading
+                    </button>
+                    <button 
+                        disabled
+                        className="relative px-6 py-2.5 rounded-[18px] text-sm font-black transition-all flex items-center gap-2 group overflow-hidden opacity-40 grayscale cursor-not-allowed text-slate-400"
+                    >
+                        <MessageCircle size={16} />
+                        Talking
                     </button>
                     <button 
                         disabled

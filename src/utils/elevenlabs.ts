@@ -1,4 +1,4 @@
-const DEFAULT_API_KEY = "sk_4050cfafb793966703cb8168c83b8b9807fb8186bd0e0f2e";
+const DEFAULT_API_KEY = "";
 
 /**
  * ElevenLabs TTS Utility

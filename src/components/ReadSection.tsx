@@ -61,6 +61,11 @@ const ReadSection: React.FC<ReadSectionProps> = ({ book, onClose, onSwitchPhase 
     const [isDifficultyOpen, setIsDifficultyOpen] = useState(false);
     const [isTextFading, setIsTextFading] = useState(false);
 
+    const [isReadAloudActive, setIsReadAloudActive] = useState(false);
+    const [readAloudMode, setReadAloudMode] = useState<'all' | 'sentence'>('all');
+    const [isRecording, setIsRecording] = useState(false);
+    const [hasRecorded, setHasRecorded] = useState(false);
+
     const handleDifficultyChange = (newDiff: 'Easy' | 'Original' | 'Difficult') => {
         setIsTextFading(true);
         setIsDifficultyOpen(false);
@@ -152,15 +157,8 @@ const ReadSection: React.FC<ReadSectionProps> = ({ book, onClose, onSwitchPhase 
         // Special case for Milo book (OG0021)
         if (book.id === 'OG0021') {
             const sceneNum = String(currentSceneIndex + 1).padStart(2, '0');
-            // Pattern: OG0021_SC01_N_A.mp3 (Original), OG0021_SC01_E_A.mp3 (Easy), OG0021_SC01_D_A.mp3 (Difficult)?
-            // For now, let's keep the logic ready as per user's request.
-            const diffSuffix = difficulty === 'Easy' ? '_E' : difficulty === 'Difficult' ? '_D' : '';
-            // Since there are no actual diff files yet, we fallback to Original if file not found (handled by browser/audio error)
-            // But user said "로직만 설정해둬", so we can use a conditional if files would exist.
-            audioUrl = `/Audio/OG0021(Milo and the Lost Color)/OG0021_SC${sceneNum}_N_A.mp3`;
-
-            // Logic placeholder:
-            // if (difficulty !== 'Original') audioUrl = audioUrl.replace('_N_A.mp3', `_N${diffSuffix}_A.mp3`);
+            // Pattern: /Audio/OG0021(Milo and the Lost Color)/Scene/OG0021_SC01_N_A.mp3
+            audioUrl = `/Audio/OG0021(Milo and the Lost Color)/Scene/OG0021_SC${sceneNum}_N_A.mp3`;
         }
 
         if (!audioUrl) return;
@@ -214,9 +212,9 @@ const ReadSection: React.FC<ReadSectionProps> = ({ book, onClose, onSwitchPhase 
         // Special case for Milo book (OG0021)
         if (book.id === 'OG0021') {
             const sceneNum = String(currentSceneIndex + 1).padStart(2, '0');
-            audioUrl = `/Audio/OG0021(Milo and the Lost Color)/OG0021_SC${sceneNum}_N_A.mp3`;
-            // Logic placeholder for difficulty based sentence audio
-            // if (difficulty !== 'Original') ...
+            const sentenceNum = String(index + 1).padStart(2, '0');
+            // Pattern: /Audio/OG0021(Milo and the Lost Color)/Sentence/OG0021_SC01_ST01_N_A.mp3
+            audioUrl = `/Audio/OG0021(Milo and the Lost Color)/Sentence/OG0021_SC${sceneNum}_ST${sentenceNum}_N_A.mp3`;
         }
 
         if (!audioUrl) return;
@@ -271,13 +269,20 @@ const ReadSection: React.FC<ReadSectionProps> = ({ book, onClose, onSwitchPhase 
                             className={`relative px-6 py-2.5 rounded-[18px] text-sm font-black transition-all flex items-center gap-2 group overflow-hidden ${!['milo', 'OG0021', 'hans-in-luck', 'CS0003'].includes(book.id) ? 'opacity-40 grayscale cursor-not-allowed text-slate-400' : 'text-slate-400 hover:text-slate-700'}`}
                         >
                             <RotateCw size={16} />
-                            Word
+                            Vocabulary
                         </button>
                         <button
                             className="relative px-6 py-2.5 rounded-[18px] text-sm font-black transition-all flex items-center gap-2 group overflow-hidden bg-white text-orange-500 shadow-sm"
                         >
                             <BookOpen size={16} />
-                            Read
+                            Reading
+                        </button>
+                        <button
+                            disabled
+                            className="relative px-6 py-2.5 rounded-[18px] text-sm font-black transition-all flex items-center gap-2 group overflow-hidden opacity-40 grayscale cursor-not-allowed text-slate-400"
+                        >
+                            <MessageCircle size={16} />
+                            Talking
                         </button>
                         <button
                             disabled
@@ -317,17 +322,35 @@ const ReadSection: React.FC<ReadSectionProps> = ({ book, onClose, onSwitchPhase 
             <div className="flex-1 flex flex-col relative overflow-hidden">
                 {/* Background Layer */}
                 {readStep === 'viewing' && filteredScenes[currentSceneIndex] ? (
-                    <img
-                        src={filteredScenes[currentSceneIndex].image_url.startsWith('http') ? convertDriveLink(filteredScenes[currentSceneIndex].image_url) : filteredScenes[currentSceneIndex].image_url}
-                        alt="scene"
-                        className="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000"
-                    />
+                    readingMode === 'interactive' && book.id === 'OG0021' ? (
+                        <video
+                            key={`video-${currentSceneIndex}`}
+                            autoPlay
+                            loop
+                            muted
+                            playsInline
+                            preload="auto"
+                            className="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000"
+                        >
+                            <source src={`/Image/Book/OG0021(Milo and the Lost Color)/ani-book/OG0021_${filteredScenes[currentSceneIndex].scene_no}_V.mp4`} type="video/mp4" />
+                        </video>
+                    ) : (
+                        <img
+                            src={
+                                book.id === 'OG0021' 
+                                ? `/Image/Book/OG0021(Milo and the Lost Color)/e-book/OG0021_${filteredScenes[currentSceneIndex].scene_no}_I.png` 
+                                : (filteredScenes[currentSceneIndex].image_url.startsWith('http') ? convertDriveLink(filteredScenes[currentSceneIndex].image_url) : filteredScenes[currentSceneIndex].image_url)
+                            }
+                            alt="scene"
+                            className="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000"
+                        />
+                    )
                 ) : (
                     <div
                         className="absolute inset-0 bg-cover bg-center transition-all duration-1000"
                         style={{
-                            backgroundImage: `url(${convertDriveLink(MOCK_BOOK_META.cover_url)})`,
-                            filter: 'brightness(0.3) blur(8px)'
+                            backgroundImage: `url(${book.id === 'OG0021' ? `/Image/Book/OG0021(Milo and the Lost Color)/OG0021_SC00_I.png` : convertDriveLink(MOCK_BOOK_META.cover_url)})`,
+                            filter: (readStep === 'intro' && book.id === 'OG0021') ? 'none' : 'brightness(0.3) blur(8px)'
                         }}
                     />
                 )}
@@ -389,9 +412,8 @@ const ReadSection: React.FC<ReadSectionProps> = ({ book, onClose, onSwitchPhase 
                 {readStep === 'viewing' && (
                     <div className="relative flex-1 flex flex-col" onClick={resetGnbTimer}>
                         {/* Read Aloud Button */}
-                        <div className={`absolute left-12 z-40 transition-all duration-300 ${isGnbVisible ? 'top-[120px]' : 'top-12'}`}>
+                        <div className={`absolute left-12 z-[200] transition-all duration-300 ${isGnbVisible ? 'top-[120px]' : 'top-12'}`}>
                             <button
-                                disabled={!isReadAloudUnlocked}
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     if (audioRef.current && !audioRef.current.paused) {
@@ -399,12 +421,12 @@ const ReadSection: React.FC<ReadSectionProps> = ({ book, onClose, onSwitchPhase 
                                         setIsSceneAudioPlaying(false);
                                     }
                                     if (unlockTimeoutRef.current) clearTimeout(unlockTimeoutRef.current);
-                                    console.log('Read Aloud Clicked');
+                                    setIsReadAloudActive(prev => !prev);
                                 }}
-                                className={`flex items-center gap-3 px-6 py-4 rounded-3xl font-black text-xl shadow-lg transition-all border-4 ${isReadAloudUnlocked ? 'bg-[#FF6B00] text-white border-orange-400' : 'bg-black/40 text-white/50 border-white/10 cursor-not-allowed backdrop-blur-md'}`}
+                                className={`flex items-center gap-3 px-6 py-4 rounded-3xl font-black text-xl shadow-lg transition-all border-4 ${isReadAloudActive ? 'bg-white text-orange-500 border-white' : 'bg-[#FF6B00] text-white border-orange-400'}`}
                             >
                                 <Mic size={28} />
-                                Read Aloud
+                                {isReadAloudActive ? 'Exit Read Aloud' : 'Read Aloud'}
                             </button>
                         </div>
 
@@ -440,33 +462,92 @@ const ReadSection: React.FC<ReadSectionProps> = ({ book, onClose, onSwitchPhase 
                             </div>
                         </div>
 
-                        {filteredScenes[currentSceneIndex] && (
+                         {filteredScenes[currentSceneIndex] && (
                             <div className={`absolute z-50 p-12 max-w-[1400px] transition-all duration-500 flex items-start gap-8 pointer-events-none ${getTextPositionClass(currentSceneIndex).replace('items-start', '').replace('items-end', '')} ${getTextPositionClass(currentSceneIndex).includes('left-') ? 'ml-32' : ''} ${getTextPositionClass(currentSceneIndex).includes('right-') ? 'mr-32' : ''}`}>
-                                <button
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        if (isSceneAudioPlaying && audioRef.current) {
-                                            audioRef.current.pause();
-                                            setIsSceneAudioPlaying(false);
-                                        } else {
-                                            playFullSceneAudio();
-                                        }
-                                    }}
-                                    className={`mt-4 w-14 h-14 bg-[#FF6B00] rounded-full shadow-lg flex items-center justify-center text-white hover:bg-[#FF8500] hover:scale-110 transition-all pointer-events-auto flex-shrink-0 ${isSceneAudioPlaying ? 'ring-4 ring-orange-300' : ''}`}
-                                >
-                                    {isSceneAudioPlaying ? <div className="flex gap-1"><div className="w-1.5 h-6 bg-white rounded-full"></div><div className="w-1.5 h-6 bg-white rounded-full"></div></div> : <Play size={28} fill="currentColor" className="ml-1" />}
-                                </button>
-                                <div className={`flex-1 pointer-events-auto transition-opacity duration-300 ${isTextFading ? 'opacity-0' : 'opacity-100'}`}>
-                                    <p className={`font-black text-white leading-[1.3] drop-shadow-2xl font-fredoka whitespace-pre-line ${getTextPositionClass(currentSceneIndex).includes('text-right') ? 'text-right' : 'text-left'} ${textSize === 'small' ? 'text-2xl md:text-3xl lg:text-4xl' :
+                                {!isReadAloudActive && (
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            if (isSceneAudioPlaying && audioRef.current) {
+                                                audioRef.current.pause();
+                                                setIsSceneAudioPlaying(false);
+                                            } else {
+                                                playFullSceneAudio();
+                                            }
+                                        }}
+                                        className={`mt-4 w-14 h-14 bg-[#FF6B00] rounded-full shadow-lg flex items-center justify-center text-white hover:bg-[#FF8500] hover:scale-110 transition-all pointer-events-auto flex-shrink-0 ${isSceneAudioPlaying ? 'ring-4 ring-orange-300' : ''}`}
+                                    >
+                                        {isSceneAudioPlaying ? <div className="flex gap-1"><div className="w-1.5 h-6 bg-white rounded-full"></div><div className="w-1.5 h-6 bg-white rounded-full"></div></div> : <Play size={28} fill="currentColor" className="ml-1" />}
+                                    </button>
+                                )}
+                                
+                                <div className={`transition-all duration-300 relative ${isReadAloudActive ? 'bg-white/90 p-10 rounded-[40px] shadow-2xl border-4 border-yellow-400' : 'p-0'} ${isTextFading ? 'opacity-0' : 'opacity-100'} pointer-events-auto`} style={{ minWidth: isReadAloudActive ? '800px' : 'auto', maxWidth: '1000px' }}>
+                                    {isReadAloudActive && (
+                                        <div className="absolute -top-16 left-10 flex items-center gap-4">
+                                            <div className="flex bg-slate-200 p-1 rounded-2xl shadow-lg border border-white">
+                                                <button onClick={() => setReadAloudMode('all')} className={`px-6 py-2 rounded-xl font-black transition-all ${readAloudMode === 'all' ? 'bg-white shadow text-slate-800' : 'text-slate-500'}`}>All</button>
+                                                <button onClick={() => setReadAloudMode('sentence')} className={`px-6 py-2 rounded-xl font-black transition-all ${readAloudMode === 'sentence' ? 'bg-white shadow text-slate-800' : 'text-slate-500'}`}>Sentence</button>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    <div id="viewing-script" className={`font-black font-fredoka whitespace-pre-line ${isReadAloudActive ? 'text-slate-800' : 'text-white drop-shadow-[0_4px_10px_rgba(0,0,0,0.8)]'} ${getTextPositionClass(currentSceneIndex).includes('text-right') ? 'text-right' : 'text-left'} ${textSize === 'small' ? 'text-2xl md:text-3xl lg:text-4xl' :
                                         textSize === 'large' ? 'text-5xl md:text-7xl lg:text-8xl' :
                                             'text-4xl md:text-5xl lg:text-6xl'
                                         }`}>
                                         {getDisplayScript().split(/(?<=[.!?]) +/).map((sentence, idx) => (
-                                            <span key={idx} onClick={(e) => { e.stopPropagation(); playSentenceAudio(idx); }} className={`cursor-pointer hover:text-orange-300 transition-all inline-block mr-4 mb-3 ${playingSentenceIndex === idx ? 'text-orange-400 scale-105' : ''}`}>
-                                                {sentence}
-                                            </span>
+                                            <div key={idx} className="leading-tight">
+                                                <span
+                                                    onClick={(e) => { e.stopPropagation(); playSentenceAudio(idx); }}
+                                                    className={`cursor-pointer transition-all inline px-1.5 rounded-xl ${isReadAloudActive ? (readAloudMode === 'all' ? 'bg-yellow-300/40 hover:bg-yellow-400/60' : 'bg-yellow-200/50 hover:bg-yellow-300') : 'hover:text-orange-300 text-white'} ${playingSentenceIndex === idx ? (isReadAloudActive ? 'bg-yellow-400 ring-2 ring-yellow-500 scale-105 shadow-lg' : 'text-orange-400 scale-105') : ''}`}
+                                                >
+                                                    {sentence.trim()}
+                                                </span>
+                                            </div>
                                         ))}
-                                    </p>
+                                    </div>
+
+                                    {/* Recording UI Bar - Absolute positioned to not shift text */}
+                                    {isReadAloudActive && (
+                                        <div className="absolute -bottom-24 left-0 right-0 flex items-center justify-between bg-white/95 backdrop-blur-md rounded-[30px] p-6 border-4 border-white shadow-2xl">
+                                            <div className="flex items-center gap-6">
+                                                <button 
+                                                    onClick={() => {
+                                                        if (isRecording) {
+                                                            setIsRecording(false);
+                                                            setHasRecorded(true);
+                                                        } else {
+                                                            setIsRecording(true);
+                                                            setHasRecorded(false);
+                                                        }
+                                                    }}
+                                                    className={`w-16 h-16 rounded-full flex items-center justify-center transition-all shadow-lg ${isRecording ? 'bg-slate-800 text-white animate-pulse' : 'bg-white text-orange-500 border-4 border-orange-400 hover:scale-110'}`}
+                                                >
+                                                    {isRecording ? <div className="w-6 h-6 bg-white rounded-sm" /> : <Mic size={32} />}
+                                                </button>
+                                                
+                                                <div className="flex items-end gap-1 h-12">
+                                                    {[...Array(20)].map((_, i) => (
+                                                        <div 
+                                                            key={i} 
+                                                            className={`w-1.5 bg-sky-400 rounded-full transition-all duration-300 ${isRecording ? 'animate-bounce' : 'h-2 opacity-30'}`}
+                                                            style={{ 
+                                                                height: isRecording ? `${Math.random() * 100}%` : '8px',
+                                                                animationDelay: `${i * 0.1}s` 
+                                                            }}
+                                                        />
+                                                    ))}
+                                                </div>
+                                            </div>
+
+                                            <button 
+                                                disabled={!hasRecorded || isRecording}
+                                                className={`w-14 h-14 rounded-full flex items-center justify-center transition-all ${hasRecorded && !isRecording ? 'bg-orange-500 text-white hover:scale-110 shadow-lg' : 'bg-slate-200 text-slate-400'}`}
+                                            >
+                                                <Play size={24} fill="currentColor" className="ml-1" />
+                                            </button>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         )}
@@ -488,6 +569,21 @@ const ReadSection: React.FC<ReadSectionProps> = ({ book, onClose, onSwitchPhase 
                                 <ChevronRight size={64} />
                             </button>
                         </div>
+
+                        {/* Final Navigation CTA in bottom-right (Talking) */}
+                        {readStep === 'viewing' && currentSceneIndex === filteredScenes.length - 1 && (
+                            <div className="absolute bottom-12 right-12 animate-in fade-in slide-in-from-right duration-500 delay-500 z-[120]">
+                                <button
+                                    onClick={() => setShowPraise(true)}
+                                    className="bg-sky-400 text-white pl-10 pr-6 py-5 rounded-[40px] flex items-center gap-6 shadow-2xl hover:bg-sky-500 active:scale-95 transition-all group pointer-events-auto"
+                                >
+                                    <span className="text-3xl font-black font-fredoka uppercase tracking-wider">Talking</span>
+                                    <div className="w-16 h-16 bg-white/20 rounded-3xl flex items-center justify-center group-hover:translate-x-2 transition-transform">
+                                        <ChevronRight size={44} strokeWidth={4} />
+                                    </div>
+                                </button>
+                            </div>
+                        )}
 
                         {/* Scene Picker Trigger */}
                         <button
@@ -523,7 +619,15 @@ const ReadSection: React.FC<ReadSectionProps> = ({ book, onClose, onSwitchPhase 
                                                 }}
                                                 className={`relative flex-shrink-0 w-72 aspect-video rounded-3xl overflow-hidden snap-start transition-all duration-300 ${idx === currentSceneIndex ? 'ring-6 ring-orange-500 scale-105 shadow-[0_0_50px_rgba(255,107,0,0.6)] z-10' : 'opacity-40 hover:opacity-100 ring-2 ring-white/10'} ${!isUnlocked ? 'grayscale cursor-not-allowed' : ''}`}
                                             >
-                                                <img src={scene.image_url.startsWith('http') ? convertDriveLink(scene.image_url) : scene.image_url} className="w-full h-full object-cover" />
+                                                <img 
+                                                    src={
+                                                        book.id === 'OG0021' 
+                                                        ? `/Image/Book/OG0021(Milo and the Lost Color)/e-book/OG0021_${scene.scene_no}_I.png` 
+                                                        : (scene.image_url.startsWith('http') ? convertDriveLink(scene.image_url) : scene.image_url)
+                                                    } 
+                                                    className="w-full h-full object-cover" 
+                                                    onError={(e) => (e.target as any).src = 'https://img.icons8.com/color/144/image.png'}
+                                                />
                                                 <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
                                                 <div className="absolute bottom-4 left-6 text-white font-black text-xl">Scene {String(idx + 1).padStart(2, '0')}</div>
                                                 {!isUnlocked && (

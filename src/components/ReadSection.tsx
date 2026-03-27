@@ -155,7 +155,7 @@ const ReadSection: React.FC<ReadSectionProps> = ({ book, onClose, onSwitchPhase 
 
         let audioUrl = scene.full_audio;
         // Special case for Milo book (OG0021)
-        if (book.id === 'OG0021') {
+        if (book.id === 'OG0021' || book.id === 'milo') {
             const sceneNum = String(currentSceneIndex + 1).padStart(2, '0');
             // Pattern: /Audio/OG0021(Milo and the Lost Color)/Scene/OG0021_SC01_N_A.mp3
             audioUrl = `/Audio/OG0021(Milo and the Lost Color)/Scene/OG0021_SC${sceneNum}_N_A.mp3`;
@@ -411,37 +411,62 @@ const ReadSection: React.FC<ReadSectionProps> = ({ book, onClose, onSwitchPhase 
                 {/* Viewing Step */}
                 {readStep === 'viewing' && (
                     <div className="relative flex-1 flex flex-col" onClick={resetGnbTimer}>
-                        {/* Read Aloud Button */}
-                        <div className={`absolute left-12 z-[200] transition-all duration-300 ${isGnbVisible ? 'top-[120px]' : 'top-12'}`}>
+                        {/* Action Buttons Top Row */}
+                        <div className={`absolute left-12 transition-all duration-300 z-[10000] pointer-events-auto flex items-center gap-8 ${isGnbVisible ? 'top-[120px]' : 'top-12'}`}>
+                            {/* Exit / Enter Read Aloud */}
                             <button
                                 onClick={(e) => {
                                     e.stopPropagation();
-                                    if (audioRef.current && !audioRef.current.paused) {
-                                        audioRef.current.pause();
-                                        setIsSceneAudioPlaying(false);
+                                    if (isReadAloudActive) {
+                                        setIsReadAloudActive(false);
+                                        setIsRecording(false);
+                                        setPlayingSentenceIndex(null);
+                                    } else {
+                                        if (audioRef.current && !audioRef.current.paused) {
+                                            audioRef.current.pause();
+                                            setIsSceneAudioPlaying(false);
+                                        }
+                                        if (unlockTimeoutRef.current) clearTimeout(unlockTimeoutRef.current);
+                                        setIsReadAloudActive(true);
                                     }
-                                    if (unlockTimeoutRef.current) clearTimeout(unlockTimeoutRef.current);
-                                    setIsReadAloudActive(prev => !prev);
                                 }}
-                                className={`flex items-center gap-3 px-6 py-4 rounded-3xl font-black text-xl shadow-lg transition-all border-4 ${isReadAloudActive ? 'bg-white text-orange-500 border-white' : 'bg-[#FF6B00] text-white border-orange-400'}`}
+                                className={`flex items-center justify-center gap-4 h-20 px-10 rounded-full font-black text-2xl shadow-xl transition-all border-[6px] pointer-events-auto hover:scale-105 active:scale-95 cursor-pointer shrink-0 ${isReadAloudActive ? 'bg-white text-[#FF6B00] border-white' : 'bg-[#FF6B00] text-white border-orange-300'}`}
                             >
-                                <Mic size={28} />
-                                {isReadAloudActive ? 'Exit Read Aloud' : 'Read Aloud'}
+                                <Mic size={32} strokeWidth={3} />
+                                <span className="font-fredoka tracking-wide whitespace-nowrap">{isReadAloudActive ? 'Exit Read Aloud' : 'Read Aloud'}</span>
                             </button>
+
+                            {/* All / Sentence Toggle (Only when Read Aloud is Active) */}
+                            {isReadAloudActive && (
+                                <div className="flex bg-white/90 backdrop-blur-sm p-2 rounded-full shadow-xl border-[6px] border-white pointer-events-auto h-20 items-center shrink-0">
+                                    <button 
+                                        onClick={(e) => { e.stopPropagation(); setReadAloudMode('all'); }} 
+                                        className={`px-10 h-full rounded-full font-black text-2xl transition-all pointer-events-auto cursor-pointer whitespace-nowrap ${readAloudMode === 'all' ? 'bg-[#FF6B00] text-white shadow-lg' : 'text-slate-500 hover:text-slate-800'}`}
+                                    >
+                                        All
+                                    </button>
+                                    <button 
+                                        onClick={(e) => { e.stopPropagation(); setReadAloudMode('sentence'); }} 
+                                        className={`px-10 h-full rounded-full font-black text-2xl transition-all pointer-events-auto cursor-pointer whitespace-nowrap ${readAloudMode === 'sentence' ? 'bg-[#FF6B00] text-white shadow-lg' : 'text-slate-500 hover:text-slate-800'}`}
+                                    >
+                                        Sentence
+                                    </button>
+                                </div>
+                            )}
                         </div>
 
                         {/* Difficulty Dropdown */}
-                        <div className={`absolute right-12 transition-all duration-300 z-[120] ${isGnbVisible ? 'top-[120px]' : 'top-12'}`}>
+                        <div className={`absolute right-12 transition-all duration-300 z-[200] pointer-events-auto ${isGnbVisible ? 'top-[120px]' : 'top-12'}`}>
                             <div className="relative">
                                 <button
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         setIsDifficultyOpen(prev => !prev);
                                     }}
-                                    className="flex items-center gap-3 px-6 py-4 rounded-3xl font-black text-xl shadow-xl transition-all border-4 bg-white/95 text-slate-800 border-white/20 backdrop-blur-md hover:bg-white active:scale-95 pointer-events-auto"
+                                    className="flex items-center justify-center gap-4 h-20 px-10 rounded-full font-black text-2xl shadow-xl transition-all border-[6px] bg-white text-slate-800 border-white hover:bg-white hover:scale-105 active:scale-95 pointer-events-auto min-w-[200px]"
                                 >
                                     <span className="font-fredoka tracking-wide uppercase">{difficulty}</span>
-                                    {isDifficultyOpen ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
+                                    {isDifficultyOpen ? <ChevronUp size={28} strokeWidth={3} /> : <ChevronDown size={28} strokeWidth={3} />}
                                 </button>
                                 {isDifficultyOpen && (
                                     <div className="absolute top-full mt-3 right-0 w-full bg-white/98 backdrop-blur-xl rounded-[24px] shadow-2xl overflow-hidden border-2 border-slate-100 flex flex-col pointer-events-auto animate-in slide-in-from-top-3 duration-300 z-[121]">
@@ -481,30 +506,47 @@ const ReadSection: React.FC<ReadSectionProps> = ({ book, onClose, onSwitchPhase 
                                     </button>
                                 )}
                                 
-                                <div className={`transition-all duration-300 relative ${isReadAloudActive ? 'bg-white/90 p-10 rounded-[40px] shadow-2xl border-4 border-yellow-400' : 'p-0'} ${isTextFading ? 'opacity-0' : 'opacity-100'} pointer-events-auto`} style={{ minWidth: isReadAloudActive ? '800px' : 'auto', maxWidth: '1000px' }}>
-                                    {isReadAloudActive && (
-                                        <div className="absolute -top-16 left-10 flex items-center gap-4">
-                                            <div className="flex bg-slate-200 p-1 rounded-2xl shadow-lg border border-white">
-                                                <button onClick={() => setReadAloudMode('all')} className={`px-6 py-2 rounded-xl font-black transition-all ${readAloudMode === 'all' ? 'bg-white shadow text-slate-800' : 'text-slate-500'}`}>All</button>
-                                                <button onClick={() => setReadAloudMode('sentence')} className={`px-6 py-2 rounded-xl font-black transition-all ${readAloudMode === 'sentence' ? 'bg-white shadow text-slate-800' : 'text-slate-500'}`}>Sentence</button>
-                                            </div>
-                                        </div>
-                                    )}
+                                <div className={`transition-all duration-300 relative ${isReadAloudActive ? 'bg-white/90 p-6 md:p-10 rounded-[40px] shadow-2xl border-4 border-yellow-400' : 'p-0'} ${isTextFading ? 'opacity-0' : 'opacity-100'} pointer-events-auto`} style={{ minWidth: isReadAloudActive ? 'min(90vw, 600px)' : 'auto', maxWidth: isReadAloudActive ? '1000px' : '1400px' }}>
+                                    <div id="viewing-script" 
+                                        className={`font-black font-fredoka whitespace-normal flex-1 leading-[1.1] ${isReadAloudActive ? 'text-slate-800' : 'text-white drop-shadow-[0_4px_10px_rgba(0,0,0,0.8)]'} ${getTextPositionClass(currentSceneIndex).includes('text-right') ? 'text-right' : 'text-left'} ${textSize === 'small' ? 'text-2xl md:text-3xl lg:text-4xl' :
+                                            textSize === 'large' ? 'text-5xl md:text-7xl lg:text-8xl' :
+                                                'text-4xl md:text-5xl lg:text-6xl'
+                                            }`}>
+                                        {getDisplayScript().replace(/[\r\n]+/g, ' ').replace(/\s\s+/g, ' ').split(/(?<=[.!?])\s+/).map((sentence, idx) => {
+                                            if (!sentence.trim()) return null;
+                                            
+                                            // Determine highlight
+                                            let isHighlighted = false;
+                                            if (isReadAloudActive) {
+                                                if (readAloudMode === 'all') {
+                                                    isHighlighted = true;
+                                                } else if (readAloudMode === 'sentence') {
+                                                    // Default to first sentence if nothing playing, or follow playing index
+                                                    isHighlighted = playingSentenceIndex === null ? idx === 0 : playingSentenceIndex === idx;
+                                                }
+                                            }
 
-                                    <div id="viewing-script" className={`font-black font-fredoka whitespace-pre-line ${isReadAloudActive ? 'text-slate-800' : 'text-white drop-shadow-[0_4px_10px_rgba(0,0,0,0.8)]'} ${getTextPositionClass(currentSceneIndex).includes('text-right') ? 'text-right' : 'text-left'} ${textSize === 'small' ? 'text-2xl md:text-3xl lg:text-4xl' :
-                                        textSize === 'large' ? 'text-5xl md:text-7xl lg:text-8xl' :
-                                            'text-4xl md:text-5xl lg:text-6xl'
-                                        }`}>
-                                        {getDisplayScript().split(/(?<=[.!?]) +/).map((sentence, idx) => (
-                                            <div key={idx} className="leading-tight">
+                                            return (
                                                 <span
-                                                    onClick={(e) => { e.stopPropagation(); playSentenceAudio(idx); }}
-                                                    className={`cursor-pointer transition-all inline px-1.5 rounded-xl ${isReadAloudActive ? (readAloudMode === 'all' ? 'bg-yellow-300/40 hover:bg-yellow-400/60' : 'bg-yellow-200/50 hover:bg-yellow-300') : 'hover:text-orange-300 text-white'} ${playingSentenceIndex === idx ? (isReadAloudActive ? 'bg-yellow-400 ring-2 ring-yellow-500 scale-105 shadow-lg' : 'text-orange-400 scale-105') : ''}`}
+                                                    key={idx}
+                                                    onClick={(e) => { 
+                                                        e.stopPropagation(); 
+                                                        if (readAloudMode === 'all') {
+                                                            playFullSceneAudio();
+                                                        } else {
+                                                            playSentenceAudio(idx); 
+                                                        }
+                                                    }}
+                                                    className={`cursor-pointer transition-all inline px-1.5 rounded-xl ${
+                                                        isReadAloudActive 
+                                                            ? (readAloudMode === 'all' || isHighlighted ? 'bg-yellow-300 text-[#FF6B00]' : 'bg-transparent text-slate-800 hover:bg-yellow-100') 
+                                                            : 'hover:text-orange-300 text-white'
+                                                    } ${playingSentenceIndex === idx && readAloudMode === 'sentence' ? 'ring-2 ring-yellow-500 scale-105 shadow-lg z-10' : ''}`}
                                                 >
-                                                    {sentence.trim()}
+                                                    {sentence.trim()}{' '}
                                                 </span>
-                                            </div>
-                                        ))}
+                                            );
+                                        })}
                                     </div>
 
                                     {/* Recording UI Bar - Absolute positioned to not shift text */}

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Sparkles, ChevronRight, ChevronLeft, Heart, Search, SlidersHorizontal, ArrowLeft, Check } from 'lucide-react';
+import { Sparkles, ChevronRight, ChevronLeft, Heart, Search, SlidersHorizontal, ArrowLeft, Check, X } from 'lucide-react';
 import { BOOKS_DATA, Book } from '../data/books';
 import UnifiedPlayer from './UnifiedPlayer';
 import { MediaItem } from '../types/media';
@@ -27,7 +27,9 @@ const LibrarySection: React.FC<LibrarySectionProps> = ({ userName, onViewInfo, o
         }
     }, [initialTab]);
     const [isFilterOpen, setIsFilterOpen] = useState(false);
+    const [inputValue, setInputValue] = useState('');
     const [searchQuery, setSearchQuery] = useState('');
+    const [showSuggestions, setShowSuggestions] = useState(false);
     const [mediaSortBy, setMediaSortBy] = useState('Recent');
     const [mediaShowUnplayedOnly, setMediaShowUnplayedOnly] = useState(false);
     const [mediaFilters, setMediaFilters] = useState<Record<string, boolean>>({
@@ -51,6 +53,35 @@ const LibrarySection: React.FC<LibrarySectionProps> = ({ userName, onViewInfo, o
         setActiveSubTab(zones[zone][0]); // Default to first tab of the new zone
     };
 
+    const handleExecuteSearch = (val?: string) => {
+        const queryToSearch = val !== undefined ? val : inputValue;
+        setSearchQuery(queryToSearch);
+        setShowSuggestions(false);
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter') {
+            handleExecuteSearch();
+        }
+    };
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const val = e.target.value;
+        setInputValue(val);
+        if (val === '') {
+            setSearchQuery('');
+            setShowSuggestions(false);
+        } else {
+            setShowSuggestions(true);
+        }
+    };
+
+    const handleClearSearch = () => {
+        setInputValue('');
+        setSearchQuery('');
+        setShowSuggestions(false);
+    };
+
 
     // If not full page, render the original "For You" slider (for backward compatibility on Home)
     if (!isFullPage) {
@@ -72,25 +103,74 @@ const LibrarySection: React.FC<LibrarySectionProps> = ({ userName, onViewInfo, o
                     </button>
 
                     {/* Search Bar */}
-                    <div className="flex-1 relative group">
-                        <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-6 h-6 text-slate-500 group-focus-within:text-sky-400 transition-colors" />
-                        <input
-                            type="text"
-                            placeholder="Search for books or keywords..."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full h-14 pl-14 pr-6 bg-white/10 border-4 border-transparent focus:border-sky-500/30 focus:bg-white/15 rounded-full text-lg font-bold text-white placeholder:text-slate-500 transition-all outline-none"
-                        />
+                    <div className="flex-1 relative group flex gap-3">
+                        <div className="flex-1 relative">
+                            <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-6 h-6 text-slate-500 group-focus-within:text-sky-400 transition-colors" />
+                            <input
+                                type="text"
+                                placeholder="Search for books or keywords..."
+                                value={inputValue}
+                                onChange={handleInputChange}
+                                onKeyDown={handleKeyDown}
+                                onFocus={() => inputValue && setShowSuggestions(true)}
+                                className="w-full h-14 pl-14 pr-12 bg-white/10 border-4 border-transparent focus:border-sky-500/30 focus:bg-white/15 rounded-full text-lg font-bold text-white placeholder:text-slate-500 transition-all outline-none"
+                            />
+                            {inputValue && (
+                                <button 
+                                    onClick={handleClearSearch}
+                                    className="absolute right-4 top-1/2 -translate-y-1/2 p-1.5 bg-white/10 hover:bg-white/20 rounded-full text-slate-300 transition-all hover:scale-110"
+                                >
+                                    <X className="w-4 h-4" />
+                                </button>
+                            )}
+
+                            {/* Suggestions Dropdown */}
+                            {showSuggestions && inputValue && (
+                                <div className="absolute top-full left-0 right-0 mt-3 bg-[#1e293b]/95 backdrop-blur-2xl rounded-[32px] border-4 border-white/10 shadow-2xl z-[100] overflow-hidden animate-in zoom-in-95 slide-in-from-top-2 duration-200">
+                                    <div className="p-4 space-y-6">
+                                        {/* Matches Books */}
+                                        {(() => {
+                                            const matches = BOOKS_DATA.filter(b => b.title.toLowerCase().includes(inputValue.toLowerCase())).slice(0, 3);
+                                            if (matches.length === 0) return null;
+                                            return (
+                                                <div>
+                                                    <h6 className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3 px-2">Matching Books</h6>
+                                                    <div className="space-y-1">
+                                                        {matches.map(book => (
+                                                            <div 
+                                                                key={book.id} 
+                                                                onClick={() => handleExecuteSearch(book.title)}
+                                                                className="flex items-center gap-4 p-2 hover:bg-white/5 rounded-2xl cursor-pointer transition-all group/item"
+                                                            >
+                                                                <div className="w-10 h-14 bg-white/10 rounded-lg overflow-hidden shrink-0">
+                                                                    <img src={book.src} alt="" className="w-full h-full object-cover" />
+                                                                </div>
+                                                                <span className="font-black text-slate-200 group-hover/item:text-sky-400 transition-colors">{book.title}</span>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            );
+                                        })()}
+
+                                </div>
+                            )}
+                        </div>
+                        <button 
+                            onClick={() => handleExecuteSearch()}
+                            className="h-14 px-8 bg-[#fbbf24] text-[#0f172a] rounded-full font-black text-lg hover:scale-105 active:scale-95 transition-all shadow-lg shadow-amber-500/30 flex items-center justify-center gap-2"
+                        >
+                            <span>Search</span>
+                        </button>
                     </div>
 
                     {/* Filter Button */}
                     <div className="relative">
                         <button
                             onClick={() => setIsFilterOpen(!isFilterOpen)}
-                            className={`h-14 px-6 rounded-3xl border-4 flex items-center gap-3 transition-all active:scale-95 font-black ${isFilterOpen ? 'bg-sky-500 text-white border-sky-400' : 'bg-white/5 text-slate-300 border-white/5 hover:bg-white/10'}`}
+                            className={`w-14 h-14 rounded-2xl border-4 flex items-center justify-center transition-all active:scale-95 ${isFilterOpen ? 'bg-sky-500 text-white border-sky-400' : 'bg-white/5 text-slate-300 border-white/5 hover:bg-white/10'}`}
                         >
                             <SlidersHorizontal className="w-6 h-6" />
-                            <span>Filters</span>
                         </button>
 
                         {/* Filter Dropdown */}
@@ -100,9 +180,10 @@ const LibrarySection: React.FC<LibrarySectionProps> = ({ userName, onViewInfo, o
                                     <Sparkles className="w-5 h-5 text-sky-400" /> Advanced Filter
                                 </h4>
                                 <div className="space-y-6">
-                                    <FilterSection title="Lexile Level" options={['BR - 200L', '200L - 400L', '400L+']} />
-                                    <FilterSection title="Book Level" options={['Beginner', 'Intermediate', 'Advanced']} />
-                                    <FilterSection title="Genre" options={['Classic', 'Creative']} />
+                                    <FilterSection title="Level" options={['Level 1', 'Level 2', 'Level 3', 'Level 4']} />
+                                    <FilterSection title="Lexile" options={['200~400', '400~600', '600~800', '800~1200']} />
+                                    <FilterSection title="Word Count" options={['200~400', '400~600', '600~800', '800~1200']} />
+                                    <FilterSection title="Book Type" options={['Original', 'Classic']} />
                                 </div>
                                 <button
                                     onClick={() => setIsFilterOpen(false)}
@@ -115,41 +196,55 @@ const LibrarySection: React.FC<LibrarySectionProps> = ({ userName, onViewInfo, o
                     </div>
                 </div>
 
-                {/* Zone Toggle Tabs */}
-                <div className="flex gap-4 p-1.5 bg-black/30 rounded-[28px] w-fit border-2 border-white/5 shadow-inner">
-                    {(Object.keys(zones) as Zone[]).map((zone) => (
-                        <button
-                            key={zone}
-                            onClick={() => handleZoneChange(zone)}
-                            className={`px-8 py-3 rounded-[22px] font-black text-lg transition-all ${activeZone === zone ? 'bg-[#fbbf24] text-[#0f172a] shadow-xl shadow-amber-500/20 transform scale-[1.05]' : 'text-slate-500 hover:text-slate-300'}`}
-                        >
-                            {zone}
-                        </button>
-                    ))}
-                </div>
+                {/* Zone Toggle Tabs - Hidden during search */}
+                {!searchQuery && (
+                    <div className="flex gap-4 p-1.5 bg-black/30 rounded-[28px] w-fit border-2 border-white/5 shadow-inner">
+                        {(Object.keys(zones) as Zone[]).map((zone) => (
+                            <button
+                                key={zone}
+                                onClick={() => handleZoneChange(zone)}
+                                className={`px-8 py-3 rounded-[22px] font-black text-lg transition-all ${activeZone === zone ? 'bg-[#fbbf24] text-[#0f172a] shadow-xl shadow-amber-500/20 transform scale-[1.05]' : 'text-slate-500 hover:text-slate-300'}`}
+                            >
+                                {zone}
+                            </button>
+                        ))}
+                    </div>
+                )}
             </header>
 
-            {/* 2. Sub Navigation */}
-            <nav className="px-8 py-2 overflow-x-auto no-scrollbar border-b border-white/5">
-                <div className="flex gap-8 whitespace-nowrap min-w-max">
-                    {zones[activeZone].map((tab) => (
-                        <button
-                            key={tab}
-                            onClick={() => setActiveSubTab(tab)}
-                            className={`relative py-4 text-xl font-black transition-all ${activeSubTab === tab ? 'text-[#fbbf24]' : 'text-slate-500 hover:text-slate-300'}`}
-                        >
-                            {tab}
-                            {activeSubTab === tab && (
-                                <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-[#fbbf24] rounded-full shadow-[0_0_15px_rgba(251,191,36,0.5)] animate-in fade-in slide-in-from-bottom-1" />
-                            )}
-                        </button>
-                    ))}
-                </div>
-            </nav>
+            {/* 2. Sub Navigation - Hidden during search */}
+            {!searchQuery && (
+                <nav className="px-8 py-2 overflow-x-auto no-scrollbar border-b border-white/5">
+                    <div className="flex gap-8 whitespace-nowrap min-w-max">
+                        {zones[activeZone].map((tab) => (
+                            <button
+                                key={tab}
+                                onClick={() => setActiveSubTab(tab)}
+                                className={`relative py-4 text-xl font-black transition-all ${activeSubTab === tab ? 'text-[#fbbf24]' : 'text-slate-500 hover:text-slate-300'}`}
+                            >
+                                {tab}
+                                {activeSubTab === tab && (
+                                    <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-[#fbbf24] rounded-full shadow-[0_0_15px_rgba(251,191,36,0.5)] animate-in fade-in slide-in-from-bottom-1" />
+                                )}
+                            </button>
+                        ))}
+                    </div>
+                </nav>
+            )}
 
             {/* 3. Content Area */}
             <main className="flex-1 overflow-y-auto px-10 py-8 relative">
-                {activeZone === 'Media Zone' ? (
+                {searchQuery ? (
+                    <SearchResultsContent 
+                        query={searchQuery} 
+                        onViewInfo={onViewInfo}
+                        onPlayMedia={(list: MediaItem[], index: number) => {
+                            setPlayerMediaList(list);
+                            setPlayerStartIndex(index);
+                            setIsPlayerOpen(true);
+                        }}
+                    />
+                ) : activeZone === 'Media Zone' ? (
                     <MediaZoneContent
                         activeSubTab={activeSubTab}
                         mediaSortBy={mediaSortBy}
@@ -476,13 +571,13 @@ const FilterSection = ({ title, options }: { title: string, options: string[] })
     const [selected, setSelected] = useState(options[0]);
     return (
         <div className="space-y-3">
-            <h5 className="text-xs font-black text-slate-400 uppercase tracking-widest">{title}</h5>
-            <div className="flex flex-wrap gap-2">
+            <h5 className="text-[11px] font-black text-slate-500 uppercase tracking-[0.15em] opacity-80">{title}</h5>
+            <div className="grid grid-cols-2 gap-2">
                 {options.map(opt => (
                     <button
                         key={opt}
                         onClick={() => setSelected(opt)}
-                        className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${selected === opt ? 'bg-sky-100 text-sky-600' : 'bg-slate-50 text-slate-400 hover:bg-slate-100'}`}
+                        className={`h-11 px-4 rounded-xl text-sm font-black transition-all border-2 ${selected === opt ? 'bg-sky-500 text-white border-sky-400 shadow-lg shadow-sky-500/20' : 'bg-white/5 text-slate-400 border-white/5 hover:border-white/10 hover:text-slate-300'}`}
                     >
                         {opt}
                     </button>
@@ -614,6 +709,107 @@ const OriginalLibrarySlider: React.FC<Pick<LibrarySectionProps, 'userName' | 'on
                     <ChevronRight className="w-8 h-8" />
                 </button>
             </div>
+        </div>
+    );
+};
+
+const SearchResultsContent = ({ query, onViewInfo, onPlayMedia }: { query: string, onViewInfo: (book: Book, origin: any) => void, onPlayMedia: (list: MediaItem[], index: number) => void }) => {
+    const lowerQuery = query.toLowerCase();
+    
+    // Filter Books
+    const filteredBooks = BOOKS_DATA.filter(book => 
+        book.title.toLowerCase().includes(lowerQuery)
+    );
+
+    // Filter Media
+    const allMediaItems: MediaItem[] = [];
+    mockMediaData.forEach(group => {
+        group.items.forEach(item => {
+            if (item.title.toLowerCase().includes(lowerQuery) || item.bookTitle?.toLowerCase().includes(lowerQuery)) {
+                allMediaItems.push(item);
+            }
+        });
+    });
+
+    if (filteredBooks.length === 0 && allMediaItems.length === 0) {
+        return (
+            <div className="flex flex-col items-center justify-center py-32 animate-in fade-in zoom-in duration-500">
+                <div className="w-32 h-32 bg-white/5 rounded-full flex items-center justify-center mb-8 border-4 border-dashed border-white/10">
+                    <Search className="w-12 h-12 text-slate-600" />
+                </div>
+                <h2 className="text-3xl font-black text-slate-400 mb-2">No results for "{query}"</h2>
+                <p className="text-slate-500 font-bold">Try different keywords or check your spelling!</p>
+            </div>
+        );
+    }
+
+    return (
+        <div className="space-y-16 pb-32 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            {/* Books Section */}
+            {filteredBooks.length > 0 && (
+                <section>
+                    <div className="flex items-center gap-4 mb-8">
+                        <div className="w-10 h-10 bg-sky-500/20 rounded-xl flex items-center justify-center text-sky-400">
+                            <Sparkles className="w-6 h-6" />
+                        </div>
+                        <h3 className="text-2xl font-black text-white flex items-center gap-4">
+                            Books 
+                            <span className="text-sm font-black bg-white/10 px-3 py-1 rounded-full text-sky-400">{filteredBooks.length}</span>
+                        </h3>
+                    </div>
+                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
+                        {filteredBooks.map(book => (
+                            <div key={book.id} onClick={() => onViewInfo(book, 'recommendation')} className="group cursor-pointer flex flex-col items-center">
+                                <div className="w-full aspect-[3/4] bg-white/10 rounded-[32px] overflow-hidden relative group-hover:scale-105 transition-all duration-300 border-4 border-transparent group-hover:border-[#fbbf24]/50 shadow-2xl">
+                                    <img src={book.src} alt={book.title} className="w-full h-full object-cover" />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                                </div>
+                                <h4 className="mt-4 text-center text-lg font-black text-slate-200 font-jua group-hover:text-[#fbbf24] transition-colors leading-tight px-2 line-clamp-1">{book.title}</h4>
+                            </div>
+                        ))}
+                    </div>
+                </section>
+            )}
+
+            {/* Media Section */}
+            {allMediaItems.length > 0 && (
+                <section>
+                    <div className="flex items-center gap-4 mb-8">
+                        <div className="w-10 h-10 bg-amber-500/20 rounded-xl flex items-center justify-center text-amber-400">
+                            <ChevronRight className="w-6 h-6" />
+                        </div>
+                        <h3 className="text-2xl font-black text-white flex items-center gap-4">
+                            Media 
+                            <span className="text-sm font-black bg-white/10 px-3 py-1 rounded-full text-amber-400">{allMediaItems.length}</span>
+                        </h3>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        {allMediaItems.map((item, idx) => (
+                            <div key={item.id} className="group cursor-pointer flex flex-col gap-3"
+                                onClick={() => onPlayMedia(allMediaItems, idx)}>
+                                <div className="aspect-video bg-slate-900/5 rounded-3xl overflow-hidden shadow-sm group-hover:shadow-xl group-hover:-translate-y-1.5 transition-all duration-300 relative border-4 border-white flex items-center justify-center">
+                                    <img src={item.thumbnail} className="w-full h-full object-cover" alt="" />
+                                    <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                        <div className="w-12 h-12 bg-white/95 rounded-full flex items-center justify-center scale-75 group-hover:scale-100 transition-transform duration-300">
+                                            <svg className="w-6 h-6 text-sky-500 fill-current" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                                        </div>
+                                    </div>
+                                    <div className="absolute bottom-2 right-2 px-2 py-1 bg-black/70 rounded-lg text-white font-black text-[10px]">
+                                        {item.duration}
+                                    </div>
+                                    <div className="absolute top-2 left-2 px-2 py-0.5 bg-amber-500 text-[#0f172a] font-black text-[9px] uppercase rounded-full">
+                                        {item.type}
+                                    </div>
+                                </div>
+                                <div className="px-1">
+                                    <h4 className="text-[15px] font-bold text-slate-200 line-clamp-1 group-hover:text-[#fbbf24] transition-colors font-jua">{item.title}</h4>
+                                    <p className="text-[11px] font-black text-slate-500 uppercase tracking-widest mt-1">{item.bookTitle}</p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </section>
+            )}
         </div>
     );
 };

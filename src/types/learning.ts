@@ -26,6 +26,7 @@ export interface ReadingHistory {
     completedPhases: LearningPhase[];
     currentPhase: LearningPhase;
     lastUpdateTime: number;
+    isActive?: boolean;
 }
 
 export interface ReadingModeState {

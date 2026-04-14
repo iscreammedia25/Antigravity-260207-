@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Bell, Menu, Play, Heart, X, Video, Maximize } from 'lucide-react';
+import { Bell, Menu, Play, Heart, X, Video, Maximize, Sparkles, Map, Lock, CheckCircle2, Star, ChevronRight, Clock, Shield } from 'lucide-react';
 import HeroSection from '@/components/HeroSection';
 import LibrarySection from '@/components/LibrarySection';
 import MultiSection from '@/components/MultiSection';
@@ -10,10 +10,130 @@ import ReadSection from '@/components/ReadSection';
 import { BOOKS_DATA, Book } from '@/data/books';
 import { ReadingHistory } from '@/types/learning';
 import { getReadingHistory } from '@/utils/storage';
+import MyLibrarySection from '@/components/MyLibrarySection';
+
+// --- Roadmap Components ---
+
+function generateComplexPath(count: number, cols: number) {
+  const spaceX = 260; const spaceY = 320;
+  const startX = 100; const startY = 160;
+  let d = `M ${startX} ${startY}`;
+  for (let i = 1; i < count; i++) {
+    const row = Math.floor(i / cols);
+    const colIdx = i % cols;
+    const isOddRow = row % 2 !== 0;
+    let targetCol = isOddRow ? (cols - 1 - colIdx) : colIdx;
+    d += ` L ${startX + targetCol * spaceX} ${startY + row * spaceY}`;
+  }
+  return d;
+}
+
+const SnakeRoadmap: React.FC<{ 
+  books: Book[], 
+  readingHistory: ReadingHistory[], 
+  onViewInfo: (b: Book) => void,
+  onStartLearning: (b: Book) => void
+}> = ({ books, readingHistory, onViewInfo, onStartLearning }) => {
+  const cols = 4;
+  const sortedBooks = React.useMemo(() => {
+    return [...books].sort((a, b) => {
+      const getLexile = (l: string) => parseInt(l.match(/\d+/)?.[0] || '0');
+      return getLexile(a.lexile) - getLexile(b.lexile);
+    });
+  }, [books]);
+
+  const rowsArr = React.useMemo(() => {
+    const rows: Book[][] = [];
+    for (let i = 0; i < sortedBooks.length; i += cols) {
+      const rowIdx = Math.floor(i / cols);
+      const row = sortedBooks.slice(i, i + cols);
+      if (rowIdx % 2 !== 0) {
+        rows.push([...row].reverse());
+      } else {
+        rows.push(row);
+      }
+    }
+    return rows;
+  }, [sortedBooks]);
+
+  return (
+    <div className="flex flex-col gap-24 relative max-w-[1100px] mx-auto py-10">
+      <svg className="absolute inset-0 w-full h-full pointer-events-none z-0 overflow-visible opacity-10">
+        <path 
+          d={generateComplexPath(sortedBooks.length, cols)} 
+          fill="none" 
+          stroke="#475569" 
+          strokeWidth="10" 
+          strokeDasharray="15 25" 
+          strokeLinecap="round" 
+        />
+      </svg>
+
+      {rowsArr.map((row, rowIdx) => (
+        <div 
+          key={rowIdx} 
+          className={`flex gap-12 lg:gap-20 items-center ${rowIdx % 2 !== 0 ? 'flex-row-reverse pl-24' : 'pr-24'}`}
+        >
+          {row.map((book) => {
+            const history = readingHistory.find(h => h.bookId === book.id);
+            const isCompleted = history?.completedPhases.length === 4;
+            const isActive = history && !isCompleted;
+            
+            const firstUnreadIdx = sortedBooks.findIndex(b => !readingHistory.some(h => h.bookId === b.id));
+            const isNextTarget = !history && sortedBooks.indexOf(book) === firstUnreadIdx;
+            const isLocked = !history && !isNextTarget && sortedBooks.indexOf(book) > firstUnreadIdx;
+
+            return (
+              <div key={book.id} className="relative z-10 group">
+                <div 
+                  onClick={() => isLocked ? null : (isActive || isNextTarget ? onStartLearning(book) : onViewInfo(book))}
+                  className={`
+                    relative w-44 lg:w-52 aspect-[3/4] rounded-[40px] overflow-hidden border-4 transition-all duration-500
+                    ${isLocked ? 'grayscale opacity-30 blur-[1px] cursor-not-allowed' : 'cursor-pointer hover:scale-105 hover:-translate-y-4'}
+                    ${isActive || isNextTarget ? 'border-amber-400 shadow-[0_0_30px_rgba(251,191,36,0.4)] z-20 scale-105' : 'border-white shadow-xl'}
+                    ${isCompleted ? 'border-emerald-400 grayscale-0 opacity-80' : ''}
+                  `}
+                >
+                  <img src={book.src} alt="" className="w-full h-full object-cover" />
+                  {isLocked && (
+                    <div className="absolute inset-0 bg-slate-900/60 flex items-center justify-center">
+                      <Lock className="w-12 h-12 text-white/50" />
+                    </div>
+                  )}
+                  {isCompleted && (
+                    <div className="absolute inset-0 bg-emerald-500/10 flex items-center justify-center">
+                      <div className="w-14 h-14 bg-white rounded-full flex items-center justify-center shadow-lg border-2 border-emerald-400">
+                        <CheckCircle2 className="w-8 h-8 text-emerald-500 fill-current" />
+                      </div>
+                    </div>
+                  )}
+                  {(isActive || isNextTarget) && (
+                    <>
+                      <div className="absolute top-3 left-3 px-3 py-1 bg-amber-400 text-slate-900 text-[10px] font-black rounded-full uppercase tracking-widest shadow-md">NEW</div>
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="w-16 h-16 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-2xl animate-pulse">
+                          <Play className="w-8 h-8 text-amber-500 fill-current ml-1" />
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </div>
+                <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 px-4 py-1.5 bg-white border border-slate-100 rounded-full shadow-lg z-30 flex items-center gap-1.5 whitespace-nowrap">
+                  <Sparkles className="w-2.5 h-2.5 text-amber-400" />
+                  <p className="text-[10px] font-black text-slate-500 uppercase tracking-tighter">Level {book.lexile}</p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      ))}
+    </div>
+  );
+};
 
 export default function Home() {
     const userName = "Ami";
-    const [view, setView] = useState<'home' | 'word' | 'read' | 'library'>('home');
+    const [view, setView] = useState<'home' | 'word' | 'read' | 'library' | 'my-library'>('home');
     const [libraryTab, setLibraryTab] = useState<{ zone: string, subTab: string } | null>(null);
     const [currentBook, setCurrentBook] = useState<Book | null>(null);
     const [isDemoMode, setIsDemoMode] = useState(true);
@@ -49,6 +169,7 @@ export default function Home() {
 
     const [isFlashing, setIsFlashing] = useState(false);
     const [isPlayingInline, setIsPlayingInline] = useState(false);
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
     const inlineVideoRef = React.useRef<HTMLVideoElement>(null);
 
     React.useEffect(() => {
@@ -185,15 +306,41 @@ export default function Home() {
                 setTimeout(() => setIsFlashing(false), 5000);
 
                 // Auto-start learning after whoosh
+                const hist = readingHistory.find(h => h.bookId === book.id);
                 const hasWordResources = ['milo', 'OG0021', 'hans-in-luck', 'CS0003'].includes(book.id);
                 setCurrentBook(book);
-                setView(hasWordResources ? 'word' : 'read');
+                
+                // Determine target view based on history
+                let targetView: 'word' | 'read' | 'talk' | 'quiz' = 'word';
+                if (hist && hist.currentPhase) {
+                    targetView = hist.currentPhase as any;
+                } else if (!hasWordResources) {
+                    targetView = 'read';
+                }
+                
+                setView(targetView);
             }, 1000); // eslint-disable-line no-magic-numbers
         } else {
+            const hist = readingHistory.find(h => h.bookId === book.id);
             const hasWordResources = ['milo', 'OG0021', 'hans-in-luck', 'CS0003'].includes(book.id);
             setCurrentBook(book);
-            setView(hasWordResources ? 'word' : 'read');
+
+            // Determine target view based on history
+            let targetView: 'word' | 'read' | 'talk' | 'quiz' = 'word';
+            if (hist && hist.currentPhase) {
+                targetView = hist.currentPhase as any;
+            } else if (!hasWordResources) {
+                targetView = 'read';
+            }
+
+            setView(targetView);
         }
+    };
+
+    const stopReading = (bookId: string) => {
+        setReadingHistory(prev => 
+            prev.map(h => h.bookId === bookId ? { ...h, isActive: false } : h)
+        );
     };
 
     return (
@@ -226,9 +373,44 @@ export default function Home() {
                                         {isDemoMode ? 'HISTORY MODE' : 'FRESH MODE'}
                                     </button>
                                     <button className="w-12 h-12 bg-white rounded-2xl shadow-sm flex items-center justify-center text-gray-400 hover:text-blue-500 transition-colors border-2 border-gray-50"><Bell /></button>
-                                    <button className="w-12 h-12 bg-white rounded-2xl shadow-sm flex items-center justify-center text-gray-400 hover:text-blue-500 transition-colors border-2 border-gray-50"><Menu /></button>
+                                    <button 
+                                        onClick={() => setIsMenuOpen(true)}
+                                        className="w-12 h-12 bg-white rounded-2xl shadow-sm flex items-center justify-center text-gray-400 hover:text-blue-500 transition-colors border-2 border-gray-50"
+                                    >
+                                        <Menu />
+                                    </button>
                                 </div>
                             </header>
+
+                            {/* Sidebar / Menu Overlay */}
+                            {isMenuOpen && (
+                                <div className="fixed inset-0 z-[200] flex justify-end">
+                                    <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={() => setIsMenuOpen(false)} />
+                                    <div className="relative w-80 h-full bg-white shadow-2xl animate-in slide-in-from-right duration-300 p-8 flex flex-col">
+                                        <div className="flex justify-between items-center mb-12">
+                                            <h2 className="text-3xl font-black text-slate-800 font-jua">Ami's Menu</h2>
+                                            <button onClick={() => setIsMenuOpen(false)} className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-400"><X /></button>
+                                        </div>
+                                        <nav className="space-y-4">
+                                            {[
+                                                { label: 'Account', icon: '👤' },
+                                                { label: 'Vocabulary', icon: '📖' },
+                                                { label: 'My Library', icon: '❤️', action: () => { setView('my-library'); setIsMenuOpen(false); } },
+                                                { label: 'My Report', icon: '📊' }
+                                            ].map((item) => (
+                                                <button 
+                                                    key={item.label}
+                                                    onClick={item.action}
+                                                    className="w-full p-5 rounded-2xl hover:bg-slate-50 flex items-center gap-4 transition-all group active:scale-95"
+                                                >
+                                                    <span className="text-2xl">{item.icon}</span>
+                                                    <span className="text-xl font-black text-slate-600 group-hover:text-sky-500">{item.label}</span>
+                                                </button>
+                                            ))}
+                                        </nav>
+                                    </div>
+                                </div>
+                            )}
 
                             {/* Hero Section */}
                             <HeroSection
@@ -248,6 +430,31 @@ export default function Home() {
                                 isDemoMode={isDemoMode}
                                 isFlashing={isFlashing}
                             />
+
+                            {/* Reading Roadmap (Snake Path) */}
+                            <div className="space-y-8 py-8 relative">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-12 h-12 bg-amber-100 rounded-2xl flex items-center justify-center text-amber-500 shadow-sm border border-amber-200">
+                                        <Map className="w-6 h-6 fill-current" />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-3xl font-black text-slate-800 font-jua">Ami's Road</h3>
+                                        <p className="text-slate-400 font-bold text-sm uppercase tracking-widest">Follow the dots to become a master reader! 🗺️</p>
+                                    </div>
+                                </div>
+                                
+                                {BOOKS_DATA.length > 0 && (
+                                    <SnakeRoadmap 
+                                        books={BOOKS_DATA} 
+                                        readingHistory={readingHistory} 
+                                        onViewInfo={(book) => {
+                                            setSelectedBook(book);
+                                            setModalOrigin('recommendation');
+                                        }}
+                                        onStartLearning={startLearning}
+                                    />
+                                )}
+                            </div>
 
                             {/* Library Section */}
                             <div className="w-full pb-8">
@@ -470,6 +677,20 @@ export default function Home() {
                 />
             )}
 
+            {view === 'my-library' && (
+                <MyLibrarySection
+                    userName={userName}
+                    readingHistory={readingHistory}
+                    onClose={() => setView('home')}
+                    onStartLearning={startLearning}
+                    onViewInfo={(book) => {
+                        setSelectedBook(book);
+                        setModalOrigin('recommendation');
+                    }}
+                    onStopReading={stopReading}
+                />
+            )}
+
             {/* Addition Animation Overlay */}
             {isAddingBook && animatingBook && (
                 <div className="fixed inset-0 z-[200] pointer-events-none">
@@ -488,3 +709,4 @@ export default function Home() {
         </div>
     );
 }
+

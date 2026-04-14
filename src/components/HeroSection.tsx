@@ -21,10 +21,13 @@ const HeroSection: React.FC<HeroSectionProps> = ({ userName, readingHistory, fre
 
   // Prepare cards: Up to 3 history items OR 3 recommendations if Fresh mode
   const cards = isHistoryMode
-    ? readingHistory.slice(0, 3).map(h => ({
-      book: BOOKS_DATA.find(b => b.id === h.bookId) || BOOKS_DATA[0],
-      history: h
-    }))
+    ? readingHistory
+      .filter(h => h.isActive !== false)
+      .slice(0, 3)
+      .map(h => ({
+        book: BOOKS_DATA.find(b => b.id === h.bookId) || BOOKS_DATA[0],
+        history: h
+      }))
     : [
       { book: freshHeroBook || BOOKS_DATA.find(b => b.id === 'CS0003') || BOOKS_DATA[0], history: null },
       { book: BOOKS_DATA.find(b => b.id === 'OG00XX_missing_planet') || BOOKS_DATA[0], history: null },

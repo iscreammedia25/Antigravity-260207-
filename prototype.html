@@ -1000,86 +1000,73 @@
                     <div class="border-b border-white/10 py-6">
                         <div class="global-container flex items-center gap-4">
                             <!-- Search Bar -->
-                            <div class="flex-1 relative group flex gap-4">
-                                <div class="flex-1 relative">
-                                    <i data-lucide="search"
-                                        class="absolute left-6 top-1/2 -translate-y-1/2 w-6 h-6 text-slate-400 group-focus-within:text-[#fbbf24] transition-colors"></i>
-                                    <input type="text" id="librarySearchInput" placeholder="Search for books or keywords..."
-                                        oninput="window.updateClearButton(this.value)"
-                                        onkeydown="if(event.key==='Enter') window.executeLibrarySearch()"
-                                        onfocus="window.updateClearButton(this.value)"
-                                        class="w-full h-14 pl-16 pr-14 bg-white border-2 border-transparent focus:border-[#fbbf24] rounded-2xl text-xl font-bold text-slate-800 placeholder:text-slate-400 transition-all outline-none shadow-sm">
-                                    <button id="libraryClearBtn" onclick="window.clearLibrarySearch()" 
-                                        class="hidden absolute right-4 top-1/2 -translate-y-1/2 p-2 bg-slate-50 hover:bg-slate-100 rounded-full text-slate-400 transition-all">
-                                        <i data-lucide="x" class="w-5 h-5"></i>
-                                    </button>
-
-                                    <!-- Suggestions Area -->
-                                    <div id="librarySearchSuggestions" 
-                                        class="hidden absolute top-full left-0 right-0 mt-3 bg-white/95 backdrop-blur-2xl rounded-[32px] shadow-[0_32px_80px_rgba(0,0,0,0.15)] border-4 border-white z-[100] overflow-hidden max-h-[480px] overflow-y-auto animate-in slide-in-from-top-2 duration-300">
-                                    </div>
-                                </div>
-                                <button onclick="window.executeLibrarySearch()" 
-                                    class="h-14 px-10 bg-[#fbbf24] text-[#0f172a] rounded-2xl font-black text-xl hover:scale-105 active:scale-95 transition-all shadow-lg shadow-amber-500/20">
-                                    Search
-                                </button>
+                            <div class="flex-1 relative group">
+                                <i data-lucide="search"
+                                    class="absolute left-6 top-1/2 -translate-y-1/2 w-6 h-6 text-slate-400 group-focus-within:text-[#fbbf24] transition-colors"></i>
+                                <input type="text" placeholder="Search for books or keywords..."
+                                    class="w-full h-14 pl-16 pr-8 bg-white border-2 border-transparent focus:border-[#fbbf24] rounded-2xl text-xl font-bold text-slate-800 placeholder:text-slate-400 transition-all outline-none shadow-sm">
                             </div>
 
                             <!-- Filter Button -->
                             <div class="relative">
                                 <button onclick="toggleLibraryFilter()" id="libraryFilterBtn"
-                                    class="h-14 w-14 rounded-2xl border-2 flex items-center justify-center transition-all active:scale-95 font-black bg-white/5 text-white border-white/10 hover:bg-white/10 shadow-inner">
-                                    <i data-lucide="sliders-horizontal" class="w-7 h-7"></i>
+                                    class="h-14 px-8 rounded-2xl border-2 flex items-center gap-4 transition-all active:scale-95 font-black bg-white/5 text-white border-white/10 hover:bg-white/10 shadow-inner">
+                                    <i data-lucide="sliders-horizontal" class="w-6 h-6"></i>
+                                    <span class="text-lg">Filters</span>
                                 </button>
 
                                 <!-- Filter Dropdown -->
                                 <div id="libraryFilterDropdown"
-                                    class="absolute top-18 right-0 w-[380px] bg-[#1e293b] rounded-[40px] shadow-[0_32px_80px_rgba(0,0,0,0.6)] border-4 border-white/10 p-8 z-50 hidden animate-in zoom-in-95 slide-in-from-top-2 duration-300">
+                                    class="absolute top-18 right-0 w-[420px] bg-[#1e293b] rounded-[32px] shadow-[0_32px_80px_rgba(0,0,0,0.5)] border border-white/10 p-10 z-50 hidden animate-in zoom-in-95 slide-in-from-top-2 duration-300">
                                     <h4 class="text-white font-black text-2xl mb-8 flex items-center gap-4">
                                         <i data-lucide="sparkles" class="w-7 h-7 text-[#fbbf24]"></i> Advanced Filter
                                     </h4>
-                                    <div class="space-y-8">
-                                        <!-- Level Section -->
-                                        <div class="space-y-4">
-                                            <h5 class="text-[11px] font-black text-white/40 uppercase tracking-[0.2em]">Level</h5>
-                                            <div class="grid grid-cols-2 gap-3">
-                                                <button onclick="toggleLibraryFilterItem(this)" class="h-12 rounded-2xl text-[15px] font-black bg-white/5 text-white/60 border-2 border-transparent hover:border-white/10 transition-all">Level 1</button>
-                                                <button onclick="toggleLibraryFilterItem(this)" class="h-12 rounded-2xl text-[15px] font-black bg-white/5 text-white/60 border-2 border-transparent hover:border-white/10 transition-all">Level 2</button>
-                                                <button onclick="toggleLibraryFilterItem(this)" class="h-12 rounded-2xl text-[15px] font-black bg-white/5 text-white/60 border-2 border-transparent hover:border-white/10 transition-all">Level 3</button>
-                                                <button onclick="toggleLibraryFilterItem(this)" class="h-12 rounded-2xl text-[15px] font-black bg-white/5 text-white/60 border-2 border-transparent hover:border-white/10 transition-all">Level 4</button>
-                                            </div>
-                                        </div>
+                                    <div class="space-y-10">
                                         <!-- Lexile Section -->
                                         <div class="space-y-4">
-                                            <h5 class="text-[11px] font-black text-white/40 uppercase tracking-[0.2em]">Lexile</h5>
-                                            <div class="grid grid-cols-2 gap-3">
-                                                <button onclick="toggleLibraryFilterItem(this)" class="h-12 rounded-2xl text-[15px] font-black bg-white/5 text-white/60 border-2 border-transparent hover:border-white/10 transition-all">200~400</button>
-                                                <button onclick="toggleLibraryFilterItem(this)" class="h-12 rounded-2xl text-[15px] font-black bg-white/5 text-white/60 border-2 border-transparent hover:border-white/10 transition-all">400~600</button>
-                                                <button onclick="toggleLibraryFilterItem(this)" class="h-12 rounded-2xl text-[15px] font-black bg-white/5 text-white/60 border-2 border-transparent hover:border-white/10 transition-all">600~800</button>
-                                                <button onclick="toggleLibraryFilterItem(this)" class="h-12 rounded-2xl text-[15px] font-black bg-white/5 text-white/60 border-2 border-transparent hover:border-white/10 transition-all">800~1200</button>
+                                            <h5 class="text-xs font-black text-white/40 uppercase tracking-[0.2em]">
+                                                Lexile</h5>
+                                            <div class="flex flex-wrap gap-3">
+                                                <button onclick="toggleLibraryFilterItem(this)"
+                                                    class="px-5 py-2.5 rounded-xl text-base font-bold bg-white/5 text-white/60 border-2 border-transparent hover:border-white/10 transition-all">200~400</button>
+                                                <button onclick="toggleLibraryFilterItem(this)"
+                                                    class="px-5 py-2.5 rounded-xl text-base font-bold bg-white/5 text-white/60 border-2 border-transparent hover:border-white/10 transition-all">400~600</button>
+                                                <button onclick="toggleLibraryFilterItem(this)"
+                                                    class="px-5 py-2.5 rounded-xl text-base font-bold bg-white/5 text-white/60 border-2 border-transparent hover:border-white/10 transition-all">600~800</button>
+                                                <button onclick="toggleLibraryFilterItem(this)"
+                                                    class="px-5 py-2.5 rounded-xl text-base font-bold bg-white/5 text-white/60 border-2 border-transparent hover:border-white/10 transition-all">800~1200</button>
                                             </div>
                                         </div>
-                                        <!-- Word Count Section -->
+                                        <!-- Level Section -->
                                         <div class="space-y-4">
-                                            <h5 class="text-[11px] font-black text-white/40 uppercase tracking-[0.2em]">Word Count</h5>
-                                            <div class="grid grid-cols-2 gap-3">
-                                                <button onclick="toggleLibraryFilterItem(this)" class="h-12 rounded-2xl text-[15px] font-black bg-white/5 text-white/60 border-2 border-transparent hover:border-white/10 transition-all">200~400</button>
-                                                <button onclick="toggleLibraryFilterItem(this)" class="h-12 rounded-2xl text-[15px] font-black bg-white/5 text-white/60 border-2 border-transparent hover:border-white/10 transition-all">400~600</button>
-                                                <button onclick="toggleLibraryFilterItem(this)" class="h-12 rounded-2xl text-[15px] font-black bg-white/5 text-white/60 border-2 border-transparent hover:border-white/10 transition-all">600~800</button>
-                                                <button onclick="toggleLibraryFilterItem(this)" class="h-12 rounded-2xl text-[15px] font-black bg-white/5 text-white/60 border-2 border-transparent hover:border-white/10 transition-all">800~1200</button>
+                                            <h5 class="text-xs font-black text-white/40 uppercase tracking-[0.2em]">
+                                                Level</h5>
+                                            <div class="flex flex-wrap gap-3">
+                                                <button onclick="toggleLibraryFilterItem(this)"
+                                                    class="px-5 py-2.5 rounded-xl text-base font-bold bg-white/5 text-white/60 border-2 border-transparent hover:border-white/10 transition-all">Level
+                                                    1</button>
+                                                <button onclick="toggleLibraryFilterItem(this)"
+                                                    class="px-5 py-2.5 rounded-xl text-base font-bold bg-white/5 text-white/60 border-2 border-transparent hover:border-white/10 transition-all">Level
+                                                    2</button>
+                                                <button onclick="toggleLibraryFilterItem(this)"
+                                                    class="px-5 py-2.5 rounded-xl text-base font-bold bg-white/5 text-white/60 border-2 border-transparent hover:border-white/10 transition-all">Level
+                                                    3</button>
                                             </div>
                                         </div>
                                         <!-- Book Type Section -->
                                         <div class="space-y-4">
-                                            <h5 class="text-[11px] font-black text-white/40 uppercase tracking-[0.2em]">Book Type</h5>
-                                            <div class="grid grid-cols-2 gap-3">
-                                                <button onclick="toggleLibraryFilterItem(this)" class="h-12 rounded-2xl text-[15px] font-black bg-white/5 text-white/60 border-2 border-transparent hover:border-white/10 transition-all">Original</button>
-                                                <button onclick="toggleLibraryFilterItem(this)" class="h-12 rounded-2xl text-[15px] font-black bg-white/5 text-white/60 border-2 border-transparent hover:border-white/10 transition-all">Classic</button>
+                                            <h5 class="text-xs font-black text-white/40 uppercase tracking-[0.2em]">Book
+                                                Type</h5>
+                                            <div class="flex flex-wrap gap-3">
+                                                <button onclick="toggleLibraryFilterItem(this)"
+                                                    class="px-5 py-2.5 rounded-xl text-base font-bold bg-white/5 text-white/60 border-2 border-transparent hover:border-white/10 transition-all">Original</button>
+                                                <button onclick="toggleLibraryFilterItem(this)"
+                                                    class="px-5 py-2.5 rounded-xl text-base font-bold bg-white/5 text-white/60 border-2 border-transparent hover:border-white/10 transition-all">Classic</button>
                                             </div>
                                         </div>
                                     </div>
                                     <button onclick="toggleLibraryFilter()"
-                                        class="w-full mt-10 py-5 bg-[#fbbf24] text-[#0f172a] rounded-[24px] font-black text-xl hover:scale-[1.02] active:scale-95 transition-all shadow-xl shadow-amber-900/20">
+                                        class="w-full mt-10 py-5 bg-[#fbbf24] text-[#0f172a] rounded-[20px] font-black text-xl hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-amber-900/40">
                                         Apply Filters
                                     </button>
                                 </div>
@@ -1088,7 +1075,7 @@
                     </div>
 
                     <!-- Row 2: Zone Toggles & Sub Tabs -->
-                    <div id="libraryNavHeader" class="border-b border-white/5 bg-black/10 transition-all">
+                    <div class="border-b border-white/5 bg-black/10">
                         <div class="global-container h-16 flex items-center justify-between">
                             <div class="flex gap-2 p-1 bg-black/30 rounded-[28px] border border-white/5 w-fit">
                                 <button onclick="setActiveZone('Book Zone')" id="zone-book"
@@ -3342,19 +3329,27 @@
 
                 // Library Full Page Logic
                 window.openLibraryFullPage = function (zone, subTab) {
-                    if (zone) currentActiveZone = zone;
-                    if (subTab) currentActiveSubTab = subTab;
+                    if (zone) {
+                        currentActiveZone = zone;
+                        currentActiveSubTab = subTab || (libraryZones[zone].length > 0 ? libraryZones[zone][0] : null);
+                        currentSubCategory = 'All';
 
-                    // Reset search state
-                    const searchInput = document.getElementById('librarySearchInput');
-                    if (searchInput) searchInput.value = '';
-                    const navHeader = document.getElementById('libraryNavHeader');
-                    if (navHeader) navHeader.classList.remove('hidden');
+                        // Update Zone UI
+                        const zoneBook = document.getElementById('zone-book');
+                        const zoneMedia = document.getElementById('zone-media');
+
+                        if (zone === 'Book Zone') {
+                            if (zoneBook) zoneBook.className = "px-8 py-2.5 rounded-[22px] font-black text-base transition-all bg-[#fbbf24] text-[#0f172a] shadow-xl";
+                            if (zoneMedia) zoneMedia.className = "px-8 py-2.5 rounded-[22px] font-black text-base transition-all text-white/50 hover:text-white";
+                        } else if (zone === 'Media Zone') {
+                            if (zoneMedia) zoneMedia.className = "px-8 py-2.5 rounded-[22px] font-black text-base transition-all bg-[#fbbf24] text-[#0f172a] shadow-xl";
+                            if (zoneBook) zoneBook.className = "px-8 py-2.5 rounded-[22px] font-black text-base transition-all text-white/50 hover:text-white";
+                        }
+                    }
 
                     const page = document.getElementById('libraryFullPage');
                     page.classList.remove('hidden');
                     document.body.style.overflow = 'hidden';
-
                     renderLibrarySubTabs();
                     renderLibraryContent();
                     lucide.createIcons();
@@ -3364,12 +3359,6 @@
                     const page = document.getElementById('libraryFullPage');
                     page.classList.add('hidden');
                     document.body.style.overflow = 'auto';
-
-                    // Reset search state
-                    const searchInput = document.getElementById('librarySearchInput');
-                    if (searchInput) searchInput.value = '';
-                    const navHeader = document.getElementById('libraryNavHeader');
-                    if (navHeader) navHeader.classList.remove('hidden');
                 };
 
                 window.toggleLibraryFilter = function () {
@@ -3379,19 +3368,10 @@
 
                     if (isOpen) {
                         dropdown.classList.add('hidden');
-                        btn.className = "h-14 px-8 rounded-2xl border-2 flex items-center gap-4 transition-all active:scale-95 font-black bg-white/5 text-white border-white/10 hover:bg-white/10 shadow-inner";
+                        btn.className = "h-14 px-8 rounded-2xl border-2 flex items-center gap-4 transition-all active:scale-95 font-black bg-white/5 text-white border-white/10 hover:bg-white/10";
                     } else {
                         dropdown.classList.remove('hidden');
                         btn.className = "h-14 px-8 rounded-2xl border-2 flex items-center gap-4 transition-all active:scale-95 font-black bg-[#fbbf24] text-[#0f172a] border-[#fbbf24] shadow-lg shadow-amber-900/20";
-                    }
-                };
-
-                window.toggleLibraryFilterItem = function (btn) {
-                    const isActive = btn.classList.contains('bg-[#fbbf24]');
-                    if (isActive) {
-                        btn.className = "px-5 py-2.5 rounded-xl text-base font-bold bg-white/5 text-white/60 border-2 border-transparent hover:border-white/10 transition-all";
-                    } else {
-                        btn.className = "px-5 py-2.5 rounded-xl text-base font-bold bg-[#fbbf24] text-[#0f172a] border-2 border-[#fbbf24] shadow-lg shadow-amber-200/20";
                     }
                 };
 
@@ -3406,231 +3386,40 @@
                     }
                 });
 
-                window.executeLibrarySearch = function () {
-                    const input = document.getElementById('librarySearchInput');
-                    const suggestions = document.getElementById('librarySearchSuggestions');
-                    if (suggestions) suggestions.classList.add('hidden');
-                    if (input) {
-                        window.handleLibrarySearch(input.value, true);
-                    }
-                };
-
-                window.updateClearButton = function (val) {
-                    const btn = document.getElementById('libraryClearBtn');
-                    if (btn) {
-                        if (val.length > 0) {
-                            btn.classList.remove('hidden');
-                            window.renderSearchSuggestions(val);
-                        } else {
-                            btn.classList.add('hidden');
-                            const suggestions = document.getElementById('librarySearchSuggestions');
-                            if (suggestions) Array.from(suggestions.children).forEach(c => c.remove());
-                            if (suggestions) suggestions.classList.add('hidden');
-                            window.handleLibrarySearch(''); // Auto-return when empty
-                        }
-                    }
-                };
-
-                window.clearLibrarySearch = function () {
-                    const input = document.getElementById('librarySearchInput');
-                    if (input) {
-                        input.value = '';
-                        window.updateClearButton('');
-                    }
-                };
-
-                window.renderSearchSuggestions = function (query) {
-                    const suggestions = document.getElementById('librarySearchSuggestions');
-                    const lowerQuery = query.toLowerCase();
-
-                    const matchedBooks = booksData.filter(b => b.title.toLowerCase().includes(lowerQuery)).slice(0, 3);
-
-                    if (matchedBooks.length === 0) {
-                        suggestions.classList.add('hidden');
-                        return;
-                    }
-
-                    let html = `<div class="p-4 space-y-4">`;
-                    if (matchedBooks.length > 0) {
-                        html += `
-                            <div>
-                                <h6 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 px-2">Matching Books</h6>
-                                <div class="space-y-2">
-                                    ${matchedBooks.map(b => `
-                                        <div onclick="window.selectLibrarySuggestion('${b.title.replace(/'/g, "\\'")}')" class="flex items-center gap-4 p-2 hover:bg-slate-50 rounded-2xl cursor-pointer transition-colors group">
-                                            <div class="w-10 h-14 bg-slate-100 rounded-lg overflow-hidden shrink-0 border border-slate-100 shadow-sm">
-                                                <img src="${b.src}" class="w-full h-full object-cover">
-                                            </div>
-                                            <span class="font-bold text-slate-700 group-hover:text-sky-500 transition-colors">${b.title}</span>
-                                        </div>
-                                    `).join('')}
-                                </div>
-                            </div>
-                        `;
-                    }
-                    html += `</div>`;
-
-                    suggestions.innerHTML = html;
-                    suggestions.classList.remove('hidden');
-                    lucide.createIcons();
-                };
-
-                window.selectLibrarySuggestion = function (val) {
-                    const input = document.getElementById('librarySearchInput');
-                    input.value = val;
-                    window.executeLibrarySearch();
-                };
-
-                window.handleLibrarySearch = function (query, isFull = false) {
-                    const navHeader = document.getElementById('libraryNavHeader');
-                    const container = document.getElementById('libraryContentContainer');
-                    const suggestions = document.getElementById('librarySearchSuggestions');
-
-                    if (query.trim().length > 0) {
-                        if (isFull) {
-                            if (navHeader) navHeader.classList.add('hidden');
-                            if (suggestions) suggestions.classList.add('hidden');
-                            renderSearchResults(query);
-                        } else {
-                            // Non-full means we are just showing suggestions, which is handled in updateClearButton
-                        }
+                window.toggleLibraryFilterItem = function (btn) {
+                    const isActive = btn.classList.contains('bg-[#fbbf24]');
+                    if (isActive) {
+                        btn.className = "px-6 py-3 rounded-2xl text-base font-bold bg-white/5 text-white/60 border-2 border-transparent hover:border-white/10 transition-all";
                     } else {
-                        if (navHeader) navHeader.classList.remove('hidden');
-                        if (suggestions) suggestions.classList.add('hidden');
-                        renderLibraryContent();
+                        btn.className = "px-6 py-3 rounded-2xl text-base font-bold bg-[#fbbf24] text-[#0f172a] border-2 border-[#fbbf24] shadow-lg shadow-amber-200/20";
                     }
                 };
-
-                function renderSearchResults(query) {
-                    const container = document.getElementById('libraryContentContainer');
-                    const lowerQuery = query.toLowerCase();
-
-                    // Filter Books
-                    const filteredBooks = booksData.filter(book =>
-                        book.title.toLowerCase().includes(lowerQuery)
-                    );
-
-                    // Filter Media
-                    const allMediaItems = [];
-                    mockMediaData.forEach(group => {
-                        group.items.forEach(item => {
-                            if (item.title.toLowerCase().includes(lowerQuery) || (item.bookTitle && item.bookTitle.toLowerCase().includes(lowerQuery))) {
-                                allMediaItems.push(item);
-                            }
-                        });
-                    });
-
-                    if (filteredBooks.length === 0 && allMediaItems.length === 0) {
-                        container.innerHTML = `
-                        <div class="flex flex-col items-center justify-center py-32 animate-in fade-in zoom-in duration-500">
-                            <div class="w-32 h-32 bg-slate-100 rounded-full flex items-center justify-center mb-8 border-4 border-dashed border-slate-200">
-                                <i data-lucide="search" class="w-12 h-12 text-slate-300"></i>
-                            </div>
-                            <h2 class="text-3xl font-black text-slate-400 mb-2">No results for "${query}"</h2>
-                            <p class="text-slate-500 font-bold">Try different keywords or check your spelling!</p>
-                        </div>
-                    `;
-                        if (window.lucide) lucide.createIcons();
-                        return;
-                    }
-
-                    let html = `<div class="space-y-16 pb-32 animate-in fade-in slide-in-from-bottom-4 duration-500">`;
-
-                    // Books Section
-                    if (filteredBooks.length > 0) {
-                        html += `
-                        <section>
-                            <div class="flex items-center gap-4 mb-8">
-                                <div class="w-10 h-10 bg-sky-500/10 rounded-xl flex items-center justify-center text-sky-500">
-                                    <i data-lucide="sparkles" class="w-6 h-6"></i>
-                                </div>
-                                <h3 class="text-2xl font-black text-slate-700 font-jua flex items-center gap-4">
-                                    Books 
-                                    <span class="text-sm font-black bg-slate-100 px-3 py-1 rounded-full text-sky-500">${filteredBooks.length}</span>
-                                </h3>
-                            </div>
-                            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-8">
-                                ${filteredBooks.map(book => `
-                                    <div onclick="openModal('${book.id}', 'recommendation')" class="group cursor-pointer flex flex-col items-center">
-                                        <div class="w-full aspect-[3/4] bg-white rounded-[32px] overflow-hidden relative group-hover:scale-105 transition-all duration-300 border-4 border-white shadow-lg shadow-slate-200/50">
-                                            <img src="${book.src}" class="w-full h-full object-cover">
-                                            <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                                        </div>
-                                        <h4 class="mt-4 text-center text-lg font-black text-slate-700 font-jua group-hover:text-sky-500 transition-colors leading-tight px-2 line-clamp-1">${book.title}</h4>
-                                    </div>
-                                `).join('')}
-                            </div>
-                        </section>
-                    `;
-                    }
-
-                    // Media Section
-                    if (allMediaItems.length > 0) {
-                        html += `
-                        <section>
-                            <div class="flex items-center gap-4 mb-8">
-                                <div class="w-10 h-10 bg-amber-500/10 rounded-xl flex items-center justify-center text-amber-500">
-                                    <i data-lucide="play" class="w-6 h-6"></i>
-                                </div>
-                                <h3 class="text-2xl font-black text-slate-700 font-jua flex items-center gap-4">
-                                    Media 
-                                    <span class="text-sm font-black bg-slate-100 px-3 py-1 rounded-full text-amber-500">${allMediaItems.length}</span>
-                                </h3>
-                            </div>
-                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                                ${allMediaItems.map((item, idx) => `
-                                    <div class="group cursor-pointer flex flex-col gap-3" onclick="alert('Playing: ${item.title}')">
-                                        <div class="aspect-video bg-slate-100 rounded-3xl overflow-hidden shadow-sm group-hover:shadow-xl group-hover:-translate-y-1.5 transition-all duration-300 relative border-4 border-white flex items-center justify-center">
-                                            <img src="${item.thumb}" class="w-full h-full object-cover" onerror="this.src='https://api.dicebear.com/7.x/shapes/svg?seed=${item.id}'">
-                                            <div class="absolute inset-0 bg-slate-950/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                                <div class="w-12 h-12 bg-white/95 rounded-full flex items-center justify-center scale-75 group-hover:scale-100 transition-transform duration-300">
-                                                    <i data-lucide="play" class="w-6 h-6 text-sky-500 fill-current ml-1"></i>
-                                                </div>
-                                            </div>
-                                            <div class="absolute bottom-2 right-2 px-2 py-1 bg-black/70 rounded-lg text-white font-black text-[10px]">
-                                                ${item.rt}
-                                            </div>
-                                            <div class="absolute top-2 left-2 px-2 py-0.5 bg-[#fbbf24] text-[#0f172a] font-black text-[9px] uppercase rounded-full">
-                                                ${item.type}
-                                            </div>
-                                        </div>
-                                        <div class="px-1">
-                                            <h4 class="text-[15px] font-bold text-slate-700 line-clamp-1 group-hover:text-sky-500 transition-colors font-jua">${item.title}</h4>
-                                            <p class="text-[11px] font-black text-slate-400 uppercase tracking-widest mt-1">${item.bookTitle || ''}</p>
-                                        </div>
-                                    </div>
-                                `).join('')}
-                            </div>
-                        </section>
-                    `;
-                    }
-
-                    html += `</div>`;
-                    container.innerHTML = html;
-                    if (window.lucide) {
-                        lucide.createIcons();
-                    }
-                }
 
                 window.setActiveZone = function (zone) {
                     currentActiveZone = zone;
-                    currentActiveSubTab = libraryZones[zone] && libraryZones[zone].length > 0 ? libraryZones[zone][0] : null;
+                    currentActiveSubTab = libraryZones[zone].length > 0 ? libraryZones[zone][0] : null;
                     currentSubCategory = 'All';
 
                     const zoneBook = document.getElementById('zone-book');
                     const zoneMedia = document.getElementById('zone-media');
+                    const zoneMyLibrary = document.getElementById('zone-my-library');
 
                     if (zone === 'Book Zone') {
-                        if (zoneBook) zoneBook.className = "px-8 py-2.5 rounded-[22px] font-black text-base transition-all bg-[#fbbf24] text-[#0f172a] shadow-xl";
-                        if (zoneMedia) zoneMedia.className = "px-8 py-2.5 rounded-[22px] font-black text-base transition-all text-white/50 hover:text-white";
+                        zoneBook.className = "px-8 py-2.5 rounded-[22px] font-black text-base transition-all bg-[#fbbf24] text-[#0f172a] shadow-xl";
+                        zoneMedia.className = "px-8 py-2.5 rounded-[22px] font-black text-base transition-all text-white/50 hover:text-white";
+                        if (zoneMyLibrary) zoneMyLibrary.className = "hidden"; // We can optionally hide or show it as a top tab, but user requested it via profile. Let's hide it from main tabs.
                     } else if (zone === 'Media Zone') {
-                        if (zoneMedia) zoneMedia.className = "px-8 py-2.5 rounded-[22px] font-black text-base transition-all bg-[#fbbf24] text-[#0f172a] shadow-xl";
-                        if (zoneBook) zoneBook.className = "px-8 py-2.5 rounded-[22px] font-black text-base transition-all text-white/50 hover:text-white";
+                        zoneMedia.className = "px-8 py-2.5 rounded-[22px] font-black text-base transition-all bg-[#fbbf24] text-[#0f172a] shadow-xl";
+                        zoneBook.className = "px-8 py-2.5 rounded-[22px] font-black text-base transition-all text-white/50 hover:text-white";
+                        if (zoneMyLibrary) zoneMyLibrary.className = "hidden";
+                    } else if (zone === 'My Library') {
+                        // Deselect others if in My Library
+                        zoneBook.className = "px-8 py-2.5 rounded-[22px] font-black text-base transition-all text-white/50 hover:text-white";
+                        zoneMedia.className = "px-8 py-2.5 rounded-[22px] font-black text-base transition-all text-white/50 hover:text-white";
                     }
 
                     renderLibrarySubTabs();
                     renderLibraryContent();
-                    lucide.createIcons();
                 };
 
                 window.setActiveSubTab = function (tab) {
@@ -3863,6 +3652,16 @@
                     lucide.createIcons();
                     initLibraryDraggable();
                 }
+
+                window.toggleMediaUnplayedOnly = function () {
+                    mediaShowUnplayedOnly = !mediaShowUnplayedOnly;
+                    renderLibraryContent();
+                };
+
+                window.toggleMediaFilter = function (type) {
+                    mediaFilters[type] = !mediaFilters[type];
+                    renderLibraryContent();
+                };
 
                 function renderMediaContent() {
                     let html = '';

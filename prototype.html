@@ -1366,7 +1366,7 @@
                 let currentModalBookId = null;
                 let isHistoryMode = true;
                 let freshHeroBook = null;
-                let currentHeroIndex = 0; // Start with Hans in Luck in middle
+                let currentHeroIndex = 1; // Start with The Silent Stick in middle
                 let isHeroCTAFlashing = false;
                 let currentModalOrigin = 'recommendation';
 
@@ -1443,7 +1443,6 @@
                 let mockHistory = [
                     { id: 'CS0003', title: 'Hans in Luck', src: './public/Image/Cover/CS0003(Hans in Luck).png', progress: 0, phase: 'voca', completedPhases: [] },
                     { id: 'OG0046', title: 'The Silent Stick', src: './public/Image/Cover/OG0046(The Silent Stick).png', progress: 0, phase: 'voca', completedPhases: [] },
-                    { id: 'OG0021', title: 'Milo and the Lost Color', src: './public/Image/Cover/OG0021(Milo and the Lost Color).png', progress: 80, phase: 'read', completedPhases: ['voca'] },
                 ];
 
 
@@ -1543,15 +1542,21 @@
                     if (!container) return; // safety
 
                     const isHistory = isHistoryMode;
-                    const items = isHistory ? mockHistory : [
+                    let items = isHistory ? [...mockHistory] : [
                         freshHeroBook || booksData.find(b => b.id === 'CS0003')
                     ];
+
+                    // Pad with placeholders to ensure 3 slots
+                    if (isHistory && items.length < 3) {
+                        const needed = 3 - items.length;
+                        for (let i = 0; i < needed; i++) items.push({ isPlaceholder: true });
+                    }
 
                     const userName = "Ami";
                     const safeIndex = (currentHeroIndex >= 0 && currentHeroIndex < items.length) ? currentHeroIndex : 0;
                     const item = items[safeIndex];
 
-                    if (item) currentModalBookId = item.id;
+                    if (item && !item.isPlaceholder) currentModalBookId = item.id;
 
                     const prevItem = items[(safeIndex - 1 + items.length) % items.length];
                     const nextItem = items[(safeIndex + 1) % items.length];
@@ -1580,10 +1585,11 @@
                                 <div id="hero-left-slot" class="absolute left-[-22%] scale-75 opacity-70 pointer-events-none transform -rotate-6 transition-all duration-500">
                                     <div class="w-48 h-64 bg-slate-900/60 backdrop-blur-md rounded-[28px] shadow-xl overflow-hidden border-2 border-white/20">
                                         ${prevItem.isPlaceholder ? `
-                                            <div class="w-full h-full border-4 border-dashed border-white/30 rounded-[28px] flex flex-col items-center justify-center gap-2">
-                                                <div class="w-12 h-12 rounded-full border-2 border-dashed border-white/30 flex items-center justify-center">
-                                                    <span class="text-white/20 text-3xl font-black">+</span>
+                                            <div class="w-full h-full border-4 border-dashed border-white/10 rounded-[28px] flex flex-col items-center justify-center gap-2 bg-gradient-to-b from-white/5 to-white/0">
+                                                <div class="w-14 h-14 rounded-full border-2 border-dashed border-white/20 flex items-center justify-center bg-white/5 shadow-inner">
+                                                    <span class="text-white/40 text-4xl font-black">+</span>
                                                 </div>
+                                                <p class="text-white/20 font-black text-[10px] uppercase tracking-widest">Empty Slot</p>
                                             </div>
                                         ` : `<img src="${prevItem.src}" class="w-full h-full object-cover brightness-90">`}
                                     </div>
@@ -1595,16 +1601,17 @@
                                 <div class="w-56 h-[280px] rounded-[36px] shadow-2xl overflow-hidden transform border-4 ${isHistory ? 'border-white' : 'border-[#0f172a]/10'} transition-all group-hover:scale-105 cursor-pointer ${item.isPlaceholder ? 'bg-slate-900/60 backdrop-blur-xl' : 'bg-white'}" 
                                      onclick="${item.isPlaceholder ? '' : `openModal('${item.id}', '${isHistory ? 'history' : 'recommendation'}')`}">
                                     ${item.isPlaceholder ? `
-                                        <div class="w-full h-full border-4 border-dashed border-white/20 rounded-[28px] flex flex-col items-center justify-center gap-4 bg-slate-900/20">
-                                            <div class="w-20 h-20 rounded-full border-4 border-dashed border-white/20 flex items-center justify-center">
-                                                <span class="text-white/20 text-5xl font-black">+</span>
+                                        <div class="w-full h-full border-4 border-dashed border-white/20 rounded-[28px] flex flex-col items-center justify-center gap-4 bg-gradient-to-b from-white/10 to-white/0 backdrop-blur-xl group-hover:from-white/20 transition-all">
+                                            <div class="w-20 h-20 rounded-full border-4 border-dashed border-white/20 flex items-center justify-center bg-white/5 shadow-2xl">
+                                                <span class="text-white/30 text-6xl font-black">+</span>
                                             </div>
-                                            <p class="text-white/20 font-black text-xl uppercase tracking-widest">Empty</p>
+                                            <p class="text-white/20 font-black text-2xl uppercase tracking-[0.2em]">Empty Slot</p>
                                         </div>
                                     ` : `
                                         <img src="${item.src}" class="w-full h-full object-cover">
                                         <div class="absolute top-4 left-4 z-20">
-                                            <div class="bg-black/40 backdrop-blur-md px-3 py-1 rounded-full border border-white/20">
+                                            <div class="bg-black/40 backdrop-blur-md px-3 py-1 rounded-full border border-white/20 flex items-center gap-2">
+                                                <div class="w-2 h-2 rounded-full bg-yellow-400 animate-pulse"></div>
                                                 <p class="text-white font-black text-[9px] uppercase tracking-widest opacity-90">${isHistory ? 'In Progress' : 'Recommended'}</p>
                                             </div>
                                         </div>
@@ -1626,10 +1633,11 @@
                                 <div id="hero-right-slot" class="absolute right-[-22%] scale-75 opacity-70 pointer-events-none transform rotate-6 transition-all duration-500">
                                     <div class="w-48 h-64 bg-slate-900/60 backdrop-blur-md rounded-[28px] shadow-xl overflow-hidden border-2 border-white/20">
                                         ${nextItem.isPlaceholder ? `
-                                            <div class="w-full h-full border-4 border-dashed border-white/30 rounded-[28px] flex flex-col items-center justify-center gap-2">
-                                                <div class="w-12 h-12 rounded-full border-2 border-dashed border-white/30 flex items-center justify-center">
-                                                    <span class="text-white/20 text-3xl font-black">+</span>
+                                            <div class="w-full h-full border-4 border-dashed border-white/10 rounded-[28px] flex flex-col items-center justify-center gap-2 bg-gradient-to-b from-white/5 to-white/0">
+                                                <div class="w-14 h-14 rounded-full border-2 border-dashed border-white/20 flex items-center justify-center bg-white/5 shadow-inner">
+                                                    <span class="text-white/40 text-4xl font-black">+</span>
                                                 </div>
+                                                <p class="text-white/20 font-black text-[10px] uppercase tracking-widest">Empty Slot</p>
                                             </div>
                                         ` : `<img src="${nextItem.src}" class="w-full h-full object-cover brightness-90">`}
                                     </div>

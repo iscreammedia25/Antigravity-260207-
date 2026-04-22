@@ -151,12 +151,6 @@ export default function Home() {
             currentPhase: 'read',
             completedPhases: ['word'],
             lastUpdateTime: Date.now() - 30000
-        },
-        {
-            bookId: 'OG0021',
-            currentPhase: 'quiz',
-            completedPhases: ['word', 'read'],
-            lastUpdateTime: Date.now() - 10000
         }
     ];
 

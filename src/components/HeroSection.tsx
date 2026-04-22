@@ -19,13 +19,13 @@ const HeroSection: React.FC<HeroSectionProps> = ({ userName, readingHistory, fre
   // Determine if we are in History mode based on the prop or content
   const isHistoryMode = isDemoMode || readingHistory.length > 0;
 
-  // Prepare cards: Up to 3 history items OR 3 recommendations if Fresh mode
-  const cards = isHistoryMode
+  // Prepare cards: Exactly 3 slots for history mode, or 3 recommendations for Fresh mode
+  let cards = isHistoryMode
     ? readingHistory
       .filter(h => h.isActive !== false)
       .slice(0, 3)
       .map(h => ({
-        book: BOOKS_DATA.find(b => b.id === h.bookId) || BOOKS_DATA[0],
+        book: BOOKS_DATA.find(b => b.id === h.bookId) || null,
         history: h
       }))
     : [
@@ -33,6 +33,14 @@ const HeroSection: React.FC<HeroSectionProps> = ({ userName, readingHistory, fre
       { book: BOOKS_DATA.find(b => b.id === 'OG00XX_missing_planet') || BOOKS_DATA[0], history: null },
       { book: BOOKS_DATA.find(b => b.id === 'OG0021') || BOOKS_DATA[0], history: null },
     ];
+
+  // In history mode, if we have fewer than 3 cards, pad with empty slots to maintain visual structure
+  if (isHistoryMode && cards.length < 3) {
+    const paddingCount = 3 - cards.length;
+    for (let i = 0; i < paddingCount; i++) {
+      cards.push({ book: null, history: null });
+    }
+  }
 
   // Reset index when mode changes or history loads
   React.useEffect(() => {
@@ -73,10 +81,11 @@ const HeroSection: React.FC<HeroSectionProps> = ({ userName, readingHistory, fre
                   {cards[(currentIndex - 1 + cards.length) % cards.length].book ? (
                     <img id="hero-left-thumb" src={cards[(currentIndex - 1 + cards.length) % cards.length].book.src} alt="prev" className="w-full h-full object-cover brightness-90" />
                   ) : (
-                    <div className="w-full h-full border-4 border-dashed border-white/30 rounded-[28px] flex flex-col items-center justify-center gap-2">
-                      <div className="w-12 h-12 rounded-full border-2 border-dashed border-white/30 flex items-center justify-center">
-                        <span className="text-white/20 text-3xl font-fredoka">+</span>
+                    <div className="w-full h-full border-4 border-dashed border-white/10 rounded-[28px] flex flex-col items-center justify-center gap-2 bg-gradient-to-b from-white/5 to-white/0">
+                      <div className="w-14 h-14 rounded-full border-2 border-dashed border-white/20 flex items-center justify-center bg-white/5 shadow-inner">
+                        <span className="text-white/40 text-4xl font-fredoka group-hover:scale-110 transition-transform">+</span>
                       </div>
+                      <p className="text-white/20 font-black text-xs uppercase tracking-widest font-fredoka">Empty Slot</p>
                     </div>
                   )}
                 </div>
@@ -86,10 +95,11 @@ const HeroSection: React.FC<HeroSectionProps> = ({ userName, readingHistory, fre
                   {cards[(currentIndex + 1) % cards.length].book ? (
                     <img id="hero-right-thumb" src={cards[(currentIndex + 1) % cards.length].book.src} alt="next" className="w-full h-full object-cover brightness-90" />
                   ) : (
-                    <div className="w-full h-full border-4 border-dashed border-white/30 rounded-[28px] flex flex-col items-center justify-center gap-2">
-                      <div className="w-12 h-12 rounded-full border-2 border-dashed border-white/30 flex items-center justify-center">
-                        <span className="text-white/20 text-3xl font-fredoka">+</span>
+                    <div className="w-full h-full border-4 border-dashed border-white/10 rounded-[28px] flex flex-col items-center justify-center gap-2 bg-gradient-to-b from-white/5 to-white/0">
+                      <div className="w-14 h-14 rounded-full border-2 border-dashed border-white/20 flex items-center justify-center bg-white/5 shadow-inner">
+                        <span className="text-white/40 text-4xl font-fredoka group-hover:scale-110 transition-transform">+</span>
                       </div>
+                      <p className="text-white/20 font-black text-xs uppercase tracking-widest font-fredoka">Empty Slot</p>
                     </div>
                   )}
                 </div>
@@ -122,11 +132,11 @@ const HeroSection: React.FC<HeroSectionProps> = ({ userName, readingHistory, fre
                   </div>
                 </>
               ) : (
-                <div className="w-full h-full border-4 border-dashed border-white/20 rounded-[28px] flex flex-col items-center justify-center gap-4 bg-slate-900/20">
-                  <div className="w-20 h-20 rounded-full border-4 border-dashed border-white/20 flex items-center justify-center">
-                    <span className="text-white/20 text-5xl font-fredoka">+</span>
+                <div className="w-full h-full border-4 border-dashed border-white/20 rounded-[28px] flex flex-col items-center justify-center gap-4 bg-gradient-to-b from-white/10 to-white/0 backdrop-blur-xl group-hover:from-white/20 transition-all">
+                  <div className="w-20 h-20 rounded-full border-4 border-dashed border-white/20 flex items-center justify-center bg-white/5 shadow-2xl">
+                    <span className="text-white/30 text-6xl font-fredoka">+</span>
                   </div>
-                  <p className="text-white/20 font-black text-xl uppercase tracking-widest font-fredoka">Empty</p>
+                  <p className="text-white/20 font-black text-2xl uppercase tracking-[0.2em] font-fredoka">Empty Slot</p>
                 </div>
               )}
             </div>

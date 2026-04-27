@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Bell, Menu, Play, Heart, X, Video, Maximize, Sparkles, Map, Lock, CheckCircle2, Star, ChevronRight, Clock, Shield } from 'lucide-react';
+import { Bell, Menu, Play, Heart, X, Video, Maximize, Star, ChevronRight } from 'lucide-react';
 import HeroSection from '@/components/HeroSection';
 import LibrarySection from '@/components/LibrarySection';
 import MultiSection from '@/components/MultiSection';
@@ -12,124 +12,6 @@ import { ReadingHistory } from '@/types/learning';
 import { getReadingHistory } from '@/utils/storage';
 import MyLibrarySection from '@/components/MyLibrarySection';
 
-// --- Roadmap Components ---
-
-function generateComplexPath(count: number, cols: number) {
-  const spaceX = 260; const spaceY = 320;
-  const startX = 100; const startY = 160;
-  let d = `M ${startX} ${startY}`;
-  for (let i = 1; i < count; i++) {
-    const row = Math.floor(i / cols);
-    const colIdx = i % cols;
-    const isOddRow = row % 2 !== 0;
-    let targetCol = isOddRow ? (cols - 1 - colIdx) : colIdx;
-    d += ` L ${startX + targetCol * spaceX} ${startY + row * spaceY}`;
-  }
-  return d;
-}
-
-const SnakeRoadmap: React.FC<{ 
-  books: Book[], 
-  readingHistory: ReadingHistory[], 
-  onViewInfo: (b: Book) => void,
-  onStartLearning: (b: Book) => void
-}> = ({ books, readingHistory, onViewInfo, onStartLearning }) => {
-  const cols = 4;
-  const sortedBooks = React.useMemo(() => {
-    return [...books].sort((a, b) => {
-      const getLexile = (l: string) => parseInt(l.match(/\d+/)?.[0] || '0');
-      return getLexile(a.lexile) - getLexile(b.lexile);
-    });
-  }, [books]);
-
-  const rowsArr = React.useMemo(() => {
-    const rows: Book[][] = [];
-    for (let i = 0; i < sortedBooks.length; i += cols) {
-      const rowIdx = Math.floor(i / cols);
-      const row = sortedBooks.slice(i, i + cols);
-      if (rowIdx % 2 !== 0) {
-        rows.push([...row].reverse());
-      } else {
-        rows.push(row);
-      }
-    }
-    return rows;
-  }, [sortedBooks]);
-
-  return (
-    <div className="flex flex-col gap-24 relative max-w-[1100px] mx-auto py-10">
-      <svg className="absolute inset-0 w-full h-full pointer-events-none z-0 overflow-visible opacity-10">
-        <path 
-          d={generateComplexPath(sortedBooks.length, cols)} 
-          fill="none" 
-          stroke="#475569" 
-          strokeWidth="10" 
-          strokeDasharray="15 25" 
-          strokeLinecap="round" 
-        />
-      </svg>
-
-      {rowsArr.map((row, rowIdx) => (
-        <div 
-          key={rowIdx} 
-          className={`flex gap-12 lg:gap-20 items-center ${rowIdx % 2 !== 0 ? 'flex-row-reverse pl-24' : 'pr-24'}`}
-        >
-          {row.map((book) => {
-            const history = readingHistory.find(h => h.bookId === book.id);
-            const isCompleted = history?.completedPhases.length === 4;
-            const isActive = history && !isCompleted;
-            
-            const firstUnreadIdx = sortedBooks.findIndex(b => !readingHistory.some(h => h.bookId === b.id));
-            const isNextTarget = !history && sortedBooks.indexOf(book) === firstUnreadIdx;
-            const isLocked = !history && !isNextTarget && sortedBooks.indexOf(book) > firstUnreadIdx;
-
-            return (
-              <div key={book.id} className="relative z-10 group">
-                <div 
-                  onClick={() => isLocked ? null : (isActive || isNextTarget ? onStartLearning(book) : onViewInfo(book))}
-                  className={`
-                    relative w-44 lg:w-52 aspect-[3/4] rounded-[40px] overflow-hidden border-4 transition-all duration-500
-                    ${isLocked ? 'grayscale opacity-30 blur-[1px] cursor-not-allowed' : 'cursor-pointer hover:scale-105 hover:-translate-y-4'}
-                    ${isActive || isNextTarget ? 'border-amber-400 shadow-[0_0_30px_rgba(251,191,36,0.4)] z-20 scale-105' : 'border-white shadow-xl'}
-                    ${isCompleted ? 'border-emerald-400 grayscale-0 opacity-80' : ''}
-                  `}
-                >
-                  <img src={book.src} alt="" className="w-full h-full object-cover" />
-                  {isLocked && (
-                    <div className="absolute inset-0 bg-slate-900/60 flex items-center justify-center">
-                      <Lock className="w-12 h-12 text-white/50" />
-                    </div>
-                  )}
-                  {isCompleted && (
-                    <div className="absolute inset-0 bg-emerald-500/10 flex items-center justify-center">
-                      <div className="w-14 h-14 bg-white rounded-full flex items-center justify-center shadow-lg border-2 border-emerald-400">
-                        <CheckCircle2 className="w-8 h-8 text-emerald-500 fill-current" />
-                      </div>
-                    </div>
-                  )}
-                  {(isActive || isNextTarget) && (
-                    <>
-                      <div className="absolute top-3 left-3 px-3 py-1 bg-amber-400 text-slate-900 text-[10px] font-black rounded-full uppercase tracking-widest shadow-md">NEW</div>
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="w-16 h-16 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-2xl animate-pulse">
-                          <Play className="w-8 h-8 text-amber-500 fill-current ml-1" />
-                        </div>
-                      </div>
-                    </>
-                  )}
-                </div>
-                <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 px-4 py-1.5 bg-white border border-slate-100 rounded-full shadow-lg z-30 flex items-center gap-1.5 whitespace-nowrap">
-                  <Sparkles className="w-2.5 h-2.5 text-amber-400" />
-                  <p className="text-[10px] font-black text-slate-500 uppercase tracking-tighter">Level {book.lexile}</p>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      ))}
-    </div>
-  );
-};
 
 export default function Home() {
     const userName = "Ami";
@@ -338,74 +220,80 @@ export default function Home() {
     };
 
     return (
-        <div className="h-full bg-[#F8FAFC] flex flex-col overflow-hidden">
+        <div className="min-h-screen">
             {/* View Switching Logic */}
             {view === 'home' && (
                 <>
-                    {/* Scrollable Content Area */}
-                    <div className="flex-1 overflow-y-auto px-4 md:px-8 py-6 custom-scrollbar">
-                        <div className="max-w-6xl mx-auto space-y-8">
-                            {/* Header */}
-                            <header className="flex justify-between items-center mb-4">
-                                <div className="flex items-center gap-4">
-                                    <div className="w-14 h-14 bg-yellow-300 rounded-full border-4 border-white shadow-md flex items-center justify-center overflow-hidden">
-                                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Ami" alt="User Avatar" />
-                                    </div>
-                                    <div>
-                                        <h1 className="text-2xl font-black text-gray-800 tracking-tight font-jua">{userName} (7y)</h1>
-                                        <div className="flex items-center gap-1 text-green-500 text-sm font-bold">
-                                            <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                                            Online & Learning
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="flex gap-4 items-center">
-                                    <button
-                                        onClick={() => setIsDemoMode(!isDemoMode)}
-                                        className={`px-4 py-2 rounded-xl text-xs font-black transition-all border-[3px] shadow-sm ${isDemoMode ? 'bg-sky-500 text-white border-sky-400 shadow-sky-100' : 'bg-white text-slate-500 border-slate-200 hover:border-slate-300'}`}
+                    {/* Fixed Header (GNB) */}
+                    <header className="fixed top-0 left-0 w-full h-24 bg-[#0f172a] border-b border-white/10 flex justify-center items-center px-4 z-[100] shadow-2xl">
+                        <div className="max-w-6xl mx-auto w-full flex justify-between items-center">
+                            {/* Left: Profile + Name */}
+                            <div className="flex items-center gap-6">
+                                {/* Profile Avatar with Dropdown */}
+                                <div className="relative">
+                                    <div
+                                        onClick={() => setIsMenuOpen(!isMenuOpen)}
+                                        className="w-16 h-16 bg-yellow-300 rounded-full border-[6px] border-white/10 shadow-xl flex items-center justify-center overflow-hidden cursor-pointer hover:scale-110 active:scale-95 transition-all"
                                     >
-                                        {isDemoMode ? 'HISTORY MODE' : 'FRESH MODE'}
-                                    </button>
-                                    <button className="w-12 h-12 bg-white rounded-2xl shadow-sm flex items-center justify-center text-gray-400 hover:text-blue-500 transition-colors border-2 border-gray-50"><Bell /></button>
-                                    <button 
-                                        onClick={() => setIsMenuOpen(true)}
-                                        className="w-12 h-12 bg-white rounded-2xl shadow-sm flex items-center justify-center text-gray-400 hover:text-blue-500 transition-colors border-2 border-gray-50"
-                                    >
-                                        <Menu />
-                                    </button>
-                                </div>
-                            </header>
+                                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Ami" alt="User Avatar" className="w-full h-full object-cover" />
+                                    </div>
 
-                            {/* Sidebar / Menu Overlay */}
-                            {isMenuOpen && (
-                                <div className="fixed inset-0 z-[200] flex justify-end">
-                                    <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={() => setIsMenuOpen(false)} />
-                                    <div className="relative w-80 h-full bg-white shadow-2xl animate-in slide-in-from-right duration-300 p-8 flex flex-col">
-                                        <div className="flex justify-between items-center mb-12">
-                                            <h2 className="text-3xl font-black text-slate-800 font-jua">Ami's Menu</h2>
-                                            <button onClick={() => setIsMenuOpen(false)} className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-400"><X /></button>
-                                        </div>
-                                        <nav className="space-y-4">
-                                            {[
-                                                { label: 'Account', icon: '👤' },
-                                                { label: 'Vocabulary', icon: '📖' },
-                                                { label: 'My Library', icon: '❤️', action: () => { setView('my-library'); setIsMenuOpen(false); } },
-                                                { label: 'My Report', icon: '📊' }
-                                            ].map((item) => (
-                                                <button 
-                                                    key={item.label}
-                                                    onClick={item.action}
-                                                    className="w-full p-5 rounded-2xl hover:bg-slate-50 flex items-center gap-4 transition-all group active:scale-95"
-                                                >
-                                                    <span className="text-2xl">{item.icon}</span>
-                                                    <span className="text-xl font-black text-slate-600 group-hover:text-sky-500">{item.label}</span>
-                                                </button>
-                                            ))}
-                                        </nav>
+                                    {/* Profile Dropdown */}
+                                    {isMenuOpen && (
+                                        <>
+                                            <div className="fixed inset-0 z-30" onClick={() => setIsMenuOpen(false)} />
+                                            <div className="absolute top-[80px] left-0 w-64 bg-white rounded-3xl border-[4px] border-slate-100 shadow-2xl z-40 overflow-hidden">
+                                                <div className="p-2 space-y-1">
+                                                    {[
+                                                        { label: 'Account', icon: <Star className="w-5 h-5 text-slate-500 group-hover:text-blue-500 transition-colors" />, color: 'group-hover:bg-blue-100', textColor: 'group-hover:text-blue-500' },
+                                                        { label: 'Vocabulary', icon: <Bell className="w-5 h-5 text-slate-500 group-hover:text-amber-500 transition-colors" />, color: 'group-hover:bg-amber-100', textColor: 'group-hover:text-amber-500' },
+                                                        { label: 'My Library', icon: <Heart className="w-5 h-5 text-slate-500 group-hover:text-rose-500 transition-colors" />, color: 'group-hover:bg-rose-100', textColor: 'group-hover:text-rose-500', action: () => { setView('my-library'); setIsMenuOpen(false); } },
+                                                        { label: 'My Report', icon: <ChevronRight className="w-5 h-5 text-slate-500 group-hover:text-emerald-500 transition-colors" />, color: 'group-hover:bg-emerald-100', textColor: 'group-hover:text-emerald-500' },
+                                                    ].map((item) => (
+                                                        <button
+                                                            key={item.label}
+                                                            onClick={item.action}
+                                                            className="w-full flex items-center gap-4 px-4 py-3 bg-white hover:bg-slate-50 text-slate-700 rounded-2xl transition-colors text-left group"
+                                                        >
+                                                            <div className={`w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center ${item.color} transition-colors`}>
+                                                                {item.icon}
+                                                            </div>
+                                                            <span className={`font-bold text-lg tracking-wide ${item.textColor} transition-colors`}>{item.label}</span>
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </>
+                                    )}
+                                </div>
+
+                                <div>
+                                    <h1 className="text-3xl font-black text-white tracking-tight font-jua">{userName}'s Adventure</h1>
+                                    <div className="flex items-center gap-2 text-emerald-400 text-sm font-bold bg-emerald-500/10 px-3 py-1 rounded-full w-fit mt-1 border border-emerald-500/20">
+                                        <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+                                        Ready to Learn!
                                     </div>
                                 </div>
-                            )}
+                            </div>
 
+                            {/* Right: Action Buttons */}
+                            <div className="flex items-center gap-2 px-2 py-1 bg-white/5 rounded-2xl border border-white/10">
+                                <button className="w-10 h-10 rounded-xl flex items-center justify-center text-white/70 hover:text-white hover:bg-white/10 transition-all">
+                                    <Bell className="w-5 h-5" />
+                                </button>
+                                <button
+                                    onClick={() => setIsMenuOpen(!isMenuOpen)}
+                                    className="w-10 h-10 rounded-xl flex items-center justify-center text-white/70 hover:text-white hover:bg-white/10 transition-all"
+                                >
+                                    <Menu className="w-5 h-5" />
+                                </button>
+                            </div>
+                        </div>
+                    </header>
+
+                    {/* Main Scrollable Content */}
+                    <div className="max-w-6xl mx-auto px-4 md:px-8">
+                        <div className="pt-28 space-y-12 pb-12 min-h-screen">
                             {/* Hero Section */}
                             <HeroSection
                                 userName={userName}
@@ -425,62 +313,45 @@ export default function Home() {
                                 isFlashing={isFlashing}
                             />
 
-                            {/* Reading Roadmap (Snake Path) */}
-                            <div className="space-y-8 py-8 relative">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-12 h-12 bg-amber-100 rounded-2xl flex items-center justify-center text-amber-500 shadow-sm border border-amber-200">
-                                        <Map className="w-6 h-6 fill-current" />
-                                    </div>
-                                    <div>
-                                        <h3 className="text-3xl font-black text-slate-800 font-jua">Ami's Road</h3>
-                                        <p className="text-slate-400 font-bold text-sm uppercase tracking-widest">Follow the dots to become a master reader! 🗺️</p>
-                                    </div>
-                                </div>
-                                
-                                {BOOKS_DATA.length > 0 && (
-                                    <SnakeRoadmap 
-                                        books={BOOKS_DATA} 
-                                        readingHistory={readingHistory} 
-                                        onViewInfo={(book) => {
-                                            setSelectedBook(book);
-                                            setModalOrigin('recommendation');
-                                        }}
+                            {/* Library + Media Section */}
+                            <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_300px] gap-6 items-stretch w-full mb-8">
+                                <div className="overflow-hidden flex">
+                                    <LibrarySection
+                                        userName={userName}
                                         onStartLearning={startLearning}
-                                    />
-                                )}
-                            </div>
-
-                            {/* Library Section */}
-                            <div className="w-full pb-8">
-                                <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_300px] gap-6 items-stretch">
-                                    <div className="overflow-hidden flex">
-                                        <LibrarySection
-                                            userName={userName}
-                                            onStartLearning={startLearning}
-                                            onViewInfo={(book, origin) => {
-                                                setSelectedBook(book);
-                                                setModalOrigin(origin || 'recommendation');
-                                                if (origin === 'history') {
-                                                    setLibraryTab({ zone: 'Book Zone', subTab: 'Reading History' });
-                                                } else {
-                                                    setLibraryTab({ zone: 'Book Zone', subTab: 'All Books' });
-                                                }
-                                            }}
-                                            onSeeAll={() => {
+                                        onViewInfo={(book, origin) => {
+                                            setSelectedBook(book);
+                                            setModalOrigin(origin || 'recommendation');
+                                            if (origin === 'history') {
+                                                setLibraryTab({ zone: 'Book Zone', subTab: 'Reading History' });
+                                            } else {
                                                 setLibraryTab({ zone: 'Book Zone', subTab: 'All Books' });
-                                                setView('library');
-                                            }}
-                                        />
-                                    </div>
-                                    <div className="flex min-h-[300px]">
-                                        <MultiSection onNavigate={(tab) => {
-                                            setLibraryTab({ zone: 'Media Zone', subTab: tab });
+                                            }
+                                        }}
+                                        onSeeAll={() => {
+                                            setLibraryTab({ zone: 'Book Zone', subTab: 'All Books' });
                                             setView('library');
-                                        }} />
-                                    </div>
+                                        }}
+                                    />
+                                </div>
+                                <div className="flex min-h-[300px]">
+                                    <MultiSection onNavigate={(tab) => {
+                                        setLibraryTab({ zone: 'Media Zone', subTab: tab });
+                                        setView('library');
+                                    }} />
                                 </div>
                             </div>
                         </div>
+                    </div>
+
+                    {/* DEV Mode Toggle FAB */}
+                    <div className="fixed bottom-6 right-6 z-[3000]">
+                        <button
+                            onClick={() => setIsDemoMode(!isDemoMode)}
+                            className={`px-6 py-3 rounded-2xl text-xs font-black transition-all border-[3px] shadow-xl whitespace-nowrap ${isDemoMode ? 'bg-slate-800 text-slate-400 border-slate-700 hover:text-white hover:border-slate-600' : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300'} active:scale-95`}
+                        >
+                            DEV: {isDemoMode ? 'HISTORY MODE' : 'FRESH MODE'}
+                        </button>
                     </div>
 
                     {/* Shared Book Detail Modal */}

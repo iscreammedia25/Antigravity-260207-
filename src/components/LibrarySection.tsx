@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Sparkles, ChevronRight, ChevronLeft, Heart, Search, SlidersHorizontal, ArrowLeft, Check } from 'lucide-react';
+import { Sparkles, ChevronRight, ChevronLeft, Heart, Search, SlidersHorizontal, ArrowLeft, Check, X } from 'lucide-react';
 import { BOOKS_DATA, Book } from '../data/books';
 import UnifiedPlayer from './UnifiedPlayer';
 import { MediaItem } from '../types/media';
@@ -28,12 +28,28 @@ const LibrarySection: React.FC<LibrarySectionProps> = ({ userName, onViewInfo, o
     }, [initialTab]);
     const [isFilterOpen, setIsFilterOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
+    const [isSearchExecuted, setIsSearchExecuted] = useState(false);
+    const [searchSelectedIndex, setSearchSelectedIndex] = useState(-1);
     const [mediaSortBy, setMediaSortBy] = useState('Recent');
     const [mediaShowUnplayedOnly, setMediaShowUnplayedOnly] = useState(false);
     const [mediaFilters, setMediaFilters] = useState<Record<string, boolean>>({
         'Greeting': true,
         'Movie Book': true,
         'Audio Book': true
+    });
+
+    // New Filter States
+    const [bookTypeFilters, setBookTypeFilters] = useState<Record<string, boolean>>({
+        'Original': true, 'Classic': true
+    });
+    const [levelFilters, setLevelFilters] = useState<Record<string, boolean>>({
+        'Lv1': true, 'Lv2': true, 'Lv3': true, 'Lv4': true
+    });
+    const [lexileFilters, setLexileFilters] = useState<Record<string, boolean>>({
+        '100~250': true, '251~500': true, '501~700': true, '701~900': true
+    });
+    const [wordCountFilters, setWordCountFilters] = useState<Record<string, boolean>>({
+        '100~200': true, '200~400': true, '300~500': true, '400~600': true
     });
 
     // Player State
@@ -72,43 +88,118 @@ const LibrarySection: React.FC<LibrarySectionProps> = ({ userName, onViewInfo, o
                     </button>
 
                     {/* Search Bar */}
-                    <div className="flex-1 relative group">
-                        <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-6 h-6 text-slate-500 group-focus-within:text-sky-400 transition-colors" />
+                    <div className="flex-1 relative group z-50">
+                        <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-6 h-6 text-slate-400 group-focus-within:text-sky-500 transition-colors" />
                         <input
                             type="text"
                             placeholder="Search for books or keywords..."
                             value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full h-14 pl-14 pr-6 bg-white/10 border-4 border-transparent focus:border-sky-500/30 focus:bg-white/15 rounded-full text-lg font-bold text-white placeholder:text-slate-500 transition-all outline-none"
+                            onChange={(e) => {
+                                setSearchQuery(e.target.value);
+                                setIsSearchExecuted(false);
+                                setSearchSelectedIndex(-1);
+                            }}
+                            onKeyDown={(e) => {
+                                const matchedBooks = BOOKS_DATA.filter(b => b.title.toLowerCase().includes(searchQuery.toLowerCase())).slice(0, 5);
+                                if (e.key === 'ArrowDown' || e.key === 'PageDown') {
+                                    e.preventDefault();
+                                    if (searchSelectedIndex < matchedBooks.length - 1) {
+                                        setSearchSelectedIndex(prev => prev + 1);
+                                    }
+                                } else if (e.key === 'ArrowUp' || e.key === 'PageUp') {
+                                    e.preventDefault();
+                                    if (searchSelectedIndex > 0) {
+                                        setSearchSelectedIndex(prev => prev - 1);
+                                    }
+                                } else if (e.key === 'Enter') {
+                                    e.preventDefault();
+                                    if (searchSelectedIndex >= 0 && searchSelectedIndex < matchedBooks.length) {
+                                        setSearchQuery(matchedBooks[searchSelectedIndex].title);
+                                        setIsSearchExecuted(true);
+                                        setSearchSelectedIndex(-1);
+                                    } else if (searchQuery.trim()) {
+                                        setIsSearchExecuted(true);
+                                    }
+                                }
+                            }}
+                            className="w-full h-14 pl-14 pr-12 bg-white border-2 border-transparent focus:border-[#fbbf24] rounded-[20px] text-lg font-bold text-slate-800 placeholder:text-slate-400 transition-all outline-none shadow-sm"
                         />
+                        {searchQuery && (
+                            <button
+                                onClick={() => {
+                                    setSearchQuery('');
+                                    setIsSearchExecuted(false);
+                                    setSearchSelectedIndex(-1);
+                                }}
+                                className="absolute right-4 top-1/2 -translate-y-1/2 w-6 h-6 bg-slate-200 rounded-full flex items-center justify-center text-slate-500 hover:bg-slate-300 transition-colors"
+                            >
+                                <X className="w-4 h-4" />
+                            </button>
+                        )}
+
+                        {/* Dropdown for Matching Books */}
+                        {searchQuery && !isSearchExecuted && (
+                            <div className="absolute top-[calc(100%+8px)] left-0 w-full bg-white rounded-3xl shadow-2xl border-2 border-slate-100 p-4 z-50 animate-in fade-in slide-in-from-top-2">
+                                <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-3 ml-4">Matching Books</h4>
+                                <div className="flex flex-col gap-2 max-h-[400px] overflow-y-auto custom-scrollbar">
+                                    {BOOKS_DATA.filter(b => b.title.toLowerCase().includes(searchQuery.toLowerCase())).slice(0, 5).map((book, index) => (
+                                        <button
+                                            key={book.id}
+                                            onClick={() => {
+                                                setSearchQuery(book.title);
+                                                setIsSearchExecuted(true);
+                                                setSearchSelectedIndex(-1);
+                                            }}
+                                            onMouseEnter={() => setSearchSelectedIndex(index)}
+                                            className={`flex items-center gap-4 p-3 rounded-2xl transition-colors text-left w-full group ${searchSelectedIndex === index ? 'bg-sky-50' : 'hover:bg-sky-50'}`}
+                                        >
+                                            <div className="w-12 h-16 bg-slate-200 rounded-xl overflow-hidden shrink-0 shadow-sm border border-slate-100">
+                                                <img src={book.src} alt={book.title} className="w-full h-full object-cover" />
+                                            </div>
+                                            <span className={`font-bold text-lg transition-colors ${searchSelectedIndex === index ? 'text-sky-500' : 'text-slate-700 group-hover:text-sky-500'}`}>{book.title}</span>
+                                        </button>
+                                    ))}
+                                    {BOOKS_DATA.filter(b => b.title.toLowerCase().includes(searchQuery.toLowerCase())).length === 0 && (
+                                        <div className="p-4 text-center text-slate-400 font-bold">No matches found</div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
                     </div>
 
+                    {/* Search Button */}
+                    <button
+                        onClick={() => {
+                            if (searchQuery.trim()) setIsSearchExecuted(true);
+                        }}
+                        className="h-14 px-8 bg-[#fbbf24] text-[#0f172a] font-black text-lg rounded-[20px] shadow-lg shadow-amber-500/20 hover:bg-amber-400 active:scale-95 transition-all whitespace-nowrap"
+                    >
+                        Search
+                    </button>
+
                     {/* Filter Button */}
-                    <div className="relative">
+                    <div className="relative z-50">
                         <button
                             onClick={() => setIsFilterOpen(!isFilterOpen)}
-                            className={`h-14 px-6 rounded-3xl border-4 flex items-center gap-3 transition-all active:scale-95 font-black ${isFilterOpen ? 'bg-sky-500 text-white border-sky-400' : 'bg-white/5 text-slate-300 border-white/5 hover:bg-white/10'}`}
+                            className={`h-14 px-6 rounded-[20px] border-2 flex items-center gap-3 transition-all active:scale-95 font-black ${isFilterOpen ? 'bg-[#1e293b] text-white border-[#1e293b]' : 'bg-[#1e293b] text-white border-transparent hover:bg-slate-800'}`}
                         >
                             <SlidersHorizontal className="w-6 h-6" />
-                            <span>Filters</span>
                         </button>
 
                         {/* Filter Dropdown */}
                         {isFilterOpen && (
-                            <div className="absolute top-16 right-0 w-82 bg-[#1e293b] rounded-[32px] shadow-2xl border-4 border-white/10 p-6 z-50 animate-in zoom-in-95 slide-in-from-top-2 duration-200">
-                                <h4 className="text-white font-black text-lg mb-4 flex items-center gap-2">
-                                    <Sparkles className="w-5 h-5 text-sky-400" /> Advanced Filter
-                                </h4>
-                                <div className="space-y-6">
-                                    <FilterSection title="Lexile Level" options={['BR - 200L', '200L - 400L', '400L+']} />
-                                    <FilterSection title="Book Level" options={['Beginner', 'Intermediate', 'Advanced']} />
-                                    <FilterSection title="Genre" options={['Classic', 'Creative']} />
+                            <div className="absolute top-[calc(100%+8px)] right-0 w-[420px] bg-white rounded-[32px] shadow-[0_32px_80px_rgba(0,0,0,0.15)] border-2 border-slate-100 p-8 animate-in zoom-in-95 slide-in-from-top-2 duration-200 text-slate-800 max-h-[80vh] overflow-y-auto custom-scrollbar">
+                                <div className="space-y-8">
+                                    <FilterSection title="Book Type" options={['Original', 'Classic']} state={bookTypeFilters} setState={setBookTypeFilters} />
+                                    <FilterSection title="Level" options={['Lv1', 'Lv2', 'Lv3', 'Lv4']} state={levelFilters} setState={setLevelFilters} />
+                                    <FilterSection title="Lexile" options={['100~250', '251~500', '501~700', '701~900']} state={lexileFilters} setState={setLexileFilters} />
+                                    <FilterSection title="Word Count" options={['100~200', '200~400', '300~500', '400~600']} state={wordCountFilters} setState={setWordCountFilters} />
                                 </div>
                                 <button
                                     onClick={() => setIsFilterOpen(false)}
-                                    className="w-full mt-6 py-4 bg-sky-500 text-white rounded-2xl font-black hover:bg-sky-600 transition-colors shadow-lg shadow-sky-500/20"
+                                    className="w-full mt-8 py-4 bg-[#0f172a] text-white rounded-2xl font-black text-lg hover:bg-slate-800 transition-colors shadow-lg shadow-slate-900/20"
                                 >
-                                    Apply Filters
+                                    OK
                                 </button>
                             </div>
                         )}
@@ -116,40 +207,54 @@ const LibrarySection: React.FC<LibrarySectionProps> = ({ userName, onViewInfo, o
                 </div>
 
                 {/* Zone Toggle Tabs */}
-                <div className="flex gap-4 p-1.5 bg-black/30 rounded-[28px] w-fit border-2 border-white/5 shadow-inner">
-                    {(Object.keys(zones) as Zone[]).map((zone) => (
-                        <button
-                            key={zone}
-                            onClick={() => handleZoneChange(zone)}
-                            className={`px-8 py-3 rounded-[22px] font-black text-lg transition-all ${activeZone === zone ? 'bg-[#fbbf24] text-[#0f172a] shadow-xl shadow-amber-500/20 transform scale-[1.05]' : 'text-slate-500 hover:text-slate-300'}`}
-                        >
-                            {zone}
-                        </button>
-                    ))}
-                </div>
+                {!isSearchExecuted && (
+                    <div className="flex gap-4 p-1.5 bg-black/30 rounded-[28px] w-fit border-2 border-white/5 shadow-inner">
+                        {(Object.keys(zones) as Zone[]).map((zone) => (
+                            <button
+                                key={zone}
+                                onClick={() => handleZoneChange(zone)}
+                                className={`px-8 py-3 rounded-[22px] font-black text-lg transition-all ${activeZone === zone ? 'bg-[#fbbf24] text-[#0f172a] shadow-xl shadow-amber-500/20 transform scale-[1.05]' : 'text-slate-500 hover:text-slate-300'}`}
+                            >
+                                {zone}
+                            </button>
+                        ))}
+                    </div>
+                )}
             </header>
 
             {/* 2. Sub Navigation */}
-            <nav className="px-8 py-2 overflow-x-auto no-scrollbar border-b border-white/5">
-                <div className="flex gap-8 whitespace-nowrap min-w-max">
-                    {zones[activeZone].map((tab) => (
-                        <button
-                            key={tab}
-                            onClick={() => setActiveSubTab(tab)}
-                            className={`relative py-4 text-xl font-black transition-all ${activeSubTab === tab ? 'text-[#fbbf24]' : 'text-slate-500 hover:text-slate-300'}`}
-                        >
-                            {tab}
-                            {activeSubTab === tab && (
-                                <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-[#fbbf24] rounded-full shadow-[0_0_15px_rgba(251,191,36,0.5)] animate-in fade-in slide-in-from-bottom-1" />
-                            )}
-                        </button>
-                    ))}
-                </div>
-            </nav>
+            {!isSearchExecuted && (
+                <nav className="px-8 py-2 overflow-x-auto no-scrollbar border-b border-white/5">
+                    <div className="flex gap-8 whitespace-nowrap min-w-max">
+                        {zones[activeZone].map((tab) => (
+                            <button
+                                key={tab}
+                                onClick={() => setActiveSubTab(tab)}
+                                className={`relative py-4 text-xl font-black transition-all ${activeSubTab === tab ? 'text-[#fbbf24]' : 'text-slate-500 hover:text-slate-300'}`}
+                            >
+                                {tab}
+                                {activeSubTab === tab && (
+                                    <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-[#fbbf24] rounded-full shadow-[0_0_15px_rgba(251,191,36,0.5)] animate-in fade-in slide-in-from-bottom-1" />
+                                )}
+                            </button>
+                        ))}
+                    </div>
+                </nav>
+            )}
 
             {/* 3. Content Area */}
-            <main className="flex-1 overflow-y-auto px-10 py-8 relative">
-                {activeZone === 'Media Zone' ? (
+            <main className={`flex-1 overflow-y-auto px-10 py-8 relative ${isSearchExecuted ? 'bg-slate-50 text-slate-800' : ''}`}>
+                {isSearchExecuted ? (
+                    <SearchResultsView 
+                        query={searchQuery} 
+                        onViewInfo={onViewInfo}
+                        onPlayMedia={(list, index) => {
+                            setPlayerMediaList(list);
+                            setPlayerStartIndex(index);
+                            setIsPlayerOpen(true);
+                        }}
+                    />
+                ) : activeZone === 'Media Zone' ? (
                     <MediaZoneContent
                         activeSubTab={activeSubTab}
                         mediaSortBy={mediaSortBy}
@@ -471,18 +576,124 @@ const MediaZoneContent = ({ activeSubTab, mediaSortBy, setMediaSortBy, mediaShow
     );
 };
 
-// Helper component for filter sections
-const FilterSection = ({ title, options }: { title: string, options: string[] }) => {
-    const [selected, setSelected] = useState(options[0]);
+const SearchResultsView = ({ query, onViewInfo, onPlayMedia }: { query: string, onViewInfo: any, onPlayMedia: any }) => {
+    const matchedBooks = BOOKS_DATA.filter(b => b.title.toLowerCase().includes(query.toLowerCase()));
+    
+    // Flatten mockMediaData for search
+    let matchedMedia: any[] = [];
+    mockMediaData.forEach(group => {
+        if (group.bookTitle.toLowerCase().includes(query.toLowerCase())) {
+            matchedMedia.push(...group.items);
+        }
+    });
+
+    const hasResults = matchedBooks.length > 0 || matchedMedia.length > 0;
+
+    if (!hasResults) {
+        return (
+            <div className="flex flex-col items-center justify-center h-full w-full animate-in fade-in zoom-in-95 duration-300 -mt-10">
+                <div className="w-32 h-32 rounded-full border-4 border-dashed border-slate-300 flex items-center justify-center mb-8 relative">
+                    <Search className="w-12 h-12 text-slate-300" />
+                    <div className="absolute inset-0 bg-slate-100/50 rounded-full animate-ping opacity-20"></div>
+                </div>
+                <h2 className="text-3xl font-black text-slate-700 mb-3 font-jua">No results for "{query}"</h2>
+                <p className="text-lg font-bold text-slate-400">Try different keywords or check your spelling!</p>
+            </div>
+        );
+    }
+
     return (
-        <div className="space-y-3">
-            <h5 className="text-xs font-black text-slate-400 uppercase tracking-widest">{title}</h5>
-            <div className="flex flex-wrap gap-2">
+        <div className="flex flex-col gap-12 w-full animate-in fade-in slide-in-from-bottom-4 duration-300">
+            {/* Books Section */}
+            {matchedBooks.length > 0 && (
+                <section>
+                    <h3 className="text-2xl font-black text-slate-800 mb-6 flex items-center gap-3 font-jua">
+                        <Sparkles className="w-6 h-6 text-sky-400" />
+                        Books
+                        <span className="bg-sky-100 text-sky-500 px-2 py-0.5 rounded-full text-sm font-black">{matchedBooks.length}</span>
+                    </h3>
+                    <div className="flex gap-6 overflow-x-auto pb-6 custom-scrollbar pr-10">
+                        {matchedBooks.map(book => (
+                            <div key={book.id} onClick={() => onViewInfo(book, 'recommendation')} className="group cursor-pointer flex flex-col gap-3 w-[160px] shrink-0">
+                                <div className="w-full aspect-[3/4] bg-slate-100 rounded-[32px] overflow-hidden relative group-hover:-translate-y-2 transition-all duration-300 border-[4px] border-white shadow-md group-hover:shadow-2xl group-hover:shadow-sky-200">
+                                    <img src={book.src} alt={book.title} className="w-full h-full object-cover" />
+                                </div>
+                                <h4 className="text-center text-[15px] font-black text-slate-700 font-jua group-hover:text-sky-500 transition-colors px-1 line-clamp-2">{book.title}</h4>
+                            </div>
+                        ))}
+                    </div>
+                </section>
+            )}
+
+            {/* Media Section */}
+            {matchedMedia.length > 0 && (
+                <section>
+                    <h3 className="text-2xl font-black text-slate-800 mb-6 flex items-center gap-3 font-jua">
+                        <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center">
+                            <svg className="w-4 h-4 text-amber-500 fill-current" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                        </div>
+                        Media
+                        <span className="bg-amber-100 text-amber-500 px-2 py-0.5 rounded-full text-sm font-black">{matchedMedia.length}</span>
+                    </h3>
+                    <div className="flex gap-6 overflow-x-auto pb-6 custom-scrollbar pr-10">
+                        {matchedMedia.map((item, idx) => (
+                            <div key={item.id} className="group cursor-pointer w-[280px] shrink-0 flex flex-col gap-3 transition-all duration-300 hover:-translate-y-2"
+                                onClick={() => onPlayMedia(matchedMedia, idx)}>
+                                <div className="aspect-video bg-slate-100 rounded-[32px] overflow-hidden shadow-sm group-hover:shadow-xl group-hover:shadow-amber-200 transition-all duration-300 relative border-4 border-white pointer-events-none flex items-center justify-center">
+                                    {item.type === 'Greeting' ? (
+                                        <video 
+                                            src={`${item.src}#t=0.001`} 
+                                            className="w-full h-full object-cover" 
+                                            preload="metadata"
+                                            muted
+                                            playsInline
+                                        />
+                                    ) : item.type === 'Audio Book' ? (
+                                        <div className="w-full h-full bg-slate-50 flex items-center justify-center p-4">
+                                            <img src={item.thumbnail} className="h-full w-auto object-contain shadow-md rounded-lg" alt="" />
+                                        </div>
+                                    ) : (
+                                        <img src={item.thumbnail} onError={(e: any) => { e.currentTarget.src = `https://api.dicebear.com/7.x/shapes/svg?seed=${item.id}`; }} className="w-full h-full object-cover" alt="" />
+                                    )}
+                                    <div className="absolute inset-0 bg-slate-900/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
+                                        <div className="w-16 h-16 bg-white/95 backdrop-blur-md rounded-full flex items-center justify-center scale-75 group-hover:scale-100 transition-transform duration-300 shadow-2xl">
+                                            <svg className="w-8 h-8 ml-1 text-amber-500 fill-current" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                                        </div>
+                                    </div>
+                                    
+                                    {/* Badges */}
+                                    <div className="absolute top-3 left-3 px-3 py-1 bg-[#0f172a] text-[#fbbf24] font-black text-[9px] uppercase tracking-widest rounded-full shadow-md z-10">{item.type}</div>
+                                    <div className="absolute bottom-3 right-3 px-2.5 py-1 bg-black/70 backdrop-blur-md rounded-lg text-white font-black text-xs tabular-nums tracking-wider shadow-sm border border-white/20">
+                                        {item.duration}
+                                    </div>
+                                </div>
+                                <div className="px-2 pointer-events-none">
+                                    <h4 className="text-[16px] font-bold text-slate-700 line-clamp-1 group-hover:text-amber-500 transition-colors font-jua">
+                                        {item.title}
+                                    </h4>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </section>
+            )}
+        </div>
+    );
+};
+
+// Helper component for filter sections
+const FilterSection = ({ title, options, state, setState }: { title: string, options: string[], state: Record<string, boolean>, setState: any }) => {
+    return (
+        <div className="space-y-4">
+            <h5 className="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center justify-between">
+                {title}
+            </h5>
+            <div className="flex flex-wrap gap-3">
                 {options.map(opt => (
                     <button
                         key={opt}
-                        onClick={() => setSelected(opt)}
-                        className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${selected === opt ? 'bg-sky-100 text-sky-600' : 'bg-slate-50 text-slate-400 hover:bg-slate-100'}`}
+                        onClick={() => setState({ ...state, [opt]: !state[opt] })}
+                        className={`px-5 py-2.5 rounded-full text-sm font-bold transition-all border-2 ${state[opt] ? 'bg-sky-50 text-sky-600 border-sky-200 shadow-sm' : 'bg-white text-slate-400 border-slate-200 hover:border-slate-300 hover:bg-slate-50'}`}
                     >
                         {opt}
                     </button>
@@ -554,7 +765,7 @@ const OriginalLibrarySlider: React.FC<Pick<LibrarySectionProps, 'userName' | 'on
                 </h3>
                 <button
                     onClick={onSeeAll}
-                    className="p-3 bg-sky-50 text-sky-400 font-black btn-jelly text-xs flex items-center gap-2 hover:bg-sky-100 hover:scale-105 active:scale-95 group font-fredoka"
+                    className="px-5 py-2.5 bg-[#0f172a] text-[#fbbf24] font-black rounded-2xl text-xs flex items-center gap-2 hover:scale-105 active:scale-95 transition-all group font-fredoka uppercase tracking-widest shadow-lg shadow-black/10"
                 >
                     SEE ALL <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </button>

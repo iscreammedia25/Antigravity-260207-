@@ -62,7 +62,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ userName, readingHistory, fre
   const handlePrev = () => setCurrentIndex((prev) => (prev - 1 + cards.length) % cards.length);
 
   return (
-    <section className={`relative overflow-hidden card-bubble p-6 md:p-10 transition-all duration-700 border-none shadow-2xl ${isHistoryMode ? 'bg-[#0f172a]' : 'bg-[#fbbf24]'}`}>
+    <section className={`relative overflow-hidden card-bubble p-6 md:p-10 transition-all duration-700 border-none shadow-2xl flex items-center min-h-[380px] ${isHistoryMode ? 'bg-[#0f172a]' : 'bg-[#fbbf24]'}`} style={{ borderRadius: '48px' }}>
       {/* Decorative Orbs (Removed for clean solid look as per user request) */}
 
       {/* Main Content Unit */}

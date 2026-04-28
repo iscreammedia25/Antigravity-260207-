@@ -1,1364 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>!!Kids Reading Adventure - Preview</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Jua&display=swap"
-        rel="stylesheet">
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <style>
-        :root {
-            --font-fredoka: 'Fredoka', sans-serif;
-            --font-jua: 'Jua', sans-serif;
-        }
-
-        body {
-            font-family: var(--font-fredoka);
-            background: linear-gradient(to bottom, #FEFCE8, #EFF6FF);
-            /* yellow-50 to blue-50 */
-            color: #334155;
-            min-height: 100vh;
-            margin: 0;
-            padding: 0;
-            overflow-x: hidden;
-        }
-
-        .font-jua {
-            font-family: var(--font-jua);
-        }
-
-        .btn-jelly {
-            border-radius: 9999px;
-            border-width: 4px;
-            border-color: #334155;
-            box-shadow: 0 6px 0 rgba(0, 0, 0, 0.1);
-            transition: all 0.2s;
-            font-weight: 900;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        .btn-jelly:active {
-            transform: translateY(4px);
-            box-shadow: 0 2px 0 rgba(0, 0, 0, 0.1);
-        }
-
-        .card-bubble {
-            border-radius: 40px;
-            background-color: rgba(255, 255, 255, 0.82);
-            backdrop-filter: blur(16px);
-            border-width: 6px;
-            border-color: #ffffff;
-            box-shadow: 0 35px 70px -15px rgba(0, 0, 0, 0.08);
-            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-
-        .hero-section-fix {
-            background-color: transparent !important;
-            backdrop-filter: none !important;
-            border: none !important;
-            box-shadow: none !important;
-        }
-
-        .no-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-
-        .no-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-
-        .custom-scrollbar::-webkit-scrollbar {
-            height: 10px;
-            background: transparent;
-        }
-
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background-color: #FFEDD5;
-            /* orange-100 */
-            border-radius: 9999px;
-            border: 3px solid transparent;
-            background-clip: padding-box;
-            transition: background-color 0.3s;
-        }
-
-        .custom-scrollbar:hover::-webkit-scrollbar-thumb {
-            background-color: #FED7AA;
-            /* orange-200 */
-        }
-
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background-color: #FDBA74;
-            /* orange-300 */
-        }
-
-        .animate-twinkle {
-            animation: twinkle 2s infinite;
-        }
-
-        @keyframes wave {
-
-            0%,
-            100% {
-                height: 8px;
-            }
-
-            50% {
-                height: 32px;
-            }
-        }
-
-        .animate-wave {
-            animation: wave 1s ease-in-out infinite;
-        }
-
-        @keyframes twinkle {
-
-            0%,
-            100% {
-                opacity: 1;
-                transform: scale(1);
-                filter: brightness(1);
-            }
-
-            50% {
-                opacity: 0.8;
-                transform: scale(1.05);
-                filter: brightness(1.3);
-                drop-shadow: 0 0 20px rgba(255, 107, 0, 0.4);
-            }
-        }
-
-        @keyframes card-float {
-
-            0%,
-            100% {
-                transform: translateY(0) scale(1.0);
-                box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.3);
-            }
-
-            50% {
-                transform: translateY(-10px) scale(1.02);
-                box-shadow: 0 25px 40px -15px rgba(0, 0, 0, 0.4);
-            }
-        }
-
-        .animate-card-float {
-            animation: card-float 3s ease-in-out infinite;
-        }
-
-        #learningModeOverlay,
-        #bookModal,
-        #libraryFullPage {
-            position: fixed !important;
-            top: 0 !important;
-            left: 0 !important;
-            right: 0 !important;
-            bottom: 0 !important;
-            width: 100vw !important;
-            height: 100vh !important;
-            margin: 0 !important;
-            padding: 0 !important;
-            overflow: hidden !important;
-        }
-
-        #learningModeOverlay {
-            transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-            transform: translateY(100%);
-            background-color: #000000;
-            z-index: 30000 !important;
-        }
-
-        #learningModeOverlay.active {
-            transform: translateY(0);
-        }
-
-        .library-full-page {
-            position: fixed;
-            inset: 0;
-            background-color: #ffffff;
-            z-index: 2000 !important;
-            display: flex;
-            flex-direction: column;
-            animation: slideInFromBottom 0.3s ease-out;
-            overflow: hidden;
-        }
-
-        .library-scroll-container::-webkit-scrollbar {
-            height: 6px;
-        }
-
-        .library-scroll-container::-webkit-scrollbar-thumb {
-            background: #e2e8f0;
-            border-radius: 10px;
-            display: none;
-        }
-
-        .library-scroll-container:hover::-webkit-scrollbar-thumb {
-            display: block;
-        }
-
-        #gnbHandle {
-            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .animate-suck-to-hero {
-            animation: suck-to-hero 1.0s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-            position: fixed;
-            z-index: 9999;
-            pointer-events: none;
-        }
-
-        @keyframes suck-to-hero {
-            0% {
-                opacity: 1;
-                transform: translate(-50%, -50%) scale(1) rotate(0deg);
-                left: 50%;
-                top: 50%;
-            }
-
-            30% {
-                opacity: 1;
-                transform: translate(-50%, -50%) scale(1.1) rotate(-5deg);
-            }
-
-            100% {
-                opacity: 0;
-                transform: translate(-50%, -50%) scale(0.1) rotate(25deg);
-                left: var(--target-x, 75%);
-                top: var(--target-y, 25%);
-            }
-        }
-
-        @keyframes flash-yellow {
-
-            0%,
-            100% {
-                filter: brightness(1) contrast(1);
-                transform: scale(1);
-            }
-
-            50% {
-                filter: brightness(1.2) contrast(1.1);
-                transform: scale(1.02);
-                box-shadow: 0 0 30px rgba(251, 191, 36, 0.6);
-            }
-        }
-
-        .animate-flash-yellow {
-            animation: flash-yellow 1s infinite;
-        }
-
-        /* Settings Toggle Styles */
-        .toggle-btn {
-            width: 110px;
-            height: 52px;
-            background-color: #1e293b;
-            /* Slate-800 */
-            border-radius: 26px;
-            position: relative;
-            cursor: pointer;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            display: flex;
-            align-items: center;
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
-        }
-
-        .toggle-btn.on {
-            background-color: #ffffff;
-            border-color: #ffffff;
-            box-shadow: 0 0 25px rgba(255, 255, 255, 0.4), inset 0 2px 4px rgba(0, 0, 0, 0.05);
-        }
-
-        .toggle-circle {
-            width: 40px;
-            height: 40px;
-            background-color: #ffffff;
-            border-radius: 50%;
-            position: absolute;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            left: 5px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-            z-index: 2;
-        }
-
-        .toggle-btn.on .toggle-circle {
-            background-color: #0f172a;
-            /* Slate-900 */
-            transform: translateX(58px);
-        }
-
-        .toggle-text {
-            position: absolute;
-            width: 100%;
-            text-align: center;
-            font-weight: 900;
-            font-size: 16px;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            z-index: 1;
-            transition: all 0.3s;
-            pointer-events: none;
-        }
-
-        .toggle-btn.on .toggle-text {
-            color: #0f172a;
-            padding-right: 40px;
-        }
-
-        .toggle-btn.off .toggle-text {
-            color: #ffffff;
-            padding-left: 40px;
-        }
-
-        .settings-btn-group button {
-            background-color: #1e293b;
-            color: rgba(255, 255, 255, 0.4);
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            padding: 14px 24px;
-            border-radius: 20px;
-            font-weight: 800;
-            font-size: 18px;
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            font-family: 'Fredoka', sans-serif;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        .settings-btn-group button.active {
-            background-color: #ffffff;
-            color: #0f172a;
-            border-color: #ffffff;
-            box-shadow: 0 10px 25px rgba(255, 255, 255, 0.2), 0 0 0 4px rgba(255, 255, 255, 0.1);
-            transform: scale(1.05);
-        }
-
-        .settings-btn-group button:hover:not(.active):not(:disabled) {
-            border-color: rgba(255, 255, 255, 0.3);
-            color: #ffffff;
-            background-color: #334155;
-        }
-
-        .settings-btn-group button:disabled {
-            opacity: 0.2;
-            cursor: not-allowed;
-        }
-
-        /* Glassmorphism Popup Style */
-        .glass-popup {
-            background-color: rgba(0, 0, 0, 0.6) !important;
-            backdrop-filter: blur(12px) !important;
-            -webkit-backdrop-filter: blur(12px) !important;
-            border: 4px solid rgba(255, 255, 255, 0.2) !important;
-            box-shadow: 0 32px 80px rgba(0, 0, 0, 0.9) !important;
-        }
-
-        .settings-label {
-            font-size: 30px !important;
-            /* Slightly larger (+2pt from prev 28) */
-            font-weight: bold !important;
-            color: #fff !important;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-        }
-
-        .settings-title {
-            font-size: 42px !important;
-            /* Slightly larger (+2pt from prev 40) */
-            font-weight: 900 !important;
-            color: #fff !important;
-            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
-        }
-
-        /* Library Section Styles */
-        #studyGnb {
-            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-            background-color: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-        }
-
-        @keyframes slideInFromBottom {
-            from {
-                transform: translateY(20px);
-                opacity: 0;
-            }
-
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-
-        .no-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-
-        .no-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-
-        .dev-toggle-fab {
-            position: fixed;
-            bottom: 24px;
-            right: 24px;
-            z-index: 3000;
-            /* Above everything */
-        }
-
-        .global-container {
-            max-width: 1152px;
-            /* 6xl */
-            margin-left: auto;
-            margin-right: auto;
-            width: 100%;
-        }
-    </style>
-    <style>
-        .page-padding {
-            padding: 1rem;
-        }
-
-        @media (min-width: 768px) {
-            .page-padding {
-                padding: 2rem;
-            }
-        }
-
-        /* Unified Media Player Styles */
-        @keyframes bounce-slow {
-
-            0%,
-            100% {
-                transform: translateY(0) rotate(3deg);
-            }
-
-            50% {
-                transform: translateY(-20px) rotate(-1deg);
-            }
-        }
-
-        @keyframes wave {
-
-            0%,
-            100% {
-                transform: scaleY(0.5);
-            }
-
-            50% {
-                transform: scaleY(1.2);
-            }
-        }
-
-        .animate-bounce-slow {
-            animation: bounce-slow 4s ease-in-out infinite;
-        }
-
-        .audio-visualizer-bar {
-            transition: height 0.2s ease-in-out;
-        }
-
-        #unifiedMediaPlayer {
-            z-index: 50000 !important;
-        }
-
-        .circular-countdown {
-            transform: rotate(-90deg);
-        }
-
-        .circular-countdown circle {
-            fill: none;
-            stroke-width: 12;
-            stroke-linecap: round;
-        }
-
-        /* Word Flash Card Styles */
-        .perspective-2000 {
-            perspective: 2000px;
-        }
-
-        .preserve-3d {
-            transform-style: preserve-3d;
-        }
-
-        .backface-hidden {
-            backface-visibility: hidden;
-        }
-
-        .rotate-y-180 {
-            transform: rotateY(180deg);
-        }
-
-        @keyframes float {
-
-            0%,
-            100% {
-                transform: translateY(0);
-            }
-
-            50% {
-                transform: translateY(-20px);
-            }
-        }
-
-        .animate-float {
-            animation: float 4s ease-in-out infinite;
-        }
-
-        @keyframes soft-glow {
-
-            0%,
-            100% {
-                box-shadow: 0 0 20px rgba(255, 255, 255, 0.3), 0 0 0px rgba(56, 189, 248, 0);
-            }
-
-            50% {
-                box-shadow: 0 0 40px rgba(255, 255, 255, 0.6), 0 0 25px rgba(56, 189, 248, 0.4);
-            }
-        }
-
-        .animate-soft-glow {
-            animation: soft-glow 3s ease-in-out infinite;
-        }
-    </style>
-</head>
-
-<body class="">
-    <!-- Header (GNB) - Fixed at top -->
-    <header id="mainGnb"
-        class="fixed top-0 left-0 w-full h-24 bg-[#0f172a] border-b border-white/10 flex justify-center items-center px-4 md:px-0 transition-all duration-300 z-[100] shadow-2xl">
-        <div class="global-container flex justify-between items-center w-full">
-            <div class="flex items-center gap-6">
-                <!-- Profile Avatar & Dropdown -->
-                <div class="relative group/profile" id="profileDropdownContainer">
-                    <div onclick="toggleProfileMenu(event)"
-                        class="w-16 h-16 bg-yellow-300 rounded-full border-[6px] border-white/10 shadow-xl flex items-center justify-center overflow-hidden transform hover:scale-110 active:scale-95 transition-all cursor-pointer relative z-50">
-                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Ami" alt="User Avatar">
-                    </div>
-
-                    <!-- Profile Menu Dropdown -->
-                    <div id="profileMenu"
-                        class="absolute top-[80px] left-0 w-64 bg-white rounded-3xl border-[4px] border-slate-100 shadow-2xl opacity-0 scale-95 pointer-events-none transition-all duration-200 origin-top-left z-40 overflow-hidden font-fredoka">
-                        <div class="p-2 space-y-1">
-                            <button
-                                class="w-full flex items-center gap-4 px-4 py-3 bg-white hover:bg-slate-50 text-slate-700 rounded-2xl transition-colors text-left group">
-                                <div
-                                    class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center group-hover:bg-blue-100 transition-colors">
-                                    <i data-lucide="user-cog"
-                                        class="w-5 h-5 text-slate-500 group-hover:text-blue-500 transition-colors"></i>
-                                </div>
-                                <span
-                                    class="font-bold text-lg tracking-wide group-hover:text-blue-500 transition-colors">Account</span>
-                            </button>
-                            <button
-                                class="w-full flex items-center gap-4 px-4 py-3 bg-white hover:bg-slate-50 text-slate-700 rounded-2xl transition-colors text-left group">
-                                <div
-                                    class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center group-hover:bg-amber-100 transition-colors">
-                                    <i data-lucide="library"
-                                        class="w-5 h-5 text-slate-500 group-hover:text-amber-500 transition-colors"></i>
-                                </div>
-                                <span
-                                    class="font-bold text-lg tracking-wide group-hover:text-amber-500 transition-colors">Vocabulary</span>
-                            </button>
-                            <button onclick="openLibraryFullPage('My Library', 'Roadmap'); toggleProfileMenu();"
-                                class="w-full flex items-center gap-4 px-4 py-3 bg-white hover:bg-slate-50 text-slate-700 rounded-2xl transition-colors text-left group">
-                                <div
-                                    class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center group-hover:bg-rose-100 transition-colors">
-                                    <i data-lucide="heart"
-                                        class="w-5 h-5 text-slate-500 group-hover:text-rose-500 transition-colors group-hover:fill-rose-100"></i>
-                                </div>
-                                <span
-                                    class="font-bold text-lg tracking-wide group-hover:text-rose-500 transition-colors">My
-                                    Library</span>
-                            </button>
-                            <button
-                                class="w-full flex items-center gap-4 px-4 py-3 bg-white hover:bg-slate-50 text-slate-700 rounded-2xl transition-colors text-left group">
-                                <div
-                                    class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center group-hover:bg-emerald-100 transition-colors">
-                                    <i data-lucide="bar-chart-2"
-                                        class="w-5 h-5 text-slate-500 group-hover:text-emerald-500 transition-colors"></i>
-                                </div>
-                                <span
-                                    class="font-bold text-lg tracking-wide group-hover:text-emerald-500 transition-colors">My
-                                    Report</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                <div>
-                    <h1 class="text-3xl font-black text-white tracking-tight font-jua">Ami's Adventure</h1>
-                    <div
-                        class="flex items-center gap-2 text-emerald-400 text-sm font-bold bg-emerald-500/10 px-3 py-1 rounded-full w-fit mt-1 border border-emerald-500/20">
-                        <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
-                        Ready to Learn!
-                    </div>
-                </div>
-            </div>
-
-            <!-- Global Actions: Unified Capsule -->
-            <div class="flex items-center gap-2 px-2 py-1 bg-white/5 rounded-2xl border border-white/10">
-                <!-- Home Button (Visible only in sub-pages if needed, hidden on home) -->
-                <button id="globalHomeBtn" onclick="location.reload()"
-                    class="hidden w-10 h-10 rounded-xl flex items-center justify-center text-white/70 hover:text-white hover:bg-white/10 transition-all">
-                    <i data-lucide="home" class="w-5 h-5"></i>
-                </button>
-                <button
-                    class="w-10 h-10 rounded-xl flex items-center justify-center text-white/70 hover:text-white hover:bg-white/10 transition-all">
-                    <i data-lucide="bell" class="w-5 h-5"></i>
-                </button>
-                <button
-                    class="w-10 h-10 rounded-xl flex items-center justify-center text-white/70 hover:text-white hover:bg-white/10 transition-all">
-                    <i data-lucide="menu" class="w-5 h-5"></i>
-                </button>
-            </div>
-        </div>
-    </header>
-
-    <div class="global-container page-padding">
-
-        <!-- Floating Dev Toggle -->
-        <div class="dev-toggle-fab">
-            <button id="modeToggleBtn" onclick="toggleMode()"
-                class="px-6 py-3 rounded-2xl text-xs font-black transition-all border-[3px] shadow-xl bg-slate-800 text-slate-400 border-slate-700 hover:text-white hover:border-slate-600 active:scale-95 whitespace-nowrap">
-                DEV: HISTORY MODE
-            </button>
-        </div>
-
-        <!-- Main Content Area with padding for fixed header -->
-        <div class="pt-28 space-y-12 pb-12 min-h-screen">
-            <!-- Hero Section -->
-            <!-- Hero Section Container -->
-            <div id="heroContainer">
-                <!-- Will be rendered by script -->
-            </div>
-
-            <!-- Lower Section Container with Grid for History Mode -->
-            <div id="lowerSectionGrid"
-                class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_300px] gap-6 items-stretch w-full mb-8">
-                <!-- Library Section -->
-                <div id="libraryContainer" class="overflow-hidden flex transition-all duration-300">
-                    <div class="card-bubble p-6 md:p-8 w-full h-full flex flex-col relative overflow-hidden">
-                        <div class="flex justify-between items-center mb-10">
-                            <h3 class="text-3xl font-black text-slate-700 flex items-center gap-4 font-jua">
-                                <span
-                                    class="w-12 h-12 bg-sky-100 rounded-2xl flex items-center justify-center text-sky-400 shadow-sm shadow-sky-100">
-                                    <i data-lucide="sparkles" class="w-8 h-8 fill-current"></i>
-                                </span>
-                                For you
-                            </h3>
-                            <button onclick="openLibraryFullPage('Book Zone', 'For you');"
-                                class="px-5 py-2.5 bg-[#0f172a] text-[#fbbf24] font-black rounded-2xl text-xs flex items-center gap-2 hover:scale-105 active:scale-95 transition-all group font-fredoka uppercase tracking-widest shadow-lg shadow-black/10">
-                                SEE ALL <i data-lucide="chevron-right"
-                                    class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
-                            </button>
-                        </div>
-
-                        <div class="relative group/scroll px-2 flex-grow flex flex-col justify-center min-h-[14rem]">
-                            <!-- Bookshelf Base -->
-                            <div
-                                class="absolute bottom-6 left-0 right-0 h-14 bg-slate-200/60 rounded-full mx-4 border-b-4 border-slate-300/40 shadow-inner">
-                            </div>
-
-                            <button id="scrollLeftBtn" onclick="scrollContainer(-400)"
-                                class="absolute left-0 top-[35%] -translate-y-1/2 -translate-x-6 w-12 h-12 bg-white text-sky-400 rounded-full shadow-lg border border-slate-100 flex items-center justify-center z-20 opacity-0 group-hover/scroll:opacity-100 transition-all hover:bg-sky-50 active:scale-90 invisible">
-                                <i data-lucide="chevron-left" class="w-8 h-8"></i>
-                            </button>
-
-                            <div id="bookContainer"
-                                class="flex gap-3 md:gap-4 overflow-x-auto pt-8 pb-8 scroll-smooth custom-scrollbar relative z-10 cursor-grab active:cursor-grabbing select-none h-full items-end">
-                                <!-- Books will be injected by script -->
-                            </div>
-
-                            <button onclick="scrollContainer(400)"
-                                class="absolute right-0 top-[35%] -translate-y-1/2 translate-x-6 w-12 h-12 bg-white text-sky-400 rounded-full shadow-lg border border-slate-100 flex items-center justify-center z-20 opacity-0 group-hover/scroll:opacity-100 transition-all hover:bg-sky-50 active:scale-90">
-                                <i data-lucide="chevron-right" class="w-8 h-8"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Multi Section -->
-                <div id="multiSectionContainer" class="flex min-h-[300px] transition-all duration-300">
-                    <div
-                        class="card-bubble p-6 md:p-8 w-full h-full flex flex-col relative overflow-hidden bg-white shadow-sm border border-slate-100">
-                        <!-- Header -->
-                        <div class="flex justify-between items-center mb-6">
-                            <h3 class="text-2xl font-black text-slate-700 font-jua">
-                                Media Box
-                            </h3>
-                            <button onclick="openLibraryFullPage('Media Zone', 'All Media');"
-                                class="px-5 py-2.5 bg-[#0f172a] text-[#fbbf24] font-black rounded-2xl text-xs flex items-center gap-2 hover:scale-105 active:scale-95 transition-all group font-fredoka uppercase tracking-widest shadow-lg shadow-black/10 text-center">
-                                SEE ALL <i data-lucide="chevron-right"
-                                    class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
-                            </button>
-                        </div>
-
-                        <!-- List -->
-                        <div class="flex flex-col gap-4 flex-1 overflow-y-auto w-full pr-2 custom-scrollbar">
-                            <!-- Greeting Item -->
-                            <button onclick="openLibraryFullPage('Media Zone', 'Greeting');"
-                                class="w-full bg-slate-50 hover:bg-sky-50 transition-colors rounded-3xl p-4 flex items-center gap-4 text-left group border-2 border-transparent hover:border-sky-100 active:scale-[0.98]">
-                                <div
-                                    class="w-14 h-14 rounded-2xl bg-indigo-100 text-indigo-500 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform shadow-sm">
-                                    <i data-lucide="video" class="w-7 h-7 fill-current text-indigo-500"></i>
-                                </div>
-                                <div class="flex-1 min-w-0">
-                                    <p class="font-black text-slate-700 text-lg font-jua truncate">Greeting</p>
-                                    <p class="text-sm font-bold text-slate-400 truncate mt-0.5">Start your day</p>
-                                </div>
-                            </button>
-
-                            <!-- Movie Item -->
-                            <button onclick="openLibraryFullPage('Media Zone', 'Movie Book');"
-                                class="w-full bg-slate-50 hover:bg-sky-50 transition-colors rounded-3xl p-4 flex items-center gap-4 text-left group border-2 border-transparent hover:border-sky-100 active:scale-[0.98]">
-                                <div
-                                    class="w-14 h-14 rounded-2xl bg-rose-100 text-rose-500 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform shadow-sm">
-                                    <i data-lucide="film" class="w-7 h-7 fill-current text-rose-500"></i>
-                                </div>
-                                <div class="flex-1 min-w-0">
-                                    <p class="font-black text-slate-700 text-lg font-jua truncate">Movie</p>
-                                    <p class="text-sm font-bold text-slate-400 truncate mt-0.5">Fun animations</p>
-                                </div>
-                            </button>
-
-                            <!-- Audio Item -->
-                            <button onclick="openLibraryFullPage('Media Zone', 'Audio Book');"
-                                class="w-full bg-slate-50 hover:bg-sky-50 transition-colors rounded-3xl p-4 flex items-center gap-4 text-left group border-2 border-transparent hover:border-sky-100 active:scale-[0.98]">
-                                <div
-                                    class="w-14 h-14 rounded-2xl bg-amber-100 text-amber-500 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform shadow-sm">
-                                    <i data-lucide="headphones" class="w-7 h-7 fill-current text-amber-500"></i>
-                                </div>
-                                <div class="flex-1 min-w-0">
-                                    <p class="font-black text-slate-700 text-lg font-jua truncate">Audio</p>
-                                    <p class="text-sm font-bold text-slate-400 truncate mt-0.5">Listen to stories</p>
-                                </div>
-                            </button>
-                        </div>
-                    </div>
-                </div> <!-- End of pt-28 (Main Content Area) -->
-            </div> <!-- End of global-container -->
-
-            <!-- Overlays stay outside to ensure they cover fixed elements -->
-            <!-- Modal Container -->
-            <div id="bookModal" class="hidden flex items-center justify-center" style="z-index: 10000 !important;">
-                <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" onclick="closeModal()"></div>
-                <div class="card-bubble w-full max-w-4xl max-h-[92vh] overflow-hidden flex flex-col relative z-20 scale-95 opacity-0 transition-all duration-300"
-                    id="modalContent">
-                    <!-- Circular Bookmark Button -->
-                    <div class="absolute top-6 left-6 z-20 pointer-events-none">
-                        <button onclick="toggleBookmarkModal()" id="modalBookmarkBtn"
-                            class="w-14 h-14 flex items-center justify-center transition-all pointer-events-auto active:scale-95 shadow-xl rounded-full border-4 border-white bg-white text-slate-300">
-                            <i data-lucide="heart" id="modalBookmarkIcon" class="w-8 h-8 transition-colors"></i>
-                        </button>
-                    </div>
-
-                    <!-- Modal Header -->
-                    <div class="p-6 md:p-8 flex justify-between items-center border-b-[6px] border-slate-50">
-                        <div class="w-14 h-14"></div> <!-- Spacer for Bookmark Button -->
-                        <h2 id="modalTitle"
-                            class="text-3xl md:text-4xl font-black text-slate-700 font-jua text-center flex-1 mx-4 truncate">
-                            Book Title
-                        </h2>
-                        <button onclick="closeModal()"
-                            class="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-600 transition-colors">
-                            <i data-lucide="x" class="w-8 h-8"></i>
-                        </button>
-                    </div>
-
-                    <!-- Modal Body -->
-                    <div id="modalBody" class="flex-1 overflow-y-auto p-6 md:p-10 flex-col gap-6 flex">
-                        <!-- Badges -->
-                        <div class="flex flex-wrap gap-3 justify-start">
-                            <span
-                                class="modalLexile px-5 py-2 bg-orange-100 text-orange-500 rounded-full font-black text-sm border-2 border-orange-200">Lexile:
-                                300</span>
-                            <span
-                                class="modalWords px-5 py-2 bg-green-100 text-green-500 rounded-full font-black text-sm border-2 border-green-200">140
-                                Words</span>
-                            <span
-                                class="modalCategory px-5 py-2 bg-sky-100 text-sky-500 rounded-full font-black text-sm border-2 border-sky-200">Science</span>
-                        </div>
-
-                        <!-- Top: Video Thumbnail -->
-                        <div
-                            class="w-full aspect-video bg-slate-200 rounded-3xl overflow-hidden border-[6px] border-white shadow-lg shadow-slate-200/50 group flex items-center justify-center relative video-container">
-
-                            <!-- The video element itself, initially hidden -->
-                            <video id="inlineVideo" class="absolute inset-0 w-full h-full object-cover z-20 hidden"
-                                playsinline controls src="https://www.w3schools.com/html/mov_bbb.mp4"></video>
-
-                            <div id="inlineVideoThumbnailWrapper"
-                                class="absolute inset-0 flex items-center justify-center">
-                                <video id="modalVideoThumbnail"
-                                    class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
-                                    preload="metadata" muted playsinline></video>
-                                <div
-                                    class="absolute inset-0 bg-slate-900/30 group-hover:bg-slate-900/20 transition-colors duration-300">
-                                </div>
-                                <button onclick="playInlineVideo(event)"
-                                    class="w-20 h-20 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center z-10 shadow-2xl group-hover:scale-110 transition-transform duration-300 cursor-pointer">
-                                    <i data-lucide="play" class="w-10 h-10 text-slate-800 ml-1" fill="currentColor"></i>
-                                </button>
-                                <div id="modalVideoLabel"
-                                    class="absolute top-4 left-4 bg-rose-500/90 backdrop-blur-md text-white px-4 py-1.5 rounded-full text-sm font-black shadow-lg border border-white/20 flex items-center gap-2 pointer-events-none">
-                                    <i data-lucide="video" class="w-4 h-4"></i> Greeting Video
-                                </div>
-                            </div>
-
-                            <button onclick="toggleInlineFullscreen(event)"
-                                class="absolute bottom-4 right-4 w-12 h-12 bg-black/50 hover:bg-black/70 rounded-full flex items-center justify-center text-white backdrop-blur-sm transition-all shadow-lg z-30 cursor-pointer">
-                                <i data-lucide="maximize" class="w-6 h-6"></i>
-                            </button>
-                        </div>
-
-                        <!-- Bottom: Details -->
-                        <div class="w-full flex-col gap-6">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                <div class="space-y-3">
-                                    <h4 class="text-xl font-black text-slate-800 font-jua">Summary</h4>
-                                    <p class="modalSummary text-lg text-slate-600 leading-relaxed font-fredoka">Summary
-                                        goes here...</p>
-                                </div>
-                                <div class="space-y-3">
-                                    <h4 class="text-xl font-black text-slate-800 font-jua">Keywords</h4>
-                                    <div class="modalKeywords flex flex-wrap gap-2"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Modal Footer -->
-                    <div class="p-8 md:p-10 bg-slate-50/50 flex justify-center">
-                        <button onclick="startLearning()" id="modalStartBtn"
-                            class="w-full md:max-w-md py-6 rounded-[28px] font-black text-4xl flex items-center justify-center gap-4 transition-all hover:scale-[1.02] active:scale-[0.98] shadow-2xl">
-                            START READING <i data-lucide="play" class="w-10 h-10 fill-current ml-2"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Settings Overlay -->
-            <div id="settingsOverlay"
-                class="fixed inset-0 z-[40000] flex items-center justify-center hidden pointer-events-auto bg-transparent"
-                onclick="toggleSettings()">
-                <div class="glass-popup w-[560px] rounded-[60px] p-16 relative z-10 text-white font-fredoka pointer-events-auto animate-in fade-in zoom-in-95 duration-300"
-                    onclick="event.stopPropagation()">
-                    <div class="flex items-center mb-12 relative h-12">
-                        <h2
-                            class="text-[40px] font-black text-white font-fredoka w-full text-center drop-shadow-lg tracking-tight uppercase">
-                            SETTING</h2>
-                        <button onclick="toggleSettings()"
-                            class="absolute right-0 w-12 h-12 bg-white/10 rounded-full flex items-center justify-center hover:bg-white/20 hover:scale-110 active:scale-90 transition-all border border-white/10 shadow-lg">
-                            <i data-lucide="x" class="w-8 h-8 text-white"></i>
-                        </button>
-                    </div>
-
-                    <div class="space-y-10">
-                        <!-- Narration -->
-                        <div
-                            class="flex justify-between items-center group/item hover:bg-white/5 p-4 rounded-3xl transition-colors">
-                            <span class="settings-label">Narration</span>
-                            <div id="toggle-narration" onclick="setNarration(!isNarrationOn)" class="toggle-btn off">
-                                <span class="toggle-text">OFF</span>
-                                <div class="toggle-circle"></div>
-                            </div>
-                        </div>
-
-                        <!-- Page Turn -->
-                        <div
-                            class="flex justify-between items-center group/item hover:bg-white/5 p-4 rounded-3xl transition-colors">
-                            <span class="settings-label">Page Turn</span>
-                            <div id="toggle-pageturn" onclick="setPageTurn(!isPageTurnOn)" class="toggle-btn off">
-                                <span class="toggle-text">OFF</span>
-                                <div class="toggle-circle"></div>
-                            </div>
-                        </div>
-
-                        <!-- Narration Speed -->
-                        <div class="space-y-6">
-                            <span class="settings-label block text-left">Narration Speed</span>
-                            <div class="flex gap-4 settings-btn-group" id="speed-group">
-                                <button onclick="setNarrationSpeed('slow')" id="speed-slow" class="flex-1">Slow</button>
-                                <button onclick="setNarrationSpeed('normal')" id="speed-normal"
-                                    class="flex-1 active">Normal</button>
-                                <button onclick="setNarrationSpeed('fast')" id="speed-fast" class="flex-1">Fast</button>
-                            </div>
-                        </div>
-
-                        <!-- Text Size -->
-                        <div class="space-y-6">
-                            <span class="settings-label block text-left">Text Size</span>
-                            <div class="flex gap-4 settings-btn-group">
-                                <button onclick="setTextSize('small')" id="text-small" class="flex-1">
-                                    <span class="text-sm">TEXT</span>
-                                </button>
-                                <button onclick="setTextSize('medium')" id="text-medium" class="flex-1 active">
-                                    <span class="text-xl font-bold">TEXT</span>
-                                </button>
-                                <button onclick="setTextSize('large')" id="text-large" class="flex-1">
-                                    <span class="text-4xl font-black">TEXT</span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Library Full Page View -->
-            <div id="libraryFullPage" class="library-full-page hidden bg-white">
-                <!-- 1. Header Area (Vivid Navy) -->
-                <div class="bg-[#0f172a] shadow-2xl relative z-40">
-                    <!-- Top Navigation Bar (GNB Pattern) -->
-                    <div class="h-24 border-b border-white/10">
-                        <div class="global-container h-full flex items-center justify-between">
-                            <!-- Profile & Identity -->
-                            <div class="flex items-center gap-6">
-                                <div class="relative group/profile">
-                                    <div onclick="toggleProfileMenu(event)"
-                                        class="w-16 h-16 bg-yellow-300 rounded-full border-[5px] border-white/10 shadow-xl flex items-center justify-center overflow-hidden transform hover:scale-110 active:scale-95 transition-all cursor-pointer relative z-50">
-                                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Ami"
-                                            alt="User Avatar">
-                                    </div>
-                                    <!-- Use the same menu items as home profile, but keep it localized for simplicity or rely on absolute positioning. Actually we'll just duplicate the html menu here for scoping. -->
-                                    <div id="libraryProfileMenu"
-                                        class="absolute top-[80px] left-0 w-64 bg-white rounded-3xl border-[4px] border-slate-100 shadow-2xl opacity-0 scale-95 pointer-events-none transition-all duration-200 origin-top-left z-40 overflow-hidden font-fredoka">
-                                        <div class="p-2 space-y-1">
-                                            <button
-                                                class="w-full flex items-center gap-4 px-4 py-3 bg-white hover:bg-slate-50 text-slate-700 rounded-2xl transition-colors text-left group">
-                                                <div
-                                                    class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center group-hover:bg-blue-100 transition-colors">
-                                                    <i data-lucide="user-cog"
-                                                        class="w-5 h-5 text-slate-500 group-hover:text-blue-500 transition-colors"></i>
-                                                </div>
-                                                <span
-                                                    class="font-bold text-lg tracking-wide group-hover:text-blue-500 transition-colors">Account</span>
-                                            </button>
-                                            <button
-                                                class="w-full flex items-center gap-4 px-4 py-3 bg-white hover:bg-slate-50 text-slate-700 rounded-2xl transition-colors text-left group">
-                                                <div
-                                                    class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center group-hover:bg-amber-100 transition-colors">
-                                                    <i data-lucide="library"
-                                                        class="w-5 h-5 text-slate-500 group-hover:text-amber-500 transition-colors"></i>
-                                                </div>
-                                                <span
-                                                    class="font-bold text-lg tracking-wide group-hover:text-amber-500 transition-colors">Vocabulary</span>
-                                            </button>
-                                            <button
-                                                class="w-full flex items-center gap-4 px-4 py-3 bg-white hover:bg-slate-50 text-slate-700 rounded-2xl transition-colors text-left group">
-                                                <div
-                                                    class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center group-hover:bg-rose-100 transition-colors">
-                                                    <i data-lucide="heart"
-                                                        class="w-5 h-5 text-slate-500 group-hover:text-rose-500 transition-colors group-hover:fill-rose-100"></i>
-                                                </div>
-                                                <span
-                                                    class="font-bold text-lg tracking-wide group-hover:text-rose-500 transition-colors">My
-                                                    Library</span>
-                                            </button>
-                                            <button
-                                                class="w-full flex items-center gap-4 px-4 py-3 bg-white hover:bg-slate-50 text-slate-700 rounded-2xl transition-colors text-left group">
-                                                <div
-                                                    class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center group-hover:bg-emerald-100 transition-colors">
-                                                    <i data-lucide="bar-chart-2"
-                                                        class="w-5 h-5 text-slate-500 group-hover:text-emerald-500 transition-colors"></i>
-                                                </div>
-                                                <span
-                                                    class="font-bold text-lg tracking-wide group-hover:text-emerald-500 transition-colors">My
-                                                    Report</span>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="hidden lg:block border-l border-white/10 pl-6 ml-2">
-                                    <h1 class="text-3xl font-black text-white tracking-tight font-jua">Ami's Adventure
-                                    </h1>
-                                    <div
-                                        class="flex items-center gap-2 mt-1 px-3 py-1 bg-white/10 rounded-full w-fit border border-white/5">
-                                        <i data-lucide="star" class="w-4 h-4 text-[#fbbf24] fill-current"></i>
-                                        <span class="text-white/80 font-bold text-sm tracking-widest">LV.4
-                                            Explorer</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Global Actions -->
-                            <div
-                                class="flex items-center gap-2 px-2 py-1 bg-white/5 rounded-2xl border border-white/10">
-                                <button onclick="closeLibraryFullPage()"
-                                    class="w-10 h-10 rounded-xl flex items-center justify-center text-white/70 hover:text-white hover:bg-white/10 transition-all">
-                                    <i data-lucide="home" class="w-5 h-5"></i>
-                                </button>
-                                <button
-                                    class="w-10 h-10 rounded-xl flex items-center justify-center text-white/70 hover:text-white hover:bg-white/10 transition-all">
-                                    <i data-lucide="bell" class="w-5 h-5"></i>
-                                </button>
-                                <button
-                                    class="w-10 h-10 rounded-xl flex items-center justify-center text-white/70 hover:text-white hover:bg-white/10 transition-all">
-                                    <i data-lucide="menu" class="w-5 h-5"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Search & Filter Area -->
-                    <div id="librarySearchArea" class="border-b border-white/10 py-6 relative z-[60]">
-                        <div class="global-container flex items-center gap-4">
-                            <!-- Search Bar -->
-                            <div class="flex-1 relative group z-50">
-                                <i data-lucide="search"
-                                    class="absolute left-6 top-1/2 -translate-y-1/2 w-6 h-6 text-slate-400 group-focus-within:text-[#fbbf24] transition-colors"></i>
-                                <input type="text" id="libSearchInput" placeholder="Search for books or keywords..."
-                                    oninput="handleLibrarySearchInput(this.value)"
-                                    onkeydown="handleLibrarySearchKeyDown(event)"
-                                    class="w-full h-14 pl-16 pr-12 bg-white border-2 border-transparent focus:border-[#fbbf24] rounded-[20px] text-xl font-bold text-slate-800 placeholder:text-slate-400 transition-all outline-none shadow-sm">
-                                
-                                <button id="libSearchClearBtn" onclick="clearLibrarySearch()" class="absolute right-4 top-1/2 -translate-y-1/2 w-6 h-6 bg-slate-200 rounded-full flex items-center justify-center text-slate-500 hover:bg-slate-300 transition-colors hidden">
-                                    <i data-lucide="x" class="w-4 h-4"></i>
-                                </button>
-
-                                <!-- Dropdown for Matching Books -->
-                                <div id="libSearchDropdown" class="absolute top-[calc(100%+8px)] left-0 w-full bg-white rounded-3xl shadow-2xl border-2 border-slate-100 p-4 z-50 animate-in fade-in slide-in-from-top-2 hidden">
-                                    <h4 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-3 ml-4">Matching Books</h4>
-                                    <div id="libSearchDropdownList" class="flex flex-col gap-2 max-h-[400px] overflow-y-auto custom-scrollbar">
-                                        <!-- Populated by JS -->
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Search Button -->
-                            <button onclick="executeLibrarySearch()" class="h-14 px-8 bg-[#fbbf24] text-[#0f172a] font-black text-lg rounded-[20px] shadow-lg shadow-amber-500/20 hover:bg-amber-400 active:scale-95 transition-all whitespace-nowrap">
-                                Search
-                            </button>
-
-                            <!-- Filter Button -->
-                            <div class="relative z-50">
-                                <button onclick="toggleLibraryFilter()" id="libraryFilterBtn"
-                                    class="h-14 px-6 rounded-[20px] border-2 flex items-center gap-3 transition-all active:scale-95 font-black bg-[#1e293b] text-white border-transparent hover:bg-slate-800">
-                                    <i data-lucide="sliders-horizontal" class="w-6 h-6"></i>
-                                </button>
-
-                                <!-- Filter Dropdown -->
-                                <div id="libraryFilterDropdown"
-                                    class="absolute top-[calc(100%+8px)] right-0 w-[420px] bg-white rounded-[32px] shadow-[0_32px_80px_rgba(0,0,0,0.15)] border-2 border-slate-100 p-8 z-50 hidden animate-in zoom-in-95 slide-in-from-top-2 duration-300 text-slate-800 max-h-[80vh] overflow-y-auto custom-scrollbar">
-                                    <div class="space-y-8">
-                                        <!-- Book Type Section -->
-                                        <div class="space-y-4">
-                                            <h5 class="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center justify-between">Book Type</h5>
-                                            <div class="flex flex-wrap gap-3">
-                                                <button onclick="toggleFilterItem(this)" class="px-5 py-2.5 rounded-full text-sm font-bold transition-all border-2 bg-sky-50 text-sky-600 border-sky-200 shadow-sm filter-item-btn">Original</button>
-                                                <button onclick="toggleFilterItem(this)" class="px-5 py-2.5 rounded-full text-sm font-bold transition-all border-2 bg-sky-50 text-sky-600 border-sky-200 shadow-sm filter-item-btn">Classic</button>
-                                            </div>
-                                        </div>
-                                        <!-- Level Section -->
-                                        <div class="space-y-4">
-                                            <h5 class="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center justify-between">Level</h5>
-                                            <div class="flex flex-wrap gap-3">
-                                                <button onclick="toggleFilterItem(this)" class="px-5 py-2.5 rounded-full text-sm font-bold transition-all border-2 bg-sky-50 text-sky-600 border-sky-200 shadow-sm filter-item-btn">Lv1</button>
-                                                <button onclick="toggleFilterItem(this)" class="px-5 py-2.5 rounded-full text-sm font-bold transition-all border-2 bg-sky-50 text-sky-600 border-sky-200 shadow-sm filter-item-btn">Lv2</button>
-                                                <button onclick="toggleFilterItem(this)" class="px-5 py-2.5 rounded-full text-sm font-bold transition-all border-2 bg-sky-50 text-sky-600 border-sky-200 shadow-sm filter-item-btn">Lv3</button>
-                                                <button onclick="toggleFilterItem(this)" class="px-5 py-2.5 rounded-full text-sm font-bold transition-all border-2 bg-sky-50 text-sky-600 border-sky-200 shadow-sm filter-item-btn">Lv4</button>
-                                            </div>
-                                        </div>
-                                        <!-- Lexile Section -->
-                                        <div class="space-y-4">
-                                            <h5 class="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center justify-between">Lexile</h5>
-                                            <div class="flex flex-wrap gap-3">
-                                                <button onclick="toggleFilterItem(this)" class="px-5 py-2.5 rounded-full text-sm font-bold transition-all border-2 bg-sky-50 text-sky-600 border-sky-200 shadow-sm filter-item-btn">100~250</button>
-                                                <button onclick="toggleFilterItem(this)" class="px-5 py-2.5 rounded-full text-sm font-bold transition-all border-2 bg-sky-50 text-sky-600 border-sky-200 shadow-sm filter-item-btn">251~500</button>
-                                                <button onclick="toggleFilterItem(this)" class="px-5 py-2.5 rounded-full text-sm font-bold transition-all border-2 bg-sky-50 text-sky-600 border-sky-200 shadow-sm filter-item-btn">501~700</button>
-                                                <button onclick="toggleFilterItem(this)" class="px-5 py-2.5 rounded-full text-sm font-bold transition-all border-2 bg-sky-50 text-sky-600 border-sky-200 shadow-sm filter-item-btn">701~900</button>
-                                            </div>
-                                        </div>
-                                        <!-- Word Count Section -->
-                                        <div class="space-y-4">
-                                            <h5 class="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center justify-between">Word Count</h5>
-                                            <div class="flex flex-wrap gap-3">
-                                                <button onclick="toggleFilterItem(this)" class="px-5 py-2.5 rounded-full text-sm font-bold transition-all border-2 bg-sky-50 text-sky-600 border-sky-200 shadow-sm filter-item-btn">100~200</button>
-                                                <button onclick="toggleFilterItem(this)" class="px-5 py-2.5 rounded-full text-sm font-bold transition-all border-2 bg-sky-50 text-sky-600 border-sky-200 shadow-sm filter-item-btn">200~400</button>
-                                                <button onclick="toggleFilterItem(this)" class="px-5 py-2.5 rounded-full text-sm font-bold transition-all border-2 bg-sky-50 text-sky-600 border-sky-200 shadow-sm filter-item-btn">300~500</button>
-                                                <button onclick="toggleFilterItem(this)" class="px-5 py-2.5 rounded-full text-sm font-bold transition-all border-2 bg-sky-50 text-sky-600 border-sky-200 shadow-sm filter-item-btn">400~600</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <button onclick="toggleLibraryFilter()" class="w-full mt-8 py-4 bg-[#0f172a] text-white rounded-2xl font-black text-lg hover:bg-slate-800 transition-colors shadow-lg shadow-slate-900/20">
-                                        OK
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Row 2: Zone Toggles & Sub Tabs -->
-                    <div id="libraryZoneRow" class="border-b border-white/5 bg-black/10">
-                        <div class="global-container h-16 flex items-center justify-between">
-                            <div id="zoneToggleGroup" class="flex gap-2 p-1 bg-black/30 rounded-[28px] border border-white/5 w-fit">
-                                <button onclick="setActiveZone('Book Zone')" id="zone-book"
-                                    class="px-8 py-2.5 rounded-[22px] font-black text-base transition-all bg-[#fbbf24] text-[#0f172a] shadow-xl">
-                                    Book Zone
-                                </button>
-                                <button onclick="setActiveZone('Media Zone')" id="zone-media"
-                                    class="px-8 py-2.5 rounded-[22px] font-black text-base transition-all text-white/50 hover:text-white">
-                                    Media Zone
-                                </button>
-                            </div>
-
-                            <!-- Sub Navigation -->
-                            <nav id="subTabContainer"
-                                class="flex gap-10 whitespace-nowrap overflow-x-auto no-scrollbar h-full">
-                                <!-- Injected by lib functionality -->
-                            </nav>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 3. Dynamic Content Area -->
-                <main id="libraryMainContent" class="flex-1 overflow-y-auto bg-slate-50 relative pb-20">
-                    <div class="global-container py-12 px-10" id="libraryContentContainer">
-                        <!-- Content injected by JS -->
-                    </div>
-                </main>
-            </div>
-
-            <!-- Learning Mode Overlay -->
-            <div id="learningModeOverlay" class="fixed inset-0 bg-black hidden overflow-hidden"
-                style="z-index: 30000 !important; top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important; height: 100vh !important;">
-
-
-                <!-- Floating GNB Wrapper -->
-                <div id="gnbWrapper" class="fixed top-0 inset-x-0 z-[110]">
-                    <nav id="studyGnb"
-                        class="h-24 px-8 flex items-center justify-between shadow-xl border-b-2 border-slate-100">
-                        <div class="flex items-center gap-4">
-                            <div
-                                class="w-12 h-12 bg-orange-100 rounded-2xl flex items-center justify-center text-orange-500 shadow-inner">
-                                <i data-lucide="video" class="w-7 h-7 fill-current"></i>
-                            </div>
-                            <h2 id="studyBookTitle" class="text-2xl font-black text-slate-700 font-jua">Book
-                                Title
-                            </h2>
-                        </div>
-
-                        <!-- Phase Tabs -->
-                        <div class="flex bg-slate-100 p-1.5 rounded-2xl gap-1">
-                            <button id="tab-voca" onclick="setPhase('voca')"
-                                class="px-6 py-2.5 rounded-xl font-black text-sm transition-all flex items-center gap-2 bg-white text-orange-500 shadow-sm">
-                                <i data-lucide="sparkles" class="w-4 h-4 fill-current"></i> Vocabulary
-                            </button>
-                            <button id="tab-read" onclick="setPhase('read')"
-                                class="px-6 py-2.5 rounded-xl font-black text-sm transition-all flex items-center gap-2 text-slate-400 opacity-50 cursor-not-allowed">
-                                <i data-lucide="book-open" class="w-4 h-4"></i> Reading <i data-lucide="lock"
-                                    class="w-3 h-3"></i>
-                            </button>
-                            <button id="tab-talk" onclick="setPhase('talk')"
-                                class="px-6 py-2.5 rounded-xl font-black text-sm transition-all flex items-center gap-2 text-slate-400 opacity-50 cursor-not-allowed">
-                                <i data-lucide="message-circle" class="w-4 h-4"></i> Talking <i data-lucide="lock"
-                                    class="w-3 h-3"></i>
-                            </button>
-                            <button id="tab-quiz" onclick="setPhase('quiz')"
-                                class="px-6 py-2.5 rounded-xl font-black text-sm transition-all flex items-center gap-2 text-slate-400 opacity-50 cursor-not-allowed">
-                                <i data-lucide="help-circle" class="w-4 h-4"></i> Quiz <i data-lucide="lock"
-                                    class="w-3 h-3"></i>
-                            </button>
-                        </div>
-
-                        <div class="w-48 flex justify-end">
-                            <button id="gnbCloseBtn" onclick="exitLearningMode()"
-                                class="w-14 h-14 bg-slate-50 rounded-2xl border-4 border-white flex items-center justify-center text-slate-400 shadow-sm hover:bg-red-50 hover:text-red-500 hover:border-red-100 transition-all active:scale-95 group">
-                                <i data-lucide="x" class="w-8 h-8 group-hover:rotate-90 transition-transform"></i>
-                            </button>
-                        </div>
-
-                        <!-- The Handle (Sticky to top when GNB hides) -->
-                        <button id="gnbHandle" onclick="toggleGnb(true); event.stopPropagation();"
-                            class="absolute -bottom-10 left-1/2 -translate-x-1/2 w-24 h-10 bg-white border-b-4 border-x-4 border-slate-50 rounded-b-[32px] flex items-center justify-center text-slate-300 hover:text-sky-400 shadow-lg transition-all active:h-12 pointer-events-auto">
-                            <i data-lucide="chevron-up" id="gnbHandleIcon" class="w-8 h-8"></i>
-                        </button>
-                    </nav>
-                </div>
-
-                <!-- Study Content Area -->
-                <main id="mainContent"
-                    class="w-full h-full bg-black flex items-center justify-center relative cursor-pointer"
-                    onclick="handleMainClick()">
-                    <!-- Vocabulary Phase -->
-                    <div id="phase-voca" class="w-full h-full flex items-center justify-center p-4 relative">
-                        <!-- Background Layer (SC00) -->
-                        <div id="wordBgLayer" class="absolute inset-0 z-0 overflow-hidden">
-                            <img id="wordBgImage" src="" class="w-full h-full object-contain opacity-20" />
-                            <div class="absolute inset-0 bg-slate-950/20 backdrop-blur-[2px]"></div>
-                        </div>
-                        <div class="w-full max-w-[1000px] flex items-center justify-between gap-8 h-full">
-                            <!-- Previous Button -->
-                            <div id="wordPrevBtn"
-                                class="w-20 hidden md:flex items-center justify-center opacity-0 pointer-events-none transition-all">
-                                <button onclick="prevWordCard()"
-                                    class="w-16 h-16 bg-white/20 hover:bg-white/40 backdrop-blur-md rounded-full flex items-center justify-center text-white transition-all shadow-xl hover:scale-110 active:scale-90">
-                                    <i data-lucide="chevron-left" class="w-10 h-10"></i>
-                                </button>
-                            </div>
-
-                            <!-- 3D Card Container -->
-                            <div id="wordCardContainer"
-                                class="relative flex-1 max-w-[900px] aspect-[4/3] cursor-pointer perspective-2000 transition-all duration-700"
-                                onclick="flipWordCard()">
-                                <div id="wordCardInner"
-                                    class="relative w-full h-full text-center transition-transform duration-700 preserve-3d">
-
-                                    <!-- Front Side -->
-                                    <div id="wordCardFront"
-                                        class="absolute inset-0 w-full h-full backface-hidden rounded-[32px] overflow-hidden border-4 border-white/50 shadow-2xl bg-white flex items-center justify-center">
-                                        <div class="absolute inset-0">
-                                            <img id="wordFrontImage" src="" alt="Word Front"
-                                                class="w-full h-full object-contain bg-white" />
-
-                                            <!-- Speaker Button on Front -->
-                                            <div class="absolute top-6 right-6 z-10">
-                                                <button onclick="event.stopPropagation(); playWordTTS();"
-                                                    class="w-16 h-16 bg-sky-100 hover:bg-sky-200 text-sky-500 rounded-2xl flex items-center justify-center shadow-lg hover:scale-110 active:scale-95 transition-all">
-                                                    <i data-lucide="volume-2" class="w-10 h-10 stroke-[3]"></i>
-                                                </button>
-                                            </div>
-
-                                            <!-- Bottom overlay for text -->
-                                            <div id="wordFrontText"
-                                                class="absolute inset-x-0 bottom-0 h-1/4 bg-white/40 backdrop-blur-sm flex items-end justify-center pb-12 opacity-0 transition-opacity duration-1000">
-                                                <span
-                                                    class="text-black text-6xl font-black font-fredoka drop-shadow-sm tracking-tight uppercase"></span>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Back Side -->
-                                    <div id="wordCardBack"
-                                        class="absolute inset-0 w-full h-full backface-hidden rotate-y-180 rounded-[32px] overflow-hidden border-4 border-white/50 shadow-2xl bg-white">
-                                        <video id="wordBackVideo" src="" class="w-full h-full object-contain" loop muted
-                                            playsinline></video>
-
-                                        <!-- Subtitle Box -->
-                                        <div id="wordSubtitleBox"
-                                            class="absolute inset-x-0 bottom-6 px-10 opacity-0 transition-opacity duration-500">
-                                            <div
-                                                class="bg-white/90 backdrop-blur-md rounded-[28px] py-4 px-8 shadow-2xl border-4 border-sky-200 flex flex-col gap-1 min-h-[80px] items-center justify-center">
-                                                <div class="w-10 h-1 bg-sky-200 rounded-full mb-1 opacity-50"></div>
-                                                <p id="wordSubtitleText"
-                                                    class="text-slate-800 text-2xl font-black font-fredoka leading-normal text-center">
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Dots - Injected by JS -->
-                                <div id="wordDots" class="absolute -bottom-8 left-1/2 -translate-x-1/2 flex gap-2">
-                                </div>
-                            </div>
-
-                            <!-- Next Button -->
-                            <div id="wordNextBtn"
-                                class="w-20 hidden md:flex items-center justify-center transition-all">
-                                <button onclick="nextWordCard(event)"
-                                    class="w-16 h-16 bg-white/20 hover:bg-white/40 backdrop-blur-md rounded-full flex items-center justify-center text-white transition-all shadow-xl hover:scale-110 active:scale-90">
-                                    <i data-lucide="chevron-right" class="w-10 h-10"></i>
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Final Navigation CTA - bottom right -->
-                        <div id="wordReadingCTA"
-                            class="absolute bottom-12 right-12 opacity-0 pointer-events-none transition-all duration-500">
-                            <button onclick="unlockReadPhase()"
-                                class="bg-sky-400 text-white pl-10 pr-6 py-5 rounded-[40px] flex items-center gap-6 shadow-2xl hover:bg-sky-500 active:scale-95 transition-all group">
-                                <span class="text-3xl font-black font-fredoka uppercase tracking-wider">Reading</span>
-                                <div
-                                    class="w-16 h-16 bg-white/20 rounded-3xl flex items-center justify-center group-hover:translate-x-2 transition-transform">
-                                    <i data-lucide="chevron-right" class="w-11 h-11 stroke-[4]"></i>
-                                </div>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Read Phase -->
-                    <div id="phase-read" class="w-full h-full flex flex-col hidden">
-                        <!-- Progress Bar (Full Width) -->
-                        <div class="h-2 w-full bg-white/10 relative z-20">
-                            <div id="readProgress" class="h-full bg-sky-400 transition-all duration-300"
-                                style="width: 0%">
-                            </div>
-                        </div>
-
-                        <!-- Read Phase Viewport -->
-                        <div id="readViewport" class="relative flex-1 bg-black overflow-hidden select-none">
-                            <!-- Scene Content Container -->
-                            <div id="sceneContainer" class="w-full h-full transition-transform duration-500 ease-out">
-                                <!-- Scenes injected here -->
-                            </div>
-
-                            <!-- Top Level Controls (Dimmed Overlay) -->
-                            <div
-                                class="absolute inset-0 bg-black/20 flex items-center justify-center z-20 transition-all duration-300 pointer-events-none">
-                            </div>
-
-                            <!-- Mode Selection (Initial) -->
-                            <div id="read-step-mode"
-                                class="relative z-10 flex-1 flex flex-col items-center justify-center p-8 animate-in fade-in duration-500">
-                                <div
-                                    class="relative z-20 w-full max-w-4xl bg-white rounded-[48px] shadow-2xl p-12 flex flex-col items-center gap-12">
-                                    <h2 class="text-5xl font-black text-slate-800 font-jua">Select Reading Mode
-                                    </h2>
-                                    <div class="grid grid-cols-2 gap-8 w-full">
-                                        <!-- Listen Mode -->
-                                        <button onclick="selectReadMode('listen')"
-                                            class="read-mode-card group p-10 rounded-[40px] border-4 border-slate-100 hover:border-sky-400 hover:bg-sky-50 transition-all flex flex-col items-center gap-6">
-                                            <div
-                                                class="w-24 h-24 bg-sky-100 text-sky-500 rounded-3xl flex items-center justify-center group-hover:scale-110 transition-transform shadow-inner">
-                                                <i data-lucide="headphones" class="w-12 h-12"></i>
-                                            </div>
-                                            <div class="text-center">
-                                                <h3 class="text-3xl font-black text-slate-700 mb-2">Listen</h3>
-                                                <p class="text-slate-400 font-bold">Narration + Auto-play</p>
-                                            </div>
-                                        </button>
-
-                                        <!-- Read Mode -->
-                                        <button onclick="selectReadMode('read')"
-                                            class="read-mode-card group p-10 rounded-[40px] border-4 border-slate-100 hover:border-emerald-400 hover:bg-emerald-50 transition-all flex flex-col items-center gap-6">
-                                            <div
-                                                class="w-24 h-24 bg-emerald-100 text-emerald-500 rounded-3xl flex items-center justify-center group-hover:scale-110 transition-transform shadow-inner">
-                                                <i data-lucide="book-open" class="w-12 h-12"></i>
-                                            </div>
-                                            <div class="text-center">
-                                                <h3 class="text-3xl font-black text-slate-700 mb-2">Read</h3>
-                                                <p class="text-slate-400 font-bold">Self-paced reading</p>
-                                            </div>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Book Intro -->
-                            <div id="read-step-intro"
-                                class="relative z-10 flex-1 flex flex-col items-center justify-between p-16 hidden">
-                            </div>
-
-                            <button onclick="goToReadStep('viewing')"
-                                class="w-48 h-48 bg-white text-slate-900 rounded-full flex items-center justify-center font-black text-4xl shadow-2xl hover:scale-110 active:scale-95 transition-all animate-twinkle">
-                                START
-                            </button>
-                        </div>
-
-                        <!-- Reading Viewer -->
-                        <div id="read-step-viewing" class="relative z-10 flex-1 flex flex-col p-8 hidden">
-                            <!-- Injected by renderReadPhase -->
-                        </div>
-                    </div>
-            </div>
-            </main>
-        </div>
-
-        <script>
 
             const booksData = [
                 { id: 'CS0003', title: 'Hans in Luck', src: './public/Image/Cover/CS0003(Hans in Luck).png', lexile: '200~280', wordCount: 115, category: 'Adventure', summary: 'Hans trades his way home, finding happiness in everything he gets along the way.', keywords: ['hans', 'luck', 'trade', 'happy'], isBookmarked: true, isUnread: false, videoUrl: './public/Video/Book/Intro/CS0003(Hans in Luck)/CS0003(Hans in Luck)_Intro.mp4' },
@@ -1404,7 +44,7 @@
             const libraryZones = {
                 'Book Zone': ['For you', 'Topics', "MD's pick", 'All Books'],
                 'Media Zone': ['All Media', 'Greeting', 'Movie Book', 'Audio Book'],
-                'My Library': ['In Progress', 'Completed', 'Favorites', 'Roadmap']
+                'My Library': ['Roadmap', 'In Progress', 'Completed', 'Favorites']
             };
 
             // My Library Dummy Data
@@ -1456,7 +96,7 @@
                             type: 'Audio Book',
                             title: `${book.title} Audio`,
                             src: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
-                            thumb: book.src, // ?ÏÑú ?? ?Ïö© (Rule 4)
+                            thumb: book.src, // ????? ???(Rule 4)
                             rt: '04:30',
                             isUnplayed: Math.random() > 0.5
                         }
@@ -1499,26 +139,26 @@
                 { book_id: "OG0046", scene_no: "SC02", script: "He hit the puck with force, \nbut his old stick broke \nsuddenly upon impact.", image_url: "./public/Image/Book/OG0046(The Silent Stick)/OG0046_SC02_I.png", full_audio: "./public/Audio/Book/OG0046(The Silent Stick)/OG0046_SC02_A.mp3" },
                 { book_id: "OG0046", scene_no: "SC03", script: "Two pieces of wood lay on the ice, \nshowing the end of his practice.", image_url: "./public/Image/Book/OG0046(The Silent Stick)/OG0046_SC03_I.png", full_audio: "./public/Audio/Book/OG0046(The Silent Stick)/OG0046_SC03_A.mp3" },
                 { book_id: "OG0046", scene_no: "SC04", script: "Ren worked for hours, \ncutting the skin to show \nthe hard wood under.", image_url: "./public/Image/Book/OG0046(The Silent Stick)/OG0046_SC04_I.png", full_audio: "./public/Audio/Book/OG0046(The Silent Stick)/OG0046_SC04_A.mp3" },
-                { book_id: "OG0046", scene_no: "SC05", script: "When he tested it, \nthe puck flew in strange circles \ndue to the wood‚Äôs natural shape.", image_url: "./public/Image/Book/OG0046(The Silent Stick)/OG0046_SC05_I.png", full_audio: "./public/Audio/Book/OG0046(The Silent Stick)/OG0046_SC05_A.mp3" },
-                { book_id: "OG0046", scene_no: "SC06", script: "Jax glanced at Ren‚Äôs rough branch \nand offered a cold smile, saying nothing.", image_url: "./public/Image/Book/OG0046(The Silent Stick)/OG0046_SC06_I.png", full_audio: "./public/Audio/Book/OG0046(The Silent Stick)/OG0046_SC06_A.mp3" },
+                { book_id: "OG0046", scene_no: "SC05", script: "When he tested it, \nthe puck flew in strange circles \ndue to the wood?ôs natural shape.", image_url: "./public/Image/Book/OG0046(The Silent Stick)/OG0046_SC05_I.png", full_audio: "./public/Audio/Book/OG0046(The Silent Stick)/OG0046_SC05_A.mp3" },
+                { book_id: "OG0046", scene_no: "SC06", script: "Jax glanced at Ren?ôs rough branch \nand offered a cold smile, saying nothing.", image_url: "./public/Image/Book/OG0046(The Silent Stick)/OG0046_SC06_I.png", full_audio: "./public/Audio/Book/OG0046(The Silent Stick)/OG0046_SC06_A.mp3" },
                 { book_id: "OG0046", scene_no: "SC07", script: "Jax controlled the ice, \nhis speed pushing Ren \nback toward his own goal.", image_url: "./public/Image/Book/OG0046(The Silent Stick)/OG0046_SC07_I.png", full_audio: "./public/Audio/Book/OG0046(The Silent Stick)/OG0046_SC07_A.mp3" },
                 { book_id: "OG0046", scene_no: "SC08", script: "The puck turned around the confused player, \ngoing quietly into the net as the whistle blew.", image_url: "./public/Image/Book/OG0046(The Silent Stick)/OG0046_SC08_I.png", full_audio: "./public/Audio/Book/OG0046(The Silent Stick)/OG0046_SC08_A.mp3" },
                 { book_id: "OG0046", scene_no: "SC09", script: "Ren smiled at his rough stick \nand skated away silently.", image_url: "./public/Image/Book/OG0046(The Silent Stick)/OG0046_SC09_I.png", full_audio: "./public/Audio/Book/OG0046(The Silent Stick)/OG0046_SC09_A.mp3" },
-                { book_id: "OG0021", scene_no: "SC01", script: "Milo is a little chameleon. He loves to change colors‚Äîgreen, blue, red!", image_url: "./public/Image/Book/OG0021(Milo and the Lost Color)/OG0021_SC01_I.png", full_audio: "" },
-                { book_id: "OG0021", scene_no: "SC02", script: "But one morning, he wakes up gray. ‚ÄúOh no! Where is my color?‚Äù Milo says. He looks at his tail. It‚Äôs still gray. He feels sad and shy.", image_url: "./public/Image/Book/OG0021(Milo and the Lost Color)/OG0021_SC02_I.png", full_audio: "" },
-                { book_id: "OG0021", scene_no: "SC03", script: "Milo walks into the forest. He sees a yellow butterfly. ‚ÄúCan I borrow your color?‚Äù he asks.", image_url: "./public/Image/Book/OG0021(Milo and the Lost Color)/OG0021_SC03_I.png", full_audio: "" },
-                { book_id: "OG0021", scene_no: "SC04", script: "The butterfly smiles. ‚ÄúMy color is for flying!‚Äù Milo smiles back. ‚ÄúThen I will keep looking.‚Äù He waves goodbye.", image_url: "./public/Image/Book/OG0021(Milo and the Lost Color)/OG0021_SC04_I.png", full_audio: "" },
-                { book_id: "OG0021", scene_no: "SC05", script: "He meets a red flower. ‚ÄúCan I have your color?‚Äù Milo asks. The flower says, ‚ÄúMy color helps the bees.‚Äù", image_url: "./public/Image/Book/OG0021(Milo and the Lost Color)/OG0021_SC05_I.png", full_audio: "" },
-                { book_id: "OG0021", scene_no: "SC06", script: "Milo is sad. ‚ÄúEveryone has their own color.‚Äù He sits by a blue pond. A small tear drops into the water.", image_url: "./public/Image/Book/OG0021(Milo and the Lost Color)/OG0021_SC06_I.png", full_audio: "" },
-                { book_id: "OG0021", scene_no: "SC07", script: "The pond shines! Milo sees many colors in the water‚Äîred, yellow, blue, green. They mix and dance like rainbows.", image_url: "./public/Image/Book/OG0021(Milo and the Lost Color)/OG0021_SC07_I.png", full_audio: "" },
-                { book_id: "OG0021", scene_no: "SC08", script: "Milo laughs. ‚ÄúMaybe my color is inside me!‚Äù He takes a deep breath and closes his eyes. His body starts to glow.", image_url: "./public/Image/Book/OG0021(Milo and the Lost Color)/OG0021_SC08_I.png", full_audio: "" },
-                { book_id: "OG0021", scene_no: "SC09", script: "Green! Then blue! Then red again! Milo‚Äôs colors come back, brighter than before. He feels happy and warm.", image_url: "./public/Image/Book/OG0021(Milo and the Lost Color)/OG0021_SC09_I.png", full_audio: "" },
-                { book_id: "OG0021", scene_no: "SC10", script: "Milo runs home. He looks in the mirror. ‚ÄúI found my color‚Äîme!‚Äù he says proudly.", image_url: "./public/Image/Book/OG0021(Milo and the Lost Color)/OG0021_SC10_I.png", full_audio: "" },
+                { book_id: "OG0021", scene_no: "SC01", script: "Milo is a little chameleon. He loves to change colors?îgreen, blue, red!", image_url: "./public/Image/Book/OG0021(Milo and the Lost Color)/OG0021_SC01_I.png", full_audio: "" },
+                { book_id: "OG0021", scene_no: "SC02", script: "But one morning, he wakes up gray. ?úOh no! Where is my color???Milo says. He looks at his tail. It?ôs still gray. He feels sad and shy.", image_url: "./public/Image/Book/OG0021(Milo and the Lost Color)/OG0021_SC02_I.png", full_audio: "" },
+                { book_id: "OG0021", scene_no: "SC03", script: "Milo walks into the forest. He sees a yellow butterfly. ?úCan I borrow your color???he asks.", image_url: "./public/Image/Book/OG0021(Milo and the Lost Color)/OG0021_SC03_I.png", full_audio: "" },
+                { book_id: "OG0021", scene_no: "SC04", script: "The butterfly smiles. ?úMy color is for flying!??Milo smiles back. ?úThen I will keep looking.??He waves goodbye.", image_url: "./public/Image/Book/OG0021(Milo and the Lost Color)/OG0021_SC04_I.png", full_audio: "" },
+                { book_id: "OG0021", scene_no: "SC05", script: "He meets a red flower. ?úCan I have your color???Milo asks. The flower says, ?úMy color helps the bees.??, image_url: "./public/Image/Book/OG0021(Milo and the Lost Color)/OG0021_SC05_I.png", full_audio: "" },
+                { book_id: "OG0021", scene_no: "SC06", script: "Milo is sad. ?úEveryone has their own color.??He sits by a blue pond. A small tear drops into the water.", image_url: "./public/Image/Book/OG0021(Milo and the Lost Color)/OG0021_SC06_I.png", full_audio: "" },
+                { book_id: "OG0021", scene_no: "SC07", script: "The pond shines! Milo sees many colors in the water?îred, yellow, blue, green. They mix and dance like rainbows.", image_url: "./public/Image/Book/OG0021(Milo and the Lost Color)/OG0021_SC07_I.png", full_audio: "" },
+                { book_id: "OG0021", scene_no: "SC08", script: "Milo laughs. ?úMaybe my color is inside me!??He takes a deep breath and closes his eyes. His body starts to glow.", image_url: "./public/Image/Book/OG0021(Milo and the Lost Color)/OG0021_SC08_I.png", full_audio: "" },
+                { book_id: "OG0021", scene_no: "SC09", script: "Green! Then blue! Then red again! Milo?ôs colors come back, brighter than before. He feels happy and warm.", image_url: "./public/Image/Book/OG0021(Milo and the Lost Color)/OG0021_SC09_I.png", full_audio: "" },
+                { book_id: "OG0021", scene_no: "SC10", script: "Milo runs home. He looks in the mirror. ?úI found my color?îme!??he says proudly.", image_url: "./public/Image/Book/OG0021(Milo and the Lost Color)/OG0021_SC10_I.png", full_audio: "" },
                 { book_id: "OG0050", scene_no: "SC01", script: "On the quiet planet of Tiny Rock, two friends named Podo and Didi spent their evenings watching the universe. One of the two friends, Didi was always searching for excitement.", image_url: "./public/Image/Book/OG0050(The Rainbow Cloud in the Box)/OG0050_SC01_I.png", full_audio: "" },
                 { book_id: "OG0050", scene_no: "SC02", script: "Suddenly, a breathtaking rainbow cloud floated near their rock. It was a swirling cloud of stardust, glowing with vibrant shades of violet, orange, and emerald green.", image_url: "./public/Image/Book/OG0050(The Rainbow Cloud in the Box)/OG0050_SC02_I.png", full_audio: "" },
                 { book_id: "OG0050", scene_no: "SC03", script: "\"It is the most beautiful thing I have ever seen!\" exclaimed Didi. \"I must have it. I will capture a piece to keep on my shelf.\"", image_url: "./public/Image/Book/OG0050(The Rainbow Cloud in the Box)/OG0050_SC03_I.png", full_audio: "" },
                 { book_id: "OG0050", scene_no: "SC04", script: "Podo frowned gently. \"I do not think you can own a cloud, Didi,\" he warned. \"Its beauty comes from its movement.\"", image_url: "./public/Image/Book/OG0050(The Rainbow Cloud in the Box)/OG0050_SC04_I.png", full_audio: "" },
-                { book_id: "OG0050", scene_no: "SC05", script: "Ignoring his friend, Didi grabbed a net and caught a portion of the cloud into a pristine crystal box. ‚ÄúGot it!‚Äù he shouted triumphantly.", image_url: "./public/Image/Book/OG0050(The Rainbow Cloud in the Box)/OG0050_SC05_I.png", full_audio: "" },
+                { book_id: "OG0050", scene_no: "SC05", script: "Ignoring his friend, Didi grabbed a net and caught a portion of the cloud into a pristine crystal box. ?úGot it!??he shouted triumphantly.", image_url: "./public/Image/Book/OG0050(The Rainbow Cloud in the Box)/OG0050_SC05_I.png", full_audio: "" },
                 { book_id: "OG0050", scene_no: "SC06", script: "He rushed inside to display his treasure. But as he set the box down, the vibrant light began to dim. The swirling colors stopped moving.", image_url: "./public/Image/Book/OG0050(The Rainbow Cloud in the Box)/OG0050_SC06_I.png", full_audio: "" },
                 { book_id: "OG0050", scene_no: "SC07", script: "The captured cloud transformed before their eyes. It became a stagnant, dark gray clump of moisture, looking like a dirty raincloud.", image_url: "./public/Image/Book/OG0050(The Rainbow Cloud in the Box)/OG0050_SC07_I.png", full_audio: "" },
                 { book_id: "OG0050", scene_no: "SC08", script: "\"This is terrible,\" Didi groaned, tapping the glass. \"It looks like smoke. Where did the magic go?\"", image_url: "./public/Image/Book/OG0050(The Rainbow Cloud in the Box)/OG0050_SC08_I.png", full_audio: "" },
@@ -2891,30 +1531,30 @@
                 { id: 'OG0046', scene_no: 'SC02', script: "He hit the puck with force, \nbut his old stick broke \nsuddenly upon impact.", image_url: './public/Image/Book/OG0046(The Silent Stick)/OG0046_SC02_I.png', audio_url: '' },
                 { id: 'OG0046', scene_no: 'SC03', script: "Two pieces of wood lay on the ice, \nshowing the end of his practice.", image_url: './public/Image/Book/OG0046(The Silent Stick)/OG0046_SC03_I.png', audio_url: '' },
                 { id: 'OG0046', scene_no: 'SC04', script: "Ren worked for hours, \ncutting the skin to show \nthe hard wood under.", image_url: './public/Image/Book/OG0046(The Silent Stick)/OG0046_SC04_I.png', audio_url: '' },
-                { id: 'OG0046', scene_no: 'SC05', script: "When he tested it, \nthe puck flew in strange circles \ndue to the wood‚Äôs natural shape.", image_url: './public/Image/Book/OG0046(The Silent Stick)/OG0046_SC05_I.png', audio_url: '' },
-                { id: 'OG0046', scene_no: 'SC06', script: "Jax glanced at Ren‚Äôs rough branch \nand offered a cold smile, saying nothing.", image_url: './public/Image/Book/OG0046(The Silent Stick)/OG0046_SC06_I.png', audio_url: '' },
+                { id: 'OG0046', scene_no: 'SC05', script: "When he tested it, \nthe puck flew in strange circles \ndue to the wood?ôs natural shape.", image_url: './public/Image/Book/OG0046(The Silent Stick)/OG0046_SC05_I.png', audio_url: '' },
+                { id: 'OG0046', scene_no: 'SC06', script: "Jax glanced at Ren?ôs rough branch \nand offered a cold smile, saying nothing.", image_url: './public/Image/Book/OG0046(The Silent Stick)/OG0046_SC06_I.png', audio_url: '' },
                 { id: 'OG0046', scene_no: 'SC07', script: "Jax controlled the ice, \nhis speed pushing Ren \nback toward his own goal.", image_url: './public/Image/Book/OG0046(The Silent Stick)/OG0046_SC07_I.png', audio_url: '' },
                 { id: 'OG0046', scene_no: 'SC08', script: "The puck turned around the confused player, \ngoing quietly into the net as the whistle blew.", image_url: './public/Image/Book/OG0046(The Silent Stick)/OG0046_SC08_I.png', audio_url: '' },
                 { id: 'OG0046', scene_no: 'SC09', script: "Ren smiled at his rough stick \nand skated away silently.", image_url: './public/Image/Book/OG0046(The Silent Stick)/OG0046_SC09_I.png', audio_url: '' },
 
                 // OG0021
-                { id: 'OG0021', scene_no: 'SC01', script: "Milo is a little chameleon. He loves to change colors‚Äîgreen, blue, red!", image_url: './public/Image/Book/OG0021(Milo and the Lost Color)/OG0021_SC01_I.png', audio_url: '' },
-                { id: 'OG0021', scene_no: 'SC02', script: "But one morning, he wakes up gray. ‚ÄúOh no! Where is my color?‚Äù Milo says. He looks at his tail. It‚Äôs still gray. He feels sad and shy.", image_url: './public/Image/Book/OG0021(Milo and the Lost Color)/OG0021_SC02_I.png', audio_url: '' },
-                { id: 'OG0021', scene_no: 'SC03', script: "Milo walks into the forest. He sees a yellow butterfly. ‚ÄúCan I borrow your color?‚Äù he asks.", image_url: './public/Image/Book/OG0021(Milo and the Lost Color)/OG0021_SC03_I.png', audio_url: '' },
-                { id: 'OG0021', scene_no: 'SC04', script: "The butterfly smiles. ‚ÄúMy color is for flying!‚Äù Milo smiles back. ‚ÄúThen I will keep looking.‚Äù He waves goodbye.", image_url: './public/Image/Book/OG0021(Milo and the Lost Color)/OG0021_SC04_I.png', audio_url: '' },
-                { id: 'OG0021', scene_no: 'SC05', script: "He meets a red flower. ‚ÄúCan I have your color?‚Äù Milo asks. The flower says, ‚ÄúMy color helps the bees.‚Äù", image_url: './public/Image/Book/OG0021(Milo and the Lost Color)/OG0021_SC05_I.png', audio_url: '' },
-                { id: 'OG0021', scene_no: 'SC06', script: "Milo is sad. ‚ÄúEveryone has their own color.‚Äù He sits by a blue pond. A small tear drops into the water.", image_url: './public/Image/Book/OG0021(Milo and the Lost Color)/OG0021_SC06_I.png', audio_url: '' },
-                { id: 'OG0021', scene_no: 'SC07', script: "The pond shines! Milo sees many colors in the water‚Äîred, yellow, blue, green. They mix and dance like rainbows.", image_url: './public/Image/Book/OG0021(Milo and the Lost Color)/OG0021_SC07_I.png', audio_url: '' },
-                { id: 'OG0021', scene_no: 'SC08', script: "Milo laughs. ‚ÄúMaybe my color is inside me!‚Äù He takes a deep breath and closes his eyes. His body starts to glow.", image_url: './public/Image/Book/OG0021(Milo and the Lost Color)/OG0021_SC08_I.png', audio_url: '' },
-                { id: 'OG0021', scene_no: 'SC09', script: "Green! Then blue! Then red again! Milo‚Äôs colors come back, brighter than before. He feels happy and warm.", image_url: './public/Image/Book/OG0021(Milo and the Lost Color)/OG0021_SC09_I.png', audio_url: '' },
-                { id: 'OG0021', scene_no: 'SC10', script: "Milo runs home. He looks in the mirror. ‚ÄúI found my color‚Äîme!‚Äù he says proudly.", image_url: './public/Image/Book/OG0021(Milo and the Lost Color)/OG0021_SC10_I.png', audio_url: '' },
+                { id: 'OG0021', scene_no: 'SC01', script: "Milo is a little chameleon. He loves to change colors?îgreen, blue, red!", image_url: './public/Image/Book/OG0021(Milo and the Lost Color)/OG0021_SC01_I.png', audio_url: '' },
+                { id: 'OG0021', scene_no: 'SC02', script: "But one morning, he wakes up gray. ?úOh no! Where is my color???Milo says. He looks at his tail. It?ôs still gray. He feels sad and shy.", image_url: './public/Image/Book/OG0021(Milo and the Lost Color)/OG0021_SC02_I.png', audio_url: '' },
+                { id: 'OG0021', scene_no: 'SC03', script: "Milo walks into the forest. He sees a yellow butterfly. ?úCan I borrow your color???he asks.", image_url: './public/Image/Book/OG0021(Milo and the Lost Color)/OG0021_SC03_I.png', audio_url: '' },
+                { id: 'OG0021', scene_no: 'SC04', script: "The butterfly smiles. ?úMy color is for flying!??Milo smiles back. ?úThen I will keep looking.??He waves goodbye.", image_url: './public/Image/Book/OG0021(Milo and the Lost Color)/OG0021_SC04_I.png', audio_url: '' },
+                { id: 'OG0021', scene_no: 'SC05', script: "He meets a red flower. ?úCan I have your color???Milo asks. The flower says, ?úMy color helps the bees.??, image_url: './public/Image/Book/OG0021(Milo and the Lost Color)/OG0021_SC05_I.png', audio_url: '' },
+                { id: 'OG0021', scene_no: 'SC06', script: "Milo is sad. ?úEveryone has their own color.??He sits by a blue pond. A small tear drops into the water.", image_url: './public/Image/Book/OG0021(Milo and the Lost Color)/OG0021_SC06_I.png', audio_url: '' },
+                { id: 'OG0021', scene_no: 'SC07', script: "The pond shines! Milo sees many colors in the water?îred, yellow, blue, green. They mix and dance like rainbows.", image_url: './public/Image/Book/OG0021(Milo and the Lost Color)/OG0021_SC07_I.png', audio_url: '' },
+                { id: 'OG0021', scene_no: 'SC08', script: "Milo laughs. ?úMaybe my color is inside me!??He takes a deep breath and closes his eyes. His body starts to glow.", image_url: './public/Image/Book/OG0021(Milo and the Lost Color)/OG0021_SC08_I.png', audio_url: '' },
+                { id: 'OG0021', scene_no: 'SC09', script: "Green! Then blue! Then red again! Milo?ôs colors come back, brighter than before. He feels happy and warm.", image_url: './public/Image/Book/OG0021(Milo and the Lost Color)/OG0021_SC09_I.png', audio_url: '' },
+                { id: 'OG0021', scene_no: 'SC10', script: "Milo runs home. He looks in the mirror. ?úI found my color?îme!??he says proudly.", image_url: './public/Image/Book/OG0021(Milo and the Lost Color)/OG0021_SC10_I.png', audio_url: '' },
 
                 // OG0050
                 { id: 'OG0050', scene_no: 'SC01', script: "On the quiet planet of Tiny Rock, two friends named Podo and Didi spent their evenings watching the universe. One of the two friends, Didi was always searching for excitement.", image_url: './public/Image/Book/OG0050(The Rainbow Cloud in the Box)/OG0050_SC01_I.png', audio_url: '' },
                 { id: 'OG0050', scene_no: 'SC02', script: "Suddenly, a breathtaking rainbow cloud floated near their rock. It was a swirling cloud of stardust, glowing with vibrant shades of violet, orange, and emerald green.", image_url: './public/Image/Book/OG0050(The Rainbow Cloud in the Box)/OG0050_SC02_I.png', audio_url: '' },
                 { id: 'OG0050', scene_no: 'SC03', script: "\"It is the most beautiful thing I have ever seen!\" exclaimed Didi. \"I must have it. I will capture a piece to keep on my shelf.\"", image_url: './public/Image/Book/OG0050(The Rainbow Cloud in the Box)/OG0050_SC03_I.png', audio_url: '' },
                 { id: 'OG0050', scene_no: 'SC04', script: "Podo frowned gently. \"I do not think you can own a cloud, Didi,\" he warned. \"Its beauty comes from its movement.\"", image_url: './public/Image/Book/OG0050(The Rainbow Cloud in the Box)/OG0050_SC04_I.png', audio_url: '' },
-                { id: 'OG0050', scene_no: 'SC05', script: "Ignoring his friend, Didi grabbed a net and caught a portion of the cloud into a pristine crystal box. ‚ÄúGot it!‚Äù he shouted triumphantly.", image_url: './public/Image/Book/OG0050(The Rainbow Cloud in the Box)/OG0050_SC05_I.png', audio_url: '' },
+                { id: 'OG0050', scene_no: 'SC05', script: "Ignoring his friend, Didi grabbed a net and caught a portion of the cloud into a pristine crystal box. ?úGot it!??he shouted triumphantly.", image_url: './public/Image/Book/OG0050(The Rainbow Cloud in the Box)/OG0050_SC05_I.png', audio_url: '' },
                 { id: 'OG0050', scene_no: 'SC06', script: "He rushed inside to display his treasure. But as he set the box down, the vibrant light began to dim. The swirling colors stopped moving.", image_url: './public/Image/Book/OG0050(The Rainbow Cloud in the Box)/OG0050_SC06_I.png', audio_url: '' },
                 { id: 'OG0050', scene_no: 'SC07', script: "The captured cloud transformed before their eyes. It became a stagnant, dark gray clump of moisture, looking like a dirty raincloud.", image_url: './public/Image/Book/OG0050(The Rainbow Cloud in the Box)/OG0050_SC07_I.png', audio_url: '' },
                 { id: 'OG0050', scene_no: 'SC08', script: "\"This is terrible,\" Didi groaned, tapping the glass. \"It looks like smoke. Where did the magic go?\"", image_url: './public/Image/Book/OG0050(The Rainbow Cloud in the Box)/OG0050_SC08_I.png', audio_url: '' },
@@ -3362,23 +2002,30 @@
 
             // Library Full Page Logic
             window.openLibraryFullPage = function (zone, subTab) {
+                if (zone) {
+                    currentActiveZone = zone;
+                    currentActiveSubTab = subTab || (libraryZones[zone].length > 0 ? libraryZones[zone][0] : null);
+                    currentSubCategory = 'All';
+
+                    // Update Zone UI
+                    const zoneBook = document.getElementById('zone-book');
+                    const zoneMedia = document.getElementById('zone-media');
+
+                    if (zone === 'Book Zone') {
+                        if (zoneBook) zoneBook.className = "px-8 py-2.5 rounded-[22px] font-black text-base transition-all bg-[#fbbf24] text-[#0f172a] shadow-xl";
+                        if (zoneMedia) zoneMedia.className = "px-8 py-2.5 rounded-[22px] font-black text-base transition-all text-white/50 hover:text-white";
+                    } else if (zone === 'Media Zone') {
+                        if (zoneMedia) zoneMedia.className = "px-8 py-2.5 rounded-[22px] font-black text-base transition-all bg-[#fbbf24] text-[#0f172a] shadow-xl";
+                        if (zoneBook) zoneBook.className = "px-8 py-2.5 rounded-[22px] font-black text-base transition-all text-white/50 hover:text-white";
+                    }
+                }
+
                 const page = document.getElementById('libraryFullPage');
                 page.classList.remove('hidden');
                 document.body.style.overflow = 'hidden';
-                
-                if (zone) {
-                    window.setActiveZone(zone);
-                    if (subTab) {
-                        window.setActiveSubTab(subTab);
-                    }
-                } else {
-                    renderLibrarySubTabs();
-                    renderLibraryContent();
-                }
-                
-                if (window.lucide) {
-                    lucide.createIcons();
-                }
+                renderLibrarySubTabs();
+                renderLibraryContent();
+                lucide.createIcons();
             };
 
             window.closeLibraryFullPage = function () {
@@ -3429,51 +2076,19 @@
                 const zoneBook = document.getElementById('zone-book');
                 const zoneMedia = document.getElementById('zone-media');
                 const zoneMyLibrary = document.getElementById('zone-my-library');
-                const searchArea = document.getElementById('librarySearchArea');
-                const zoneToggleGroup = document.getElementById('zoneToggleGroup');
-                const subTabContainer = document.getElementById('subTabContainer');
-                
-                // Clear any active search when switching zones
-                if (typeof clearLibrarySearch === 'function') {
-                    clearLibrarySearch();
-                } else {
-                    isLibrarySearchExecuted = false;
-                    const searchInput = document.getElementById('libSearchInput');
-                    if (searchInput) searchInput.value = '';
-                }
 
                 if (zone === 'Book Zone') {
                     zoneBook.className = "px-8 py-2.5 rounded-[22px] font-black text-base transition-all bg-[#fbbf24] text-[#0f172a] shadow-xl";
                     zoneMedia.className = "px-8 py-2.5 rounded-[22px] font-black text-base transition-all text-white/50 hover:text-white";
-                    if (zoneMyLibrary) zoneMyLibrary.className = "hidden";
-                    if (searchArea) searchArea.style.display = 'block';
-                    if (zoneToggleGroup) zoneToggleGroup.style.display = 'flex';
-                    if (subTabContainer) {
-                        subTabContainer.classList.add('ml-12');
-                        subTabContainer.classList.remove('w-full');
-                    }
+                    if (zoneMyLibrary) zoneMyLibrary.className = "hidden"; // We can optionally hide or show it as a top tab, but user requested it via profile. Let's hide it from main tabs.
                 } else if (zone === 'Media Zone') {
                     zoneMedia.className = "px-8 py-2.5 rounded-[22px] font-black text-base transition-all bg-[#fbbf24] text-[#0f172a] shadow-xl";
                     zoneBook.className = "px-8 py-2.5 rounded-[22px] font-black text-base transition-all text-white/50 hover:text-white";
                     if (zoneMyLibrary) zoneMyLibrary.className = "hidden";
-                    if (searchArea) searchArea.style.display = 'block';
-                    if (zoneToggleGroup) zoneToggleGroup.style.display = 'flex';
-                    if (subTabContainer) {
-                        subTabContainer.classList.add('ml-12');
-                        subTabContainer.classList.remove('w-full');
-                    }
                 } else if (zone === 'My Library') {
                     // Deselect others if in My Library
                     zoneBook.className = "px-8 py-2.5 rounded-[22px] font-black text-base transition-all text-white/50 hover:text-white";
                     zoneMedia.className = "px-8 py-2.5 rounded-[22px] font-black text-base transition-all text-white/50 hover:text-white";
-                    // Hide Search and Book/Media tabs
-                    if (searchArea) searchArea.style.display = 'none';
-                    if (zoneToggleGroup) zoneToggleGroup.style.display = 'none';
-                    // Pull tabs to the left
-                    if (subTabContainer) {
-                        subTabContainer.classList.remove('ml-12');
-                        subTabContainer.classList.add('w-full');
-                    }
                 }
 
                 renderLibrarySubTabs();
@@ -3526,52 +2141,17 @@
                 const container = document.getElementById('subTabContainer');
                 const tabs = libraryZones[currentActiveZone];
 
-                if (currentActiveZone === 'My Library') {
-                    let leftTabs = '';
-                    let rightTabs = '';
-
-                    tabs.forEach(tab => {
-                        const safeTab = tab.replace(/'/g, "\\'");
-                        if (tab === 'Roadmap') {
-                            leftTabs += `
-                                <div class="flex items-center pr-4">
-                                    <button onclick="setActiveSubTab('${safeTab}')"
-                                        class="relative px-6 py-2.5 rounded-2xl font-black transition-all flex items-center gap-3 border-2 border-transparent active:scale-95 ${currentActiveSubTab === tab ? 'bg-[#fbbf24] text-[#0f172a] shadow-[0_0_20px_rgba(251,191,36,0.4)] scale-105' : 'bg-amber-500/10 text-amber-500 hover:bg-amber-500/20'}">
-                                        <i data-lucide="map" class="w-5 h-5 ${currentActiveSubTab === tab ? 'animate-bounce' : ''}"></i>
-                                        <span class="uppercase tracking-widest text-sm">${tab}</span>
-                                    </button>
-                                </div>
-                            `;
-                        } else {
-                            rightTabs += `
-                                <button onclick="setActiveSubTab('${safeTab}')"
-                                    class="relative py-4 text-xl font-black transition-all flex items-center gap-3 ${currentActiveSubTab === tab ? 'text-[#fbbf24]' : 'text-slate-300 hover:text-white'}">
-                                    <span>${tab}</span>
-                                    ${currentActiveSubTab === tab ? '<div class="absolute bottom-0 left-0 right-0 h-1.5 bg-[#fbbf24] rounded-full animate-in fade-in slide-in-from-bottom-1"></div>' : ''}
-                                </button>
-                            `;
-                        }
-                    });
-
-                    container.innerHTML = `
-                        ${leftTabs}
-                        <div class="ml-auto flex items-center gap-8 pr-8">
-                            ${rightTabs}
-                        </div>
+                container.innerHTML = tabs.map(tab => {
+                    // Handle potential quotes in tab names like MD's pick
+                    const safeTab = tab.replace(/'/g, "\\'");
+                    return `
+                        <button onclick="setActiveSubTab('${safeTab}')"
+                            class="relative py-4 text-xl font-black transition-all flex items-center gap-3 ${currentActiveSubTab === tab ? 'text-[#fbbf24]' : 'text-slate-300 hover:text-white'}">
+                            <span>${tab}</span>
+                            ${currentActiveSubTab === tab ? '<div class="absolute bottom-0 left-0 right-0 h-1.5 bg-[#fbbf24] rounded-full animate-in fade-in slide-in-from-bottom-1"></div>' : ''}
+                        </button>
                     `;
-                } else {
-                    container.innerHTML = tabs.map(tab => {
-                        const safeTab = tab.replace(/'/g, "\\'");
-                        return `
-                            <button onclick="setActiveSubTab('${safeTab}')"
-                                class="relative py-4 text-xl font-black transition-all flex items-center gap-3 ${currentActiveSubTab === tab ? 'text-[#fbbf24]' : 'text-slate-300 hover:text-white'}">
-                                <span>${tab}</span>
-                                ${currentActiveSubTab === tab ? '<div class="absolute bottom-0 left-0 right-0 h-1.5 bg-[#fbbf24] rounded-full animate-in fade-in slide-in-from-bottom-1"></div>' : ''}
-                            </button>
-                        `;
-                    }).join('');
-                }
-                
+                }).join('');
                 if (window.lucide) {
                     lucide.createIcons();
                 }
@@ -3698,173 +2278,64 @@
                 }
             };
 
-            window.selectRoadmapBook = function(bookId) {
-                window.currentRoadmapActiveBookId = bookId;
-                renderLibraryContent();
-            };
-
             function renderRoadmap(books) {
-                const activeBooks = books.slice(0, 3);
-                if (!window.currentRoadmapActiveBookId) {
-                    window.currentRoadmapActiveBookId = activeBooks[0].id;
-                }
+                let html = '<div class="relative w-full max-w-5xl mx-auto py-12 px-4 animate-in fade-in">';
                 
-                const selectedBook = activeBooks.find(b => b.id === window.currentRoadmapActiveBookId) || activeBooks[0];
-                
-                const allBooks = books;
-                let pathBooks = [];
-                let themeTitle = '';
-                let currentIndex = 2; // Default to having books before and after
-                
-                if (selectedBook.id === 'l-1') {
-                    pathBooks = [allBooks[2], allBooks[3], selectedBook, allBooks[5], allBooks[6], allBooks[7]];
-                    themeTitle = 'üó∫Ô∏è Journey to True Happiness';
-                    currentIndex = 2;
-                } else if (selectedBook.id === 'l-2') {
-                    pathBooks = [allBooks[0], selectedBook, allBooks[2], allBooks[8], allBooks[9]];
-                    themeTitle = 'üó∫Ô∏è Quest for the Lost Colors';
-                    currentIndex = 1;
-                } else {
-                    pathBooks = [allBooks[1], allBooks[2], allBooks[4], selectedBook, allBooks[9], allBooks[8]];
-                    themeTitle = 'üó∫Ô∏è Mystery of the Silent Watch';
-                    currentIndex = 3;
-                }
-                
-                let html = '<div class="relative w-full animate-in fade-in">';
-                
-                // Top Book Selector
-                html += `
-                    <div class="w-full bg-white/50 backdrop-blur-sm border-b border-slate-100 py-6 sticky top-0 z-50">
-                        <div class="max-w-[1200px] mx-auto px-4 sm:px-10 flex flex-col gap-4">
-                            <h3 class="text-sm font-black text-slate-400 uppercase tracking-widest flex items-center gap-2"><i data-lucide="compass" class="w-4 h-4"></i> Active Journeys</h3>
-                            <div class="flex gap-4 overflow-x-auto no-scrollbar pb-2">
-                `;
-                
-                activeBooks.forEach(book => {
-                    const isSelected = book.id === window.currentRoadmapActiveBookId;
-                    const ringClass = isSelected ? 'ring-4 ring-indigo-500 ring-offset-4 scale-105' : 'ring-2 ring-slate-200 hover:ring-indigo-300 opacity-60 hover:opacity-100 scale-95 hover:scale-100 cursor-pointer';
-                    html += `
-                        <button onclick="selectRoadmapBook('${book.id}')" class="flex flex-col items-center gap-2 group shrink-0 transition-all duration-300 mr-2 outline-none border-none bg-transparent">
-                            <div class="w-16 h-16 rounded-full overflow-hidden ${ringClass} transition-all duration-300 shadow-sm">
-                                <img src="${book.src}" class="w-full h-full object-cover">
-                            </div>
-                            <span class="text-[10px] font-bold ${isSelected ? 'text-slate-800' : 'text-slate-400'} max-w-[70px] truncate text-center">${book.title}</span>
-                        </button>
-                    `;
-                });
-                
-                html += `
-                            </div>
-                        </div>
-                    </div>
-                `;
-                
-                // Roadmap Title
-                html += `
-                    <div class="max-w-[1200px] mx-auto px-4 sm:px-10 pt-12 pb-4">
-                        <h2 class="text-3xl font-black font-jua text-slate-800">${themeTitle}</h2>
-                    </div>
-                `;
-                
-                // Snake Map Area
-                html += '<div class="relative w-full max-w-[1200px] mx-auto pb-32 pt-10 px-4 sm:px-10">';
-                html += `<svg class="absolute inset-0 w-full h-full pointer-events-none z-0" style="opacity: 0.6;">
-                    <path id="roadmap-path" d="" fill="none" stroke="#6366f1" stroke-width="8" stroke-dasharray="0 24" stroke-linecap="round" />
+                // SVG Background Line
+                html += `<svg class="absolute inset-0 w-full h-full" style="z-index: 0; pointer-events: none;">
+                    <path id="roadmap-path" d="" fill="none" stroke="#93c5fd" stroke-width="6" stroke-dasharray="12 12" stroke-linecap="round" />
                 </svg>`;
-                html += '<div class="flex flex-col gap-24 relative z-10" id="roadmap-container">';
+                
+                html += '<div class="flex flex-col gap-16 relative z-10" id="roadmap-container">';
                 
                 const cols = 4;
-                const rows = [];
-                for(let i=0; i<pathBooks.length; i+=cols) {
-                    const row = pathBooks.slice(i, i+cols);
-                    const isOddRow = (Math.floor(i/cols) % 2 !== 0);
-                    rows.push({ items: isOddRow ? row.reverse() : row, isOddRow, originalStartIdx: i });
-                }
+                const rows = Math.ceil(books.length / cols);
                 
-                rows.forEach((rowObj, rowIdx) => {
-                    const justifyClass = rowObj.isOddRow ? 'flex-row-reverse' : 'flex-row';
-                    const paddingClass = rowObj.isOddRow ? 'pr-12 md:pr-24' : 'pl-12 md:pl-24';
+                for(let r = 0; r < rows; r++) {
+                    let rowBooks = books.slice(r * cols, (r + 1) * cols);
+                    let isReverse = r % 2 !== 0;
+                    if(isReverse) rowBooks.reverse();
                     
-                    html += `<div class="roadmap-row flex items-center gap-8 md:gap-16 w-full ${justifyClass} ${paddingClass} justify-around">`;
+                    html += `<div class="flex justify-between items-center w-full roadmap-row" data-reverse="${isReverse}">`;
                     
-                    rowObj.items.forEach((book, colIdx) => {
-                        const pathIdx = pathBooks.findIndex(b => b.id === book.id);
-                        const isCompleted = pathIdx < currentIndex;
-                        const isCurrent = pathIdx === currentIndex;
-                        const isNotStarted = pathIdx > currentIndex;
+                    rowBooks.forEach((book, idx) => {
+                        const globalIdx = isReverse ? (r * cols + (cols - 1 - idx)) : (r * cols + idx);
+                        const isCompleted = globalIdx < 5;
+                        const isCurrent = globalIdx === 5;
+                        const isLocked = globalIdx > 5;
                         
-                        let statusClass = 'shadow-xl hover:scale-105 hover:-translate-y-2';
-                        let ringClass = 'border-white';
-                        
-                        if(isCurrent) {
-                            statusClass = 'scale-110 z-30 shadow-[0_0_40px_rgba(99,102,241,0.5)] border-indigo-500';
-                            ringClass = 'border-indigo-500';
-                        }
+                        let statusClass = '';
+                        if(isCompleted) statusClass = 'grayscale opacity-60 hover:grayscale-0 hover:opacity-100';
+                        else if(isLocked) statusClass = 'grayscale opacity-30';
+                        else if(isCurrent) statusClass = 'ring-4 ring-sky-500 scale-110 shadow-[0_0_30px_rgba(56,189,248,0.5)] z-20';
                         
                         html += `
-                            <div class="roadmap-node relative group flex flex-col items-center transition-all duration-500 cursor-pointer" data-index="${pathIdx}" onclick="openModal('${book.id}', 'library')">
-                                
-                                <div class="w-32 md:w-44 lg:w-48 aspect-[3/4] rounded-[32px] overflow-hidden border-4 ${ringClass} shadow-xl relative bg-white transform transition-all ${statusClass}">
+                            <div class="roadmap-node relative w-40 md:w-48 transition-all duration-300 ${statusClass} cursor-pointer" onclick="openModal('${book.id}', 'library')">
+                                <div class="aspect-[3/4] rounded-2xl overflow-hidden border-4 border-white shadow-xl relative bg-white">
                                     <img src="${book.src}" class="w-full h-full object-cover">
-                                    
-                                    ${isCompleted ? '<div class="absolute top-0 right-0 bg-emerald-500 text-white text-[10px] font-bold px-3 py-1.5 rounded-bl-[16px] z-20 shadow-sm flex items-center gap-1"><i data-lucide="check-circle-2" class="w-3 h-3"></i> COMPLETED</div>' : ''}
-                                    ${isCurrent ? '<div class="absolute top-0 right-0 bg-indigo-500 text-white text-[10px] font-black px-3 py-1.5 rounded-bl-[16px] z-20 shadow-sm flex items-center gap-1"><i data-lucide="zap" class="w-3 h-3"></i> IN PROGRESS</div>' : ''}
-                                    
-                                    ${isCurrent ? '<div class="absolute inset-0 bg-indigo-500/10 mix-blend-overlay"></div>' : ''}
-                                </div>
-                                
-                                <div class="absolute -bottom-6 px-4 py-1.5 bg-white border border-slate-100 rounded-full shadow-lg z-30 flex items-center gap-1.5 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity translate-y-2 group-hover:translate-y-0">
-                                    <i data-lucide="${isCompleted ? 'check' : isCurrent ? 'sparkles' : 'book'}" class="w-3 h-3 ${isCompleted ? 'text-emerald-500' : isCurrent ? 'text-indigo-500' : 'text-slate-400'}"></i>
-                                    <p class="text-[11px] font-black ${isCompleted ? 'text-emerald-600' : isCurrent ? 'text-indigo-600' : 'text-slate-500'} uppercase tracking-tighter line-clamp-1 max-w-[120px]">${book.title || 'Book Title'}</p>
+                                    ${isCurrent ? '<div class="absolute top-0 left-0 right-0 bg-gradient-to-b from-sky-500 to-transparent pt-2 pb-6 px-3"><span class="text-white text-xs font-black uppercase tracking-widest drop-shadow-md">Current Stage</span></div>' : ''}
+                                    ${isLocked ? '<div class="absolute inset-0 bg-slate-900/40 flex items-center justify-center"><i data-lucide="lock" class="w-10 h-10 text-white/70"></i></div>' : ''}
+                                    ${isCompleted ? '<div class="absolute top-2 right-2 w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center shadow-lg border-2 border-white"><i data-lucide="check" class="w-4 h-4 text-white stroke-[3]"></i></div>' : ''}
+                                    ${isCurrent ? '<button class="absolute bottom-4 right-4 w-12 h-12 bg-sky-500 rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform"><i data-lucide="play" class="w-5 h-5 text-white ml-1 fill-white"></i></button>' : ''}
                                 </div>
                             </div>
                         `;
                     });
-                    html += `</div>`;
-                });
-                
-                html += '</div></div></div>';
-                
-                setTimeout(() => {
-                    const container = document.getElementById('roadmap-container');
-                    const path = document.getElementById('roadmap-path');
-                    if(!container || !path) return;
                     
-                    const nodesRaw = Array.from(container.querySelectorAll('.roadmap-node'));
-                    const nodes = nodesRaw.sort((a,b) => parseInt(a.dataset.index) - parseInt(b.dataset.index));
-                    
-                    if(nodes.length < 2) return;
-                    
-                    const svgRect = path.parentElement.getBoundingClientRect();
-                    let d = '';
-                    nodes.forEach((node, i) => {
-                        const rect = node.getBoundingClientRect();
-                        const x = rect.left - svgRect.left + rect.width / 2;
-                        const y = rect.top - svgRect.top + rect.height / 2;
-                        
-                        if(i === 0) {
-                            d += `M ${x} ${y}`;
-                        } else {
-                            const prevRect = nodes[i-1].getBoundingClientRect();
-                            const prevX = prevRect.left - svgRect.left + prevRect.width / 2;
-                            const prevY = prevRect.top - svgRect.top + prevRect.height / 2;
-                            
-                            // Check for row wrap (U-turn)
-                            if (i % 4 === 0) {
-                                const isRightSide = Math.floor((i-1)/4) % 2 === 0;
-                                const offset = isRightSide ? 150 : -150;
-                                d += ` C ${prevX + offset} ${prevY}, ${x + offset} ${y}, ${x} ${y}`;
-                            } else {
-                                // Normal connection within row
-                                const midX = (prevX + x) / 2;
-                                d += ` C ${midX} ${prevY}, ${midX} ${y}, ${x} ${y}`;
-                            }
+                    // Fill empty spaces if last row is incomplete to maintain grid alignment
+                    if(r === rows - 1 && rowBooks.length < cols) {
+                        for(let i=0; i < cols - rowBooks.length; i++) {
+                            html += `<div class="roadmap-node empty w-40 md:w-48 opacity-0 pointer-events-none"></div>`;
                         }
-                    });
-                    path.setAttribute('d', d);
-                    lucide.createIcons();
-                }, 100);
+                    }
+                    
+                    html += `</div>`;
+                }
                 
+                html += '</div></div>';
+                
+                // Add a small script to draw the SVG line after rendering
+                setTimeout(drawRoadmapLine, 100);
                 return html;
             }
 
@@ -3873,7 +2344,7 @@
                 const path = document.getElementById('roadmap-path');
                 if(!container || !path) return;
                 
-                const nodes = Array.from(container.querySelectorAll('.roadmap-node'));
+                const nodes = Array.from(container.querySelectorAll('.roadmap-node:not(.empty)'));
                 if(nodes.length < 2) return;
                 
                 const containerRect = container.getBoundingClientRect();
@@ -3887,200 +2358,12 @@
                     if(i === 0) {
                         d += `M ${x} ${y}`;
                     } else {
-                        const prevRect = nodes[i-1].getBoundingClientRect();
-                        const prevX = prevRect.left - containerRect.left + prevRect.width / 2;
-                        const prevY = prevRect.top - containerRect.top + prevRect.height / 2;
-                        
-                        // Use a smooth vertical S-curve
-                        const cp1X = prevX;
-                        const cp1Y = prevY + (y - prevY) / 2;
-                        const cp2X = x;
-                        const cp2Y = prevY + (y - prevY) / 2;
-                        
-                        d += ` C ${cp1X} ${cp1Y}, ${cp2X} ${cp2Y}, ${x} ${y}`;
+                        // Just use straight lines for simplicity and robustness
+                        d += ` L ${x} ${y}`;
                     }
                 });
                 
                 path.setAttribute('d', d);
-            }
-
-            let showCompletedFavoritesOnly = false;
-            window.toggleCompletedFavorites = function() {
-                showCompletedFavoritesOnly = !showCompletedFavoritesOnly;
-                renderLibraryContent();
-            };
-
-            window.toggleHeart = function(bookId) {
-                const book = booksData.find(b => b.id === bookId);
-                if(book) book.isBookmarked = !book.isBookmarked;
-                
-                ['completed', 'roadmap'].forEach(key => {
-                    if(MY_LIBRARY_DUMMY_DATA[key]) {
-                        const b = MY_LIBRARY_DUMMY_DATA[key].find(x => x.id === bookId);
-                        if(b) b.isBookmarked = book ? book.isBookmarked : !b.isBookmarked;
-                    }
-                });
-                renderLibraryContent();
-            };
-
-            function renderCoverGallery(books, emptyTitle, emptyDesc, showToggle = false, isFavoritesOnly = false, isCarousel = false) {
-                let filteredBooks = books;
-                if (isFavoritesOnly) {
-                    filteredBooks = books.filter(b => b.isBookmarked);
-                }
-
-                let html = '';
-                
-                if (showToggle) {
-                    html += `
-                        <div class="flex justify-end mb-6 animate-in fade-in">
-                            <label class="flex items-center gap-3 cursor-pointer group bg-white px-4 py-2 rounded-2xl shadow-sm border-2 border-slate-100 hover:border-pink-200 transition-colors">
-                                <i data-lucide="heart" class="w-5 h-5 ${isFavoritesOnly ? 'fill-pink-500 text-pink-500' : 'text-slate-300'} transition-colors"></i>
-                                <span class="font-bold text-slate-600">Favorites Only</span>
-                                <div class="relative ml-2">
-                                    <input type="checkbox" class="sr-only peer" ${isFavoritesOnly ? 'checked' : ''} onchange="toggleCompletedFavorites()">
-                                    <div class="w-10 h-5 bg-slate-200 rounded-full peer peer-checked:bg-pink-500 transition-all"></div>
-                                    <div class="absolute left-1 top-1 w-3 h-3 bg-white rounded-full peer-checked:translate-x-5 transition-transform"></div>
-                                </div>
-                            </label>
-                        </div>
-                    `;
-                }
-
-                if(!filteredBooks || filteredBooks.length === 0) {
-                    html += `
-                        <div class="flex flex-col items-center justify-center py-20 animate-in fade-in duration-500 w-full">
-                            <div class="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mb-6 border-4 border-slate-100">
-                                <i data-lucide="book-x" class="w-10 h-10 text-slate-300"></i>
-                            </div>
-                            <h2 class="text-2xl font-black text-slate-600 font-jua mb-2">${emptyTitle}</h2>
-                            <p class="text-slate-400 font-bold">${emptyDesc}</p>
-                        </div>
-                    `;
-                    return html;
-                }
-
-                if (!isCarousel) {
-                    html += `<div class="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-6 animate-in fade-in slide-in-from-bottom-4">`;
-                }
-                
-                filteredBooks.forEach(book => {
-                    const isFav = book.isBookmarked;
-                    const widthClass = isCarousel ? 'w-32 md:w-40 shrink-0' : 'w-full';
-                    html += `
-                        <div class="relative group cursor-pointer aspect-[3/4] rounded-[20px] overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-300 border-[3px] border-slate-100 hover:border-indigo-100 bg-slate-50 ${widthClass}" onclick="openModal('${book.id}', 'library')">
-                            <img src="${book.src}" class="w-full h-full object-cover pointer-events-none">
-                            <div class="absolute inset-0 bg-slate-900/10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
-                            
-                            <button class="absolute bottom-2 right-2 w-9 h-9 bg-white backdrop-blur-sm rounded-full flex items-center justify-center shadow-md hover:scale-110 active:scale-95 transition-all z-20 group/btn border-2 border-slate-50" onclick="event.stopPropagation(); toggleHeart('${book.id}')">
-                                <i data-lucide="heart" class="w-4 h-4 ${isFav ? 'fill-pink-500 text-pink-500' : 'text-slate-300 group-hover/btn:text-pink-400'} transition-colors"></i>
-                            </button>
-                        </div>
-                    `;
-                });
-                
-                if (!isCarousel) {
-                    html += `</div>`;
-                }
-                return html;
-            }
-
-            function renderFavoritesTab() {
-                const favBooks = booksData.filter(b => b.isBookmarked);
-                
-                if (favBooks.length === 0) {
-                    return `
-                        <div class="flex flex-col items-center justify-center py-32 animate-in fade-in duration-500">
-                            <div class="w-32 h-32 bg-pink-50 rounded-full flex items-center justify-center mb-6 border-8 border-white shadow-lg">
-                                <i data-lucide="heart-crack" class="w-12 h-12 text-pink-300"></i>
-                            </div>
-                            <h2 class="text-3xl font-black text-slate-700 font-jua mb-4">No Favorites Yet</h2>
-                            <p class="text-slate-500 font-bold text-lg">Find books you love and tap the heart icon to save them here!</p>
-                            <button onclick="setActiveZone('Book Zone')" class="mt-8 px-8 py-3 bg-slate-900 text-white rounded-2xl font-black shadow-lg hover:scale-105 active:scale-95 transition-all">
-                                Explore Books
-                            </button>
-                        </div>
-                    `;
-                }
-
-                const completedIds = MY_LIBRARY_DUMMY_DATA.completed.map(b => b.id);
-                const savedForLater = favBooks.filter(b => !completedIds.includes(b.id));
-                const hallOfFame = favBooks.filter(b => completedIds.includes(b.id));
-
-                if (currentSubCategory === 'SavedForLater') {
-                    return `
-                        <div class="space-y-6 animate-in fade-in slide-in-from-right-8">
-                            <div class="flex items-center gap-4 mb-8">
-                                <button onclick="setSubCategory('All')" class="w-12 h-12 flex items-center justify-center bg-white rounded-2xl shadow-sm border-2 border-slate-100 hover:border-slate-300 hover:bg-slate-50 transition-all group active:scale-95">
-                                    <i data-lucide="arrow-left" class="w-6 h-6 text-slate-400 group-hover:text-slate-600 transition-colors"></i>
-                                </button>
-                                <div>
-                                    <h3 class="text-3xl font-black text-slate-800 font-jua">Saved for Later</h3>
-                                </div>
-                            </div>
-                            ${renderCoverGallery(savedForLater, 'No saved books', '', false, false, false)}
-                        </div>
-                    `;
-                }
-
-                if (currentSubCategory === 'HallOfFame') {
-                    return `
-                        <div class="space-y-6 animate-in fade-in slide-in-from-right-8">
-                            <div class="flex items-center gap-4 mb-8">
-                                <button onclick="setSubCategory('All')" class="w-12 h-12 flex items-center justify-center bg-white rounded-2xl shadow-sm border-2 border-slate-100 hover:border-slate-300 hover:bg-slate-50 transition-all group active:scale-95">
-                                    <i data-lucide="arrow-left" class="w-6 h-6 text-slate-400 group-hover:text-slate-600 transition-colors"></i>
-                                </button>
-                                <div>
-                                    <h3 class="text-3xl font-black text-amber-900 font-jua">Hall of Fame</h3>
-                                </div>
-                            </div>
-                            ${renderCoverGallery(hallOfFame, 'No hall of fame', '', false, false, false)}
-                        </div>
-                    `;
-                }
-
-                let html = '<div class="space-y-16">';
-                
-                if (savedForLater.length > 0) {
-                    html += `
-                        <div class="space-y-6">
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 bg-sky-100 rounded-xl flex items-center justify-center">
-                                        <i data-lucide="bookmark" class="w-5 h-5 text-sky-500"></i>
-                                    </div>
-                                    <h3 class="text-3xl font-black text-slate-800 font-jua uppercase tracking-tight">Saved for Later</h3>
-                                </div>
-                                <button class="text-[#fbbf24] font-black px-5 py-2.5 bg-[#0f172a] rounded-xl hover:scale-105 active:scale-95 transition-all text-sm uppercase tracking-wider shadow-lg shadow-slate-900/20" onclick="setSubCategory('SavedForLater')">See All</button>
-                            </div>
-                            <div class="library-scroll-container flex gap-6 overflow-x-auto pb-6 -mx-4 px-4 cursor-grab active:cursor-grabbing select-none">
-                                ${renderCoverGallery(savedForLater, '', '', false, false, true)}
-                            </div>
-                        </div>
-                    `;
-                }
-                
-                if (hallOfFame.length > 0) {
-                    html += `
-                        <div class="space-y-6">
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 bg-amber-200 rounded-xl flex items-center justify-center shadow-inner">
-                                        <i data-lucide="award" class="w-5 h-5 text-amber-600"></i>
-                                    </div>
-                                    <h3 class="text-3xl font-black text-amber-900 font-jua uppercase tracking-tight">Hall of Fame</h3>
-                                </div>
-                                <button class="text-[#fbbf24] font-black px-5 py-2.5 bg-[#0f172a] rounded-xl hover:scale-105 active:scale-95 transition-all text-sm uppercase tracking-wider shadow-lg shadow-slate-900/20" onclick="setSubCategory('HallOfFame')">See All</button>
-                            </div>
-                            <div class="library-scroll-container flex gap-6 overflow-x-auto pb-6 -mx-4 px-4 cursor-grab active:cursor-grabbing select-none">
-                                ${renderCoverGallery(hallOfFame, '', '', false, false, true)}
-                            </div>
-                        </div>
-                    `;
-                }
-                
-                html += '</div>';
-                return html;
             }
 
             function renderMyLibraryGrid(books, emptyTitle, emptyDesc) {
@@ -4109,57 +2392,6 @@
                         ${renderBookCards('My Library', false, books.length, books)}
                     </div>
                 `;
-            }
-
-            function renderInProgressGrid(books, emptyTitle, emptyDesc) {
-                if(!books || books.length === 0) {
-                    return renderMyLibraryGrid(books, emptyTitle, emptyDesc);
-                }
-
-                let html = '<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 animate-in fade-in slide-in-from-bottom-4">';
-                
-                books.forEach(book => {
-                    // Generate a random progress between 10% and 90% for dummy data
-                    const progress = Math.floor(Math.random() * 80) + 10;
-                    const ctaText = progress > 0 ? "CONTINUE READING" : "START READING";
-                    
-                    html += `
-                        <div class="bg-white rounded-[32px] p-6 shadow-sm border-[3px] border-slate-100 hover:border-sky-300 hover:shadow-xl transition-all duration-300 group flex flex-col">
-                            <div class="flex items-start gap-5 mb-6">
-                                <div class="w-24 shrink-0 aspect-[3/4] rounded-2xl overflow-hidden shadow-md group-hover:scale-105 transition-transform duration-300">
-                                    <img src="${book.src}" class="w-full h-full object-cover">
-                                </div>
-                                <div class="flex-1 min-w-0 flex flex-col justify-center h-24">
-                                    <h4 class="text-lg font-black text-slate-800 leading-tight mb-2 line-clamp-2">${book.title || 'Book Title'}</h4>
-                                    <div class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-slate-100 rounded-lg w-fit">
-                                        <i data-lucide="bar-chart-2" class="w-3.5 h-3.5 text-slate-500"></i>
-                                        <span class="text-xs font-bold text-slate-500 tracking-wider">LV.3</span>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="mt-auto">
-                                <div class="flex justify-between items-end mb-2">
-                                    <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Progress</span>
-                                    <span class="text-sm font-black text-sky-500">${progress}%</span>
-                                </div>
-                                <div class="w-full bg-slate-100 rounded-full h-3 mb-6 overflow-hidden border border-slate-200">
-                                    <div class="bg-gradient-to-r from-sky-400 to-blue-500 h-3 rounded-full relative" style="width: ${progress}%">
-                                        <div class="absolute right-0 top-0 bottom-0 w-4 bg-white/30 skew-x-[-20deg]"></div>
-                                    </div>
-                                </div>
-                                
-                                <button onclick="openLearningMode('${book.id}', '${book.title}')" class="w-full py-4 bg-slate-900 text-white rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-sky-500 active:scale-95 transition-all flex items-center justify-center gap-2 shadow-lg shadow-slate-900/20 hover:shadow-sky-500/30">
-                                    <i data-lucide="play" class="w-4 h-4 fill-current"></i>
-                                    ${ctaText}
-                                </button>
-                            </div>
-                        </div>
-                    `;
-                });
-                
-                html += '</div>';
-                return html;
             }
 
             function renderLibraryContent() {
@@ -4286,7 +2518,7 @@
 
                 let html = '';
 
-                const isSortDisabled = (currentActiveSubTab === 'Topics' || currentActiveSubTab === "MD's pick" || currentActiveSubTab === 'Favorites') && currentSubCategory === 'All';
+                const isSortDisabled = (currentActiveSubTab === 'Topics' || currentActiveSubTab === "MD's pick") && currentSubCategory === 'All';
 
                 // 1. Toolbar (Hide for Roadmap)
                 if (currentActiveSubTab !== 'Roadmap') {
@@ -4304,6 +2536,15 @@
                                     </select>
                                     <i data-lucide="chevron-down" class="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none"></i>
                                 </div>
+                                
+                                <label class="flex items-center gap-3 cursor-pointer group">
+                                    <div class="relative">
+                                        <input type="checkbox" class="sr-only peer" ${libraryShowUnreadOnly ? 'checked' : ''} onchange="toggleUnreadOnly()">
+                                        <div class="w-12 h-6 bg-slate-200 rounded-full peer peer-checked:bg-[#fbbf24] transition-all"></div>
+                                        <div class="absolute left-1 top-1 w-4 h-4 bg-white rounded-full peer-checked:translate-x-6 transition-transform"></div>
+                                    </div>
+                                    <span class="font-bold text-slate-500 group-hover:text-slate-700 transition-colors">Unread Only</span>
+                                </label>
                             </div>
                         </div>`;
                 }
@@ -4350,13 +2591,12 @@
                     if (currentActiveSubTab === 'Roadmap') {
                         html += renderRoadmap(MY_LIBRARY_DUMMY_DATA.roadmap);
                     } else if (currentActiveSubTab === 'In Progress') {
-                        // Use booksData that are currently in the Hero section (first 4 books of reading history)
-                        const inProgressBooks = booksData.slice(0, 4);
-                        html += renderInProgressGrid(inProgressBooks, "No Books in Progress", "You haven't started any books yet.");
+                        html += renderMyLibraryGrid(MY_LIBRARY_DUMMY_DATA.inProgress, "No Books in Progress", "You haven't started any books yet.");
                     } else if (currentActiveSubTab === 'Completed') {
-                        html += renderCoverGallery(MY_LIBRARY_DUMMY_DATA.completed, "No Completed Books", "You haven't finished any books yet.", true, showCompletedFavoritesOnly);
+                        html += renderMyLibraryGrid(MY_LIBRARY_DUMMY_DATA.completed, "No Completed Books", "You haven't finished any books yet.");
                     } else if (currentActiveSubTab === 'Favorites') {
-                        html += renderFavoritesTab();
+                        const favoritedBooks = booksData.filter(b => b.isBookmarked);
+                        html += renderMyLibraryGrid(favoritedBooks, "Your Library is Empty!", "Find books you love and tap the heart icon to save them here.");
                     }
                 } else {
                     // Book Zone Grid View
@@ -5219,7 +3459,4 @@
                     console.error('Initialization error:', e);
                 }
             });
-        </script>
-</body>
-
-</html>
+        

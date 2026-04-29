@@ -263,33 +263,33 @@ export default function Home() {
                                 onSeeAll={() => setView('my-library')}
                             />
 
-                            {/* Library + Media Section */}
-                            <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_300px] gap-6 items-stretch w-full mb-8">
-                                <div className="overflow-hidden flex">
-                                    <LibrarySection
-                                        userName={userName}
-                                        onStartLearning={startLearning}
-                                        onViewInfo={(book, origin) => {
-                                            setSelectedBook(book);
-                                            setModalOrigin(origin || 'recommendation');
-                                            if (origin === 'history') {
-                                                setLibraryTab({ zone: 'Book Zone', subTab: 'Reading History' });
-                                            } else {
-                                                setLibraryTab({ zone: 'Book Zone', subTab: 'All Books' });
-                                            }
-                                        }}
-                                        onSeeAll={() => {
+                            {/* Library Section (For you) - Full Width */}
+                            <div className="w-full">
+                                <LibrarySection
+                                    userName={userName}
+                                    onStartLearning={startLearning}
+                                    onViewInfo={(book, origin) => {
+                                        setSelectedBook(book);
+                                        setModalOrigin(origin || 'recommendation');
+                                        if (origin === 'history') {
+                                            setLibraryTab({ zone: 'Book Zone', subTab: 'Reading History' });
+                                        } else {
                                             setLibraryTab({ zone: 'Book Zone', subTab: 'All Books' });
-                                            setView('library');
-                                        }}
-                                    />
-                                </div>
-                                <div className="flex min-h-[300px]">
-                                    <MultiSection onNavigate={(tab) => {
-                                        setLibraryTab({ zone: 'Media Zone', subTab: tab });
+                                        }
+                                    }}
+                                    onSeeAll={() => {
+                                        setLibraryTab({ zone: 'Book Zone', subTab: 'All Books' });
                                         setView('library');
-                                    }} />
-                                </div>
+                                    }}
+                                />
+                            </div>
+
+                            {/* Media Box Section (Full Width Slider) */}
+                            <div className="w-full">
+                                <MultiSection onNavigate={(tab) => {
+                                    setLibraryTab({ zone: 'Media Zone', subTab: tab });
+                                    setView('library');
+                                }} />
                             </div>
                         </div>
                     </div>

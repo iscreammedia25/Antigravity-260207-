@@ -72,28 +72,23 @@
             scrollbar-width: none;
         }
 
-        .custom-scrollbar::-webkit-scrollbar {
-            height: 10px;
+        .hover-scrollbar {
+            /* Standard scrollbar space is reserved, but color is controlled below */
+        }
+        .hover-scrollbar::-webkit-scrollbar {
+            height: 10px; /* Slightly thicker for visibility */
             background: transparent;
         }
-
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background-color: #FFEDD5;
-            /* orange-100 */
+        .hover-scrollbar::-webkit-scrollbar-thumb {
+            background-color: rgba(148, 163, 184, 0); /* Start fully transparent */
             border-radius: 9999px;
             border: 3px solid transparent;
             background-clip: padding-box;
-            transition: background-color 0.3s;
+            transition: background-color 0.8s ease-in-out; /* Smooth fade out */
         }
-
-        .custom-scrollbar:hover::-webkit-scrollbar-thumb {
-            background-color: #FED7AA;
-            /* orange-200 */
-        }
-
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background-color: #FDBA74;
-            /* orange-300 */
+        .hover-scrollbar.sb-visible::-webkit-scrollbar-thumb {
+            background-color: rgba(148, 163, 184, 1); /* Appear slate-400 clearly */
+            transition: background-color 0.2s ease-in-out; /* Fast fade in */
         }
 
         .animate-twinkle {
@@ -646,110 +641,132 @@
                 <!-- Will be rendered by script -->
             </div>
 
-            <!-- Lower Section Container with Grid for History Mode -->
-            <div id="lowerSectionGrid"
-                class="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_300px] gap-6 items-stretch w-full mb-8">
-                <!-- Library Section -->
+            <!-- Lower Sections (Vertical Stack) -->
+            <div id="lowerSectionGrid" class="flex flex-col gap-12 w-full mb-8">
+                <!-- 1. For you Section (Full Width) -->
                 <div id="libraryContainer" class="overflow-hidden flex transition-all duration-300">
-                    <div class="card-bubble p-6 md:p-8 w-full h-full flex flex-col relative overflow-hidden">
-                        <div class="flex justify-between items-center mb-10">
-                            <h3 class="text-3xl font-black text-slate-700 flex items-center gap-4 font-jua">
-                                <span
-                                    class="w-12 h-12 bg-sky-100 rounded-2xl flex items-center justify-center text-sky-400 shadow-sm shadow-sky-100">
+                    <div class="card-bubble p-8 md:p-10 w-full h-full flex flex-col relative overflow-hidden bg-white shadow-sm border border-slate-100">
+                        <div class="flex justify-between items-center mb-8">
+                            <h3 class="text-3xl font-black text-slate-800 flex items-center gap-4 font-jua">
+                                <span class="w-12 h-12 bg-sky-100 rounded-2xl flex items-center justify-center text-sky-400 shadow-sm shadow-sky-100">
                                     <i data-lucide="sparkles" class="w-8 h-8 fill-current"></i>
                                 </span>
                                 For you
                             </h3>
                             <button onclick="openLibraryFullPage('Book Zone', 'For you');"
-                                class="px-5 py-2.5 bg-[#0f172a] text-[#fbbf24] font-black rounded-2xl text-xs flex items-center gap-2 hover:scale-105 active:scale-95 transition-all group font-fredoka uppercase tracking-widest shadow-lg shadow-black/10">
-                                SEE ALL <i data-lucide="chevron-right"
-                                    class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
+                                class="px-5 py-2.5 bg-[#0f172a] text-[#fbbf24] font-black rounded-full text-xs flex items-center gap-2 hover:scale-105 active:scale-95 transition-all group font-fredoka uppercase tracking-widest shadow-lg shadow-black/10">
+                                SEE ALL <i data-lucide="chevron-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
                             </button>
                         </div>
 
-                        <div class="relative group/scroll px-2 flex-grow flex flex-col justify-center min-h-[14rem]">
-                            <!-- Bookshelf Base -->
-                            <div
-                                class="absolute bottom-6 left-0 right-0 h-14 bg-slate-200/60 rounded-full mx-4 border-b-4 border-slate-300/40 shadow-inner">
-                            </div>
-
-                            <button id="scrollLeftBtn" onclick="scrollContainer(-400)"
-                                class="absolute left-0 top-[35%] -translate-y-1/2 -translate-x-6 w-12 h-12 bg-white text-sky-400 rounded-full shadow-lg border border-slate-100 flex items-center justify-center z-20 opacity-0 group-hover/scroll:opacity-100 transition-all hover:bg-sky-50 active:scale-90 invisible">
+                        <div class="relative group/scroll px-2 flex-grow flex flex-col justify-center min-h-[16rem]">
+                            <button onclick="scrollContainer('bookContainer', -400)"
+                                class="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-6 w-12 h-12 bg-white text-sky-400 rounded-full shadow-lg border border-slate-100 flex items-center justify-center z-20 opacity-0 group-hover/scroll:opacity-100 transition-all hover:bg-sky-50 active:scale-90">
                                 <i data-lucide="chevron-left" class="w-8 h-8"></i>
                             </button>
 
-                            <div id="bookContainer"
-                                class="flex gap-3 md:gap-4 overflow-x-auto pt-8 pb-8 scroll-smooth custom-scrollbar relative z-10 cursor-grab active:cursor-grabbing select-none h-full items-end">
+                            <div id="bookContainer" class="flex gap-6 overflow-x-auto pt-4 pb-8 hover-scrollbar scroll-smooth relative z-10 cursor-grab select-none h-full items-end">
                                 <!-- Books will be injected by script -->
                             </div>
 
-                            <button onclick="scrollContainer(400)"
-                                class="absolute right-0 top-[35%] -translate-y-1/2 translate-x-6 w-12 h-12 bg-white text-sky-400 rounded-full shadow-lg border border-slate-100 flex items-center justify-center z-20 opacity-0 group-hover/scroll:opacity-100 transition-all hover:bg-sky-50 active:scale-90">
+                            <button onclick="scrollContainer('bookContainer', 400)"
+                                class="absolute right-0 top-1/2 -translate-y-1/2 translate-x-6 w-12 h-12 bg-white text-sky-400 rounded-full shadow-lg border border-slate-100 flex items-center justify-center z-20 opacity-0 group-hover/scroll:opacity-100 transition-all hover:bg-sky-50 active:scale-90">
                                 <i data-lucide="chevron-right" class="w-8 h-8"></i>
                             </button>
                         </div>
                     </div>
                 </div>
 
-                <!-- Multi Section -->
-                <div id="multiSectionContainer" class="flex min-h-[300px] transition-all duration-300">
-                    <div
-                        class="card-bubble p-6 md:p-8 w-full h-full flex flex-col relative overflow-hidden bg-white shadow-sm border border-slate-100">
-                        <!-- Header -->
-                        <div class="flex justify-between items-center mb-6">
-                            <h3 class="text-2xl font-black text-slate-700 font-jua">
+                <!-- 2. Media Box Section (Full Width Slider) -->
+                <div id="multiSectionContainer" class="flex transition-all duration-300">
+                    <div class="card-bubble p-8 md:p-10 w-full h-full flex flex-col relative overflow-hidden bg-white shadow-sm border border-slate-100">
+                        <div class="flex justify-between items-center mb-8">
+                            <h3 class="text-3xl font-black text-slate-800 flex items-center gap-4 font-jua">
+                                <span class="w-12 h-12 bg-indigo-100 rounded-2xl flex items-center justify-center text-indigo-500 shadow-sm shadow-indigo-100">
+                                    <i data-lucide="video" class="w-8 h-8 fill-current"></i>
+                                </span>
                                 Media Box
                             </h3>
                             <button onclick="openLibraryFullPage('Media Zone', 'All Media');"
-                                class="px-5 py-2.5 bg-[#0f172a] text-[#fbbf24] font-black rounded-2xl text-xs flex items-center gap-2 hover:scale-105 active:scale-95 transition-all group font-fredoka uppercase tracking-widest shadow-lg shadow-black/10 text-center">
-                                SEE ALL <i data-lucide="chevron-right"
-                                    class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
+                                class="px-5 py-2.5 bg-[#0f172a] text-[#fbbf24] font-black rounded-full text-xs flex items-center gap-2 hover:scale-105 active:scale-95 transition-all group font-fredoka uppercase tracking-widest shadow-lg shadow-black/10">
+                                SEE ALL <i data-lucide="chevron-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
                             </button>
                         </div>
 
-                        <!-- List -->
-                        <div class="flex flex-col gap-4 flex-1 overflow-y-auto w-full pr-2 custom-scrollbar">
-                            <!-- Greeting Item -->
-                            <button onclick="openLibraryFullPage('Media Zone', 'Greeting');"
-                                class="w-full bg-slate-50 hover:bg-sky-50 transition-colors rounded-3xl p-4 flex items-center gap-4 text-left group border-2 border-transparent hover:border-sky-100 active:scale-[0.98]">
-                                <div
-                                    class="w-14 h-14 rounded-2xl bg-indigo-100 text-indigo-500 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform shadow-sm">
-                                    <i data-lucide="video" class="w-7 h-7 fill-current text-indigo-500"></i>
-                                </div>
-                                <div class="flex-1 min-w-0">
-                                    <p class="font-black text-slate-700 text-lg font-jua truncate">Greeting</p>
-                                    <p class="text-sm font-bold text-slate-400 truncate mt-0.5">Start your day</p>
-                                </div>
+                        <div class="relative group/media-scroll px-2">
+                            <button onclick="scrollContainer('mediaContainer', -400)"
+                                class="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-6 w-12 h-12 bg-white text-indigo-400 rounded-full shadow-lg border border-slate-100 flex items-center justify-center z-20 opacity-0 group-hover/media-scroll:opacity-100 transition-all hover:bg-indigo-50 active:scale-90">
+                                <i data-lucide="chevron-left" class="w-8 h-8"></i>
                             </button>
 
-                            <!-- Movie Item -->
-                            <button onclick="openLibraryFullPage('Media Zone', 'Movie Book');"
-                                class="w-full bg-slate-50 hover:bg-sky-50 transition-colors rounded-3xl p-4 flex items-center gap-4 text-left group border-2 border-transparent hover:border-sky-100 active:scale-[0.98]">
-                                <div
-                                    class="w-14 h-14 rounded-2xl bg-rose-100 text-rose-500 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform shadow-sm">
-                                    <i data-lucide="film" class="w-7 h-7 fill-current text-rose-500"></i>
+                            <div id="mediaContainer" class="flex gap-6 overflow-x-auto pb-4 hover-scrollbar scroll-smooth cursor-grab select-none">
+                                <!-- Media cards -->
+                                <div class="group/media shrink-0 w-[320px] cursor-pointer" onclick="openLibraryFullPage('Media Zone', 'Movie Book')">
+                                    <div class="relative aspect-video rounded-[28px] overflow-hidden mb-4 shadow-md group-hover/media:shadow-xl transition-all border-4 border-white">
+                                        <img src="./public/Image/Cover/CS0003(Hans in Luck).png" class="w-full h-full object-cover group-hover/media:scale-110 transition-transform duration-700">
+                                        <div class="absolute bottom-3 right-3 px-2 py-1 bg-black/60 rounded-lg text-[10px] font-black text-white">01:54</div>
+                                    </div>
+                                    <div class="space-y-1">
+                                        <div class="inline-flex items-center gap-1.5 px-3 py-1 bg-indigo-50 rounded-full">
+                                            <i data-lucide="film" class="w-3 h-3 text-indigo-500"></i>
+                                            <span class="text-[10px] font-black text-indigo-500 uppercase">Movie Book</span>
+                                        </div>
+                                        <h4 class="font-black text-slate-700 text-lg group-hover/media:text-indigo-600 transition-colors">Hans in Luck Movie</h4>
+                                    </div>
                                 </div>
-                                <div class="flex-1 min-w-0">
-                                    <p class="font-black text-slate-700 text-lg font-jua truncate">Movie</p>
-                                    <p class="text-sm font-bold text-slate-400 truncate mt-0.5">Fun animations</p>
-                                </div>
-                            </button>
 
-                            <!-- Audio Item -->
-                            <button onclick="openLibraryFullPage('Media Zone', 'Audio Book');"
-                                class="w-full bg-slate-50 hover:bg-sky-50 transition-colors rounded-3xl p-4 flex items-center gap-4 text-left group border-2 border-transparent hover:border-sky-100 active:scale-[0.98]">
-                                <div
-                                    class="w-14 h-14 rounded-2xl bg-amber-100 text-amber-500 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform shadow-sm">
-                                    <i data-lucide="headphones" class="w-7 h-7 fill-current text-amber-500"></i>
+                                <div class="group/media shrink-0 w-[320px] cursor-pointer" onclick="openLibraryFullPage('Media Zone', 'Audio Book')">
+                                    <div class="relative aspect-video rounded-[28px] overflow-hidden mb-4 shadow-md group-hover/media:shadow-xl transition-all border-4 border-white">
+                                        <img src="./public/Image/Cover/CS0003(Hans in Luck).png" class="w-full h-full object-cover group-hover/media:scale-110 transition-transform duration-700">
+                                        <div class="absolute bottom-3 right-3 px-2 py-1 bg-black/60 rounded-lg text-[10px] font-black text-white">05:30</div>
+                                    </div>
+                                    <div class="space-y-1">
+                                        <div class="inline-flex items-center gap-1.5 px-3 py-1 bg-rose-50 rounded-full">
+                                            <i data-lucide="headphones" class="w-3 h-3 text-rose-500"></i>
+                                            <span class="text-[10px] font-black text-rose-500 uppercase">Audio Book</span>
+                                        </div>
+                                        <h4 class="font-black text-slate-700 text-lg group-hover/media:text-rose-600 transition-colors">Hans in Luck Audio</h4>
+                                    </div>
                                 </div>
-                                <div class="flex-1 min-w-0">
-                                    <p class="font-black text-slate-700 text-lg font-jua truncate">Audio</p>
-                                    <p class="text-sm font-bold text-slate-400 truncate mt-0.5">Listen to stories</p>
+
+                                <div class="group/media shrink-0 w-[320px] cursor-pointer" onclick="openLibraryFullPage('Media Zone', 'Vocab')">
+                                    <div class="relative aspect-video rounded-[28px] overflow-hidden mb-4 shadow-md group-hover/media:shadow-xl transition-all border-4 border-white">
+                                        <img src="./public/Image/Cover/OG0050(The Rainbow Cloud in the Box).png" class="w-full h-full object-cover group-hover/media:scale-110 transition-transform duration-700">
+                                        <div class="absolute bottom-3 right-3 px-2 py-1 bg-black/60 rounded-lg text-[10px] font-black text-white">02:15</div>
+                                    </div>
+                                    <div class="space-y-1">
+                                        <div class="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-50 rounded-full">
+                                            <i data-lucide="video" class="w-3 h-3 text-amber-500"></i>
+                                            <span class="text-[10px] font-black text-amber-500 uppercase">Vocab</span>
+                                        </div>
+                                        <h4 class="font-black text-slate-700 text-lg group-hover/media:text-amber-600 transition-colors">Rainbow Cloud in the Box</h4>
+                                    </div>
                                 </div>
+
+                                <div class="group/media shrink-0 w-[320px] cursor-pointer" onclick="openLibraryFullPage('Media Zone', 'Movie Book')">
+                                    <div class="relative aspect-video rounded-[28px] overflow-hidden mb-4 shadow-md group-hover/media:shadow-xl transition-all border-4 border-white">
+                                        <img src="./public/Image/Cover/OG0021(Milo and the Lost Color).png" class="w-full h-full object-cover group-hover/media:scale-110 transition-transform duration-700">
+                                        <div class="absolute bottom-3 right-3 px-2 py-1 bg-black/60 rounded-lg text-[10px] font-black text-white">01:54</div>
+                                    </div>
+                                    <div class="space-y-1">
+                                        <div class="inline-flex items-center gap-1.5 px-3 py-1 bg-indigo-50 rounded-full">
+                                            <i data-lucide="film" class="w-3 h-3 text-indigo-500"></i>
+                                            <span class="text-[10px] font-black text-indigo-500 uppercase">Movie Book</span>
+                                        </div>
+                                        <h4 class="font-black text-slate-700 text-lg group-hover/media:text-indigo-600 transition-colors">Milo Movie</h4>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button onclick="scrollContainer('mediaContainer', 400)"
+                                class="absolute right-0 top-1/2 -translate-y-1/2 translate-x-6 w-12 h-12 bg-white text-indigo-400 rounded-full shadow-lg border border-slate-100 flex items-center justify-center z-20 opacity-0 group-hover/media-scroll:opacity-100 transition-all hover:bg-indigo-50 active:scale-90">
+                                <i data-lucide="chevron-right" class="w-8 h-8"></i>
                             </button>
                         </div>
                     </div>
-                </div> <!-- End of pt-28 (Main Content Area) -->
+                </div>
+            </div>
+ <!-- End of pt-28 (Main Content Area) -->
             </div> <!-- End of global-container -->
 
             <!-- Overlays stay outside to ensure they cover fixed elements -->
@@ -3229,12 +3246,63 @@
             const bookContainer = document.getElementById('bookContainer');
             const scrollLeftBtn = document.getElementById('scrollLeftBtn');
 
-            function scrollContainer(amount) {
-                bookContainer.scrollBy({
-                    left: amount,
-                    behavior: 'smooth'
+            function scrollContainer(containerId, amount) {
+                const container = document.getElementById(containerId);
+                if (container) {
+                    container.scrollBy({ left: amount, behavior: 'smooth' });
+                }
+            }
+
+            function initDragScroll(containerId) {
+                const slider = document.getElementById(containerId);
+                if (!slider) {
+                    console.log('Slider not found:', containerId);
+                    return;
+                }
+
+                // Force visibility for testing
+                slider.addEventListener('mouseenter', () => {
+                    slider.classList.add('sb-visible');
+                });
+                slider.addEventListener('mouseleave', () => {
+                    slider.classList.remove('sb-visible');
+                });
+
+                let isDown = false;
+                let startX;
+                let scrollLeft;
+
+                slider.addEventListener('mousedown', (e) => {
+                    isDown = true;
+                    slider.classList.add('active');
+                    slider.style.cursor = 'grabbing';
+                    startX = e.pageX - slider.offsetLeft;
+                    scrollLeft = slider.scrollLeft;
+                });
+                slider.addEventListener('mouseleave', () => {
+                    isDown = false;
+                    slider.classList.remove('active');
+                    slider.style.cursor = 'grab';
+                });
+                slider.addEventListener('mouseup', () => {
+                    isDown = false;
+                    slider.classList.remove('active');
+                    slider.style.cursor = 'grab';
+                });
+                slider.addEventListener('mousemove', (e) => {
+                    if (!isDown) return;
+                    e.preventDefault();
+                    const x = e.pageX - slider.offsetLeft;
+                    const walk = (x - startX) * 2;
+                    slider.scrollLeft = scrollLeft - walk;
                 });
             }
+
+            // Initialize drag scroll for both containers
+            document.addEventListener('DOMContentLoaded', () => {
+                initDragScroll('bookContainer');
+                initDragScroll('mediaContainer');
+            });
 
             bookContainer.addEventListener('scroll', () => {
                 if (bookContainer.scrollLeft > 10) {

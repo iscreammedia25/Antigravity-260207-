@@ -11,9 +11,10 @@ interface HeroSectionProps {
   onViewInfo: (book: Book, origin?: 'history' | 'recommendation') => void;
   isDemoMode?: boolean;
   isFlashing?: boolean;
+  onSeeAll?: () => void;
 }
 
-const HeroSection: React.FC<HeroSectionProps> = ({ userName, readingHistory, freshHeroBook, onStartLearning, onViewInfo, isDemoMode, isFlashing }) => {
+const HeroSection: React.FC<HeroSectionProps> = ({ userName, readingHistory, freshHeroBook, onStartLearning, onViewInfo, isDemoMode, isFlashing, onSeeAll }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   // Determine if we are in History mode based on the prop or content
@@ -63,7 +64,17 @@ const HeroSection: React.FC<HeroSectionProps> = ({ userName, readingHistory, fre
 
   return (
     <section className={`relative overflow-hidden card-bubble p-6 md:p-10 transition-all duration-700 border-none shadow-2xl flex items-center min-h-[380px] ${isHistoryMode ? 'bg-[#0f172a]' : 'bg-[#fbbf24]'}`} style={{ borderRadius: '48px' }}>
-      {/* Decorative Orbs (Removed for clean solid look as per user request) */}
+      {/* SEE ALL Button in Top Right */}
+      {onSeeAll && (
+        <div className="absolute top-8 right-8 z-20">
+          <button
+            onClick={onSeeAll}
+            className="px-5 py-2.5 bg-[#0f172a] text-[#fbbf24] font-black rounded-2xl text-xs flex items-center gap-2 hover:scale-105 active:scale-95 transition-all group font-fredoka uppercase tracking-widest shadow-xl border border-[#fbbf24]/20"
+          >
+            SEE ALL <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+          </button>
+        </div>
+      )}
 
       {/* Main Content Unit */}
       <div

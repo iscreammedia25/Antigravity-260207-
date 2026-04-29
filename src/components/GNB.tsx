@@ -1,13 +1,17 @@
 import React, { useState } from 'react';
-import { Bell, Menu, Heart, Star, ChevronRight } from 'lucide-react';
+import { Bell, Menu, Heart, Star, ChevronRight, BookOpen, Home } from 'lucide-react';
 
 interface GNBProps {
     userName: string;
-    onNavigate: (view: 'home' | 'my-library') => void;
+    onNavigate: (view: 'home' | 'my-library' | 'library') => void;
+    currentView: 'home' | 'my-library' | 'library' | 'word' | 'read';
 }
 
-export default function GNB({ userName, onNavigate }: GNBProps) {
+export default function GNB({ userName, onNavigate, currentView }: GNBProps) {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+    const isHome = currentView === 'home';
+    const isLibrary = currentView === 'library';
 
     return (
         <header className="fixed top-0 left-0 w-full h-24 bg-[#0f172a] border-b border-white/10 flex justify-center items-center px-4 z-[100] shadow-2xl">
@@ -62,10 +66,35 @@ export default function GNB({ userName, onNavigate }: GNBProps) {
                 </div>
 
                 {/* Right: Action Buttons */}
-                <div className="flex items-center gap-2 px-2 py-1 bg-white/5 rounded-2xl border border-white/10">
+                <div className="flex items-center gap-2 px-3 py-1 bg-white/5 rounded-2xl border border-white/10">
+                    {/* Home Button (Only if not on home) */}
+                    {!isHome && (
+                        <button 
+                            onClick={() => onNavigate('home')}
+                            className="w-10 h-10 rounded-xl flex items-center justify-center text-white/70 hover:text-white hover:bg-white/10 transition-all"
+                            title="Home"
+                        >
+                            <Home className="w-5 h-5" />
+                        </button>
+                    )}
+
+                    {/* Library Icon (Book Zone) - Hide if already in library (Book/Media Zone) */}
+                    {!isLibrary && (
+                        <button 
+                            onClick={() => onNavigate('library')}
+                            className="w-10 h-10 rounded-xl flex items-center justify-center text-white/70 hover:text-white hover:bg-white/10 transition-all"
+                            title="Go to Library"
+                        >
+                            <BookOpen className="w-5 h-5" />
+                        </button>
+                    )}
+
+                    {/* Notification Bell */}
                     <button className="w-10 h-10 rounded-xl flex items-center justify-center text-white/70 hover:text-white hover:bg-white/10 transition-all">
                         <Bell className="w-5 h-5" />
                     </button>
+
+                    {/* Menu Button */}
                     <button
                         onClick={() => setIsMenuOpen(!isMenuOpen)}
                         className="w-10 h-10 rounded-xl flex items-center justify-center text-white/70 hover:text-white hover:bg-white/10 transition-all"

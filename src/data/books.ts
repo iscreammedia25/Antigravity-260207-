@@ -9,6 +9,7 @@ export interface Book {
     keywords: string[];
     isBookmarked: boolean;
     videoUrl: string;
+    rating?: number;
 }
 
 export const BOOKS_DATA: Book[] = [
@@ -22,7 +23,8 @@ export const BOOKS_DATA: Book[] = [
         summary: 'Hans trades his way home, finding happiness in everything he gets along the way.',
         keywords: ['hans', 'luck', 'trade', 'happy'],
         isBookmarked: true,
-        videoUrl: '/Video/Book/Intro/CS0003(Hans in Luck)/CS0003(Hans in Luck)_Intro.mp4'
+        videoUrl: '/Video/Book/Intro/CS0003(Hans in Luck)/CS0003(Hans in Luck)_Intro.mp4',
+        rating: 5
     },
     {
         id: 'OG0021',
@@ -34,7 +36,8 @@ export const BOOKS_DATA: Book[] = [
         summary: 'Milo is a dog with a very big imagination. Every time he goes for a walk, he sees a world full of dragons.',
         keywords: ['dog', 'dream', 'adventure', 'wild'],
         isBookmarked: true,
-        videoUrl: '/Video/Book/Intro/OG0021(Milo and the Lost Color)/OG0021(Milo and the Lost Color)_Intro.mp4'
+        videoUrl: '/Video/Book/Intro/OG0021(Milo and the Lost Color)/OG0021(Milo and the Lost Color)_Intro.mp4',
+        rating: 5
     },
     {
         id: 'OG0046',
@@ -45,8 +48,9 @@ export const BOOKS_DATA: Book[] = [
         category: 'Adventure 🗺️',
         summary: "A magic stick that doesn't make a sound helps a quiet boy find his way through a mysterious forest.",
         keywords: ['magic', 'quiet', 'forest', 'path'],
-        isBookmarked: true,
-        videoUrl: '/Video/Book/Intro/OG0046(The Silent Stick)/OG0046(The Silent Stick)_Intro.mp4'
+        isBookmarked: false,
+        videoUrl: '/Video/Book/Intro/OG0046(The Silent Stick)/OG0046(The Silent Stick)_Intro.mp4',
+        rating: 5
     },
     {
         id: 'OG0050',
@@ -58,7 +62,8 @@ export const BOOKS_DATA: Book[] = [
         summary: 'A magical cloud that rains colors instead of water changes everything in the gray city of Grumbletown.',
         keywords: ['magic', 'cloud', 'color', 'happy'],
         isBookmarked: true,
-        videoUrl: '/Video/Book/Intro/OG0050(The Rainbow Cloud in the Box)/OG0050(The Rainbow Cloud in the Box)_Intro.mp4'
+        videoUrl: '/Video/Book/Intro/OG0050(The Rainbow Cloud in the Box)/OG0050(The Rainbow Cloud in the Box)_Intro.mp4',
+        rating: 4
     },
     {
         id: 'OG00XX_missing_planet',
@@ -93,7 +98,7 @@ export const BOOKS_DATA: Book[] = [
         category: 'Friendship 🤝',
         summary: 'A story about a rabbit and a turtle who discover that being different is what makes their friendship so special.',
         keywords: ['friends', 'together', 'help', 'game'],
-        isBookmarked: false,
+        isBookmarked: true,
         videoUrl: ''
     },
     {
@@ -105,7 +110,7 @@ export const BOOKS_DATA: Book[] = [
         category: 'Science 🔬',
         summary: 'Deep under the ground, a tiny seed waits silently for the perfect moment to grow into a magnificent tree.',
         keywords: ['grow', 'wait', 'ground', 'leaf'],
-        isBookmarked: false,
+        isBookmarked: true,
         videoUrl: ''
     },
     {
@@ -117,7 +122,7 @@ export const BOOKS_DATA: Book[] = [
         category: 'Nature 🌳',
         summary: 'When a strong wind breaks a branch, the forest animals work together to make it a new home for a bird family.',
         keywords: ['tree', 'wind', 'home', 'birds'],
-        isBookmarked: false,
+        isBookmarked: true,
         videoUrl: ''
     },
     {

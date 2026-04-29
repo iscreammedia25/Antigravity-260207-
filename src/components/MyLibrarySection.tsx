@@ -16,7 +16,7 @@ interface MyLibrarySectionProps {
     onStopReading: (bookId: string) => void;
 }
 
-type LibraryTab = 'reading' | 'completed' | 'favorites' | 'roadmap';
+type LibraryTab = 'reading' | 'completed' | 'wishlist' | 'roadmap';
 
 // --- Utility: Parse Lexile for sorting ---
 const getLexileValue = (lexile: string) => {
@@ -60,14 +60,13 @@ const MyLibrarySection: React.FC<MyLibrarySectionProps> = ({
             }));
     }, [readingHistory]);
 
-    const favoriteBooks = useMemo(() => {
-        return BOOKS_DATA.filter(b => b.isBookmarked);
-    }, []);
+    // Re-compute on every render so BOOKS_DATA mutations (isBookmarked toggle) are reflected
+    const favoriteBooks = BOOKS_DATA.filter(b => b.isBookmarked);
 
     const leftTabs = [
         { id: 'reading', label: 'In Progress', icon: Clock },
         { id: 'completed', label: 'Completed', icon: Trophy },
-        { id: 'favorites', label: 'Favorites', icon: Heart },
+        { id: 'wishlist', label: '❤️ Wishlist', icon: Heart },
     ];
 
     return (
@@ -147,12 +146,13 @@ const MyLibrarySection: React.FC<MyLibrarySectionProps> = ({
                         />
                     )}
 
-                    {/* 3. Favorites */}
-                    {activeTab === 'favorites' && (
-                        <FavoritesTab 
+                    {/* 3. Wishlist */}
+                    {activeTab === 'wishlist' && (
+                        <WishlistTab 
                             favoriteBooks={favoriteBooks} 
                             readingHistory={readingHistory} 
-                            onViewInfo={onViewInfo} 
+                            onViewInfo={onViewInfo}
+                            onNavigate={setActiveTab}
                         />
                     )}
 
@@ -252,110 +252,88 @@ const ActiveReadingTab: React.FC<{
     }
 
     return (
-        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            {/* Toolbar - Optimized */}
-            <div className="flex items-center justify-between bg-slate-50/50 p-4 rounded-3xl border border-slate-100 backdrop-blur-sm">
-                <div className="flex items-center gap-6">
-                    <button 
-                        onClick={handleToggleAll}
-                        className="flex items-center gap-3 group"
-                    >
-                        <div className={`w-6 h-6 rounded-lg border-2 transition-all flex items-center justify-center ${selectedIds.length === readingItems.length ? 'bg-sky-500 border-sky-500 shadow-lg shadow-sky-200' : 'bg-white border-slate-300 group-hover:border-sky-300'}`}>
-                            {selectedIds.length === readingItems.length && <CheckCircle2 className="w-4 h-4 text-white fill-current" />}
-                        </div>
-                        <span className="font-black text-slate-600 text-sm uppercase tracking-widest">Select All</span>
-                    </button>
-                    
-                    <div className="h-4 w-px bg-slate-200"></div>
-                    
-                    <p className="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">
-                        {selectedIds.length} <span className="text-slate-300">/</span> {readingItems.length} Books Selected
-                    </p>
-                </div>
-                
+        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            {/* Toolbar */}
+            <div className="flex items-center justify-between bg-slate-50/80 px-5 py-3.5 rounded-2xl border border-slate-100">
                 <div className="flex items-center gap-4">
-                    <button 
-                        onClick={handleBulkDelete}
-                        disabled={selectedIds.length === 0}
-                        className={`px-8 py-3 rounded-2xl font-black text-sm transition-all flex items-center gap-2 ${selectedIds.length > 0 ? 'bg-rose-500 text-white shadow-xl shadow-rose-200 hover:-translate-y-1' : 'bg-slate-100 text-slate-300 cursor-not-allowed'}`}
+                    <button
+                        onClick={handleToggleAll}
+                        className="flex items-center gap-2.5 group"
                     >
-                        <XCircle className="w-4 h-4" /> REMOVE SELECTED
+                        <div className={`w-5 h-5 rounded-md border-2 transition-all flex items-center justify-center ${selectedIds.length === readingItems.length && readingItems.length > 0 ? 'bg-sky-500 border-sky-500' : 'bg-white border-slate-300 group-hover:border-sky-300'}`}>
+                            {selectedIds.length === readingItems.length && readingItems.length > 0 && <CheckCircle2 className="w-3.5 h-3.5 text-white fill-current" />}
+                        </div>
+                        <span className="font-black text-slate-500 text-sm uppercase tracking-wider">Select All</span>
                     </button>
-                    <div className="flex items-center gap-2 text-[10px] font-black text-slate-300 uppercase tracking-widest px-4">
-                        <GripVertical className="w-3.5 h-3.5" /> Drag cards to reorder
-                    </div>
+                    <div className="h-4 w-px bg-slate-200" />
+                    <span className="text-xs font-bold text-slate-400">
+                        {selectedIds.length > 0 ? `${selectedIds.length} selected` : `${readingItems.length} books`}
+                    </span>
                 </div>
+
+                <button
+                    onClick={handleBulkDelete}
+                    disabled={selectedIds.length === 0}
+                    className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-black text-sm transition-all ${selectedIds.length > 0 ? 'bg-rose-500 text-white shadow-lg shadow-rose-100 hover:bg-rose-600 hover:-translate-y-0.5' : 'bg-slate-100 text-slate-300 cursor-not-allowed'}`}
+                >
+                    <XCircle className="w-4 h-4" />
+                    Remove{selectedIds.length > 0 ? ` (${selectedIds.length})` : ''}
+                </button>
             </div>
 
+            {/* Cards Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                 {readingItems.map(({ book, history }) => {
                     const isSelected = selectedIds.includes(book.id);
+                    const progressPercent = Math.round((history.completedPhases.length / 4) * 100);
+                    
                     return (
-                        <div 
-                            key={book.id} 
-                            className={`bg-white rounded-[40px] p-6 shadow-xl hover:shadow-2xl transition-all duration-500 border-4 relative group flex flex-col hover:-translate-y-2 ${isSelected ? 'border-sky-400 ring-4 ring-sky-50' : 'border-white'}`}
+                        <div
+                            key={book.id}
+                            className={`bg-white rounded-[40px] p-5 shadow-xl hover:shadow-2xl transition-all duration-500 border-4 relative group flex flex-col hover:-translate-y-2 ${isSelected ? 'border-sky-400 ring-4 ring-sky-50' : 'border-white'}`}
                         >
-                            {/* Drag Handle & Reorder Hint - Always Visible */}
-                            <div className="absolute top-1/2 -left-3 -translate-y-1/2 h-20 w-8 bg-white shadow-xl border border-slate-100 rounded-full flex flex-col items-center justify-center gap-1 z-40 cursor-grab active:cursor-grabbing hover:scale-110 transition-all border-l-4 border-l-sky-400">
-                                <GripVertical className="w-5 h-5 text-sky-400" />
-                                <span className="[writing-mode:vertical-lr] text-[8px] font-black text-sky-600 uppercase tracking-tighter">DRAG</span>
-                            </div>
-
-                            {/* Direct Delete Button */}
-                            <button 
-                                onClick={(e) => { e.stopPropagation(); onStopReading(book.id); }}
-                                className="absolute -top-3 -right-3 w-12 h-12 bg-white text-slate-200 hover:text-rose-500 hover:scale-110 transition-all z-30 shadow-2xl rounded-2xl flex items-center justify-center border-2 border-slate-50 group-hover:border-rose-100"
-                            >
-                                <XCircle className="w-7 h-7" />
-                            </button>
-
                             {/* Selection Checkbox */}
-                            <button 
-                                onClick={() => handleToggleSelect(book.id)}
-                                className={`absolute top-6 left-6 z-30 w-10 h-10 rounded-2xl flex items-center justify-center transition-all shadow-xl hover:scale-110 ${isSelected ? 'bg-sky-500 text-white border-4 border-white' : 'bg-white/80 backdrop-blur-md text-slate-300 border-2 border-slate-100 opacity-0 group-hover:opacity-100'}`}
+                            <button
+                                onClick={(e) => { e.stopPropagation(); handleToggleSelect(book.id); }}
+                                className={`absolute top-5 left-5 z-30 w-10 h-10 rounded-2xl flex items-center justify-center transition-all shadow-xl hover:scale-110 ${isSelected ? 'bg-sky-500 text-white border-4 border-white' : 'bg-white/80 backdrop-blur-md text-slate-300 border-2 border-slate-100 opacity-0 group-hover:opacity-100'}`}
                             >
                                 <CheckCircle2 className={`w-6 h-6 ${isSelected ? 'fill-current' : ''}`} />
                             </button>
 
-                            <div className="relative aspect-[3/4] rounded-[32px] overflow-hidden mb-6 shadow-md cursor-pointer" onClick={() => handleToggleSelect(book.id)}>
-                                <img 
-                                    src={book.src} 
-                                    alt={book.title} 
+                            {/* Top: Cover centered and larger */}
+                            <div 
+                                className="relative w-full aspect-[3/4] rounded-[24px] overflow-hidden mb-5 shadow-md cursor-pointer"
+                                onClick={() => handleToggleSelect(book.id)}
+                            >
+                                <img
+                                    src={book.src}
+                                    alt={book.title}
                                     className={`w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000 ${isSelected ? 'brightness-75' : ''}`}
                                 />
-                                <div className="absolute bottom-4 left-4 right-4 flex justify-center">
-                                    <div className="bg-white/90 backdrop-blur-md px-4 py-1.5 rounded-full shadow-xl border border-white/50 flex items-center gap-2">
-                                        <div className="w-2 h-2 rounded-full bg-sky-500 animate-pulse" />
-                                        <span className="text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">Learning Now</span>
-                                    </div>
-                                </div>
                             </div>
 
-                            <div className="flex-1 flex flex-col">
-                                <h4 className="text-2xl font-black text-slate-800 font-jua line-clamp-1 mb-2">
-                                    {book.title}
-                                </h4>
-                                
-                                <div className="flex justify-between items-center mb-4 text-xs font-black text-slate-400 uppercase tracking-widest px-1">
-                                    <span>Step {history.completedPhases.length + 1} <span className="text-slate-200 mx-2">|</span> {['Voca', 'Read', 'Talk', 'Quiz'][history.completedPhases.length] || 'Done'}</span>
-                                    <span className="text-sky-500">{(history.completedPhases.length / 4) * 100}%</span>
+                            {/* Middle: Progress Bar with Label */}
+                            <div className="space-y-2 mb-5 px-1">
+                                <div className="flex justify-between items-end">
+                                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Progress</span>
+                                    <span className="text-xs font-black text-sky-500">{progressPercent}%</span>
                                 </div>
-
-                                <div className="h-4 w-full bg-slate-100 rounded-full overflow-hidden mb-10 border border-slate-200/50">
-                                    <div 
-                                        className="h-full bg-gradient-to-r from-sky-400 to-sky-600 shadow-[0_0_10px_rgba(14,165,233,0.3)] transition-all duration-1000" 
-                                        style={{ width: `${(history.completedPhases.length / 4) * 100}%` }}
+                                <div className="h-2.5 w-full bg-slate-100 rounded-full overflow-hidden border border-slate-200/50 p-0.5">
+                                    <div
+                                        className="h-full rounded-full bg-gradient-to-r from-sky-400 to-sky-600 shadow-[0_0_10px_rgba(14,165,233,0.3)] transition-all duration-1000"
+                                        style={{ width: `${progressPercent}%` }}
                                     />
                                 </div>
-
-                                <button 
-                                    onClick={(e) => { e.stopPropagation(); handleContinue(book, history); }}
-                                    className="w-full py-5 bg-[#fbbf24] hover:bg-[#f59e0b] hover:shadow-2xl hover:shadow-amber-200 text-[#0f172a] rounded-[28px] font-black text-lg flex items-center justify-center gap-3 transform active:scale-95 transition-all mt-auto shadow-xl"
-                                >
-                                    <span className="uppercase tracking-tight">Continue Reading</span>
-                                    <Play className="w-6 h-6 fill-current" />
-                                </button>
                             </div>
+
+                            {/* Bottom: CTA Button (Hero Style - Yellow) */}
+                            <button
+                                onClick={(e) => { e.stopPropagation(); handleContinue(book, history); }}
+                                className="w-full py-4 bg-[#fbbf24] hover:bg-amber-400 text-[#0f172a] rounded-[24px] font-black text-xs uppercase tracking-[0.15em] flex items-center justify-center gap-2 transform active:scale-95 transition-all shadow-lg shadow-amber-500/20"
+                            >
+                                <Play className="w-4 h-4 fill-current" />
+                                <span>Continue Reading</span>
+                            </button>
                         </div>
                     );
                 })}
@@ -368,167 +346,319 @@ const FinishedTab: React.FC<{
     readingHistory: ReadingHistory[], 
     onViewInfo: (book: Book) => void 
 }> = ({ readingHistory, onViewInfo }) => {
-    const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
     
     const finishedItems = useMemo(() => {
-        let items = readingHistory
+        return readingHistory
             .filter(h => h.completedPhases.length === 4)
             .map(h => ({
                 book: BOOKS_DATA.find(b => b.id === h.bookId) || BOOKS_DATA[0],
                 history: h
             }));
-        if (showFavoritesOnly) {
-            items = items.filter(item => item.book.isBookmarked);
-        }
-        return items;
-    }, [readingHistory, showFavoritesOnly]);
+    }, [readingHistory]);
+
+    const hallOfFameItems = finishedItems.filter(item => item.book.isBookmarked && item.book.rating === 5);
 
     return (
-        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
-            <div className="flex justify-end mb-6">
-                <label className="flex items-center gap-3 cursor-pointer group bg-white px-4 py-2 rounded-2xl shadow-sm border-2 border-slate-100 hover:border-pink-200 transition-colors">
-                    <Heart className={`w-5 h-5 transition-colors ${showFavoritesOnly ? 'fill-pink-500 text-pink-500' : 'text-slate-300'}`} />
-                    <span className="font-bold text-slate-600">Favorites Only</span>
-                    <div className="relative ml-2">
-                        <input type="checkbox" className="sr-only peer" checked={showFavoritesOnly} onChange={() => setShowFavoritesOnly(!showFavoritesOnly)} />
-                        <div className="w-10 h-5 bg-slate-200 rounded-full peer peer-checked:bg-pink-500 transition-all"></div>
-                        <div className="absolute left-1 top-1 w-3 h-3 bg-white rounded-full peer-checked:translate-x-5 transition-transform"></div>
-                    </div>
-                </label>
-            </div>
+        <div className="space-y-16 animate-in fade-in slide-in-from-bottom-4">
             
-            {finishedItems.length === 0 ? (
-                <EmptyState icon={showFavoritesOnly ? Heart : Trophy} message={showFavoritesOnly ? "No favorite completed books!" : "No trophies collected yet!"} />
-            ) : (
-                <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-6">
-                    {finishedItems.map(({ book }) => (
-                        <div key={book.id} onClick={() => onViewInfo(book)} className="relative group cursor-pointer aspect-[3/4] rounded-[20px] overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-300 border-[3px] border-slate-100 hover:border-indigo-100 bg-slate-50 w-full">
-                            <img src={book.src} alt={book.title} className="w-full h-full object-cover pointer-events-none" />
-                            <div className="absolute inset-0 bg-slate-900/10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
-                            
-                            <button className="absolute bottom-2 right-2 w-9 h-9 bg-white backdrop-blur-sm rounded-full flex items-center justify-center shadow-md hover:scale-110 active:scale-95 transition-all z-20 group/btn border-2 border-slate-50" onClick={(e) => { e.stopPropagation(); /* React version does not have global toggleHeart yet, would need parent prop. Placeholder: */ console.log('toggle heart'); }}>
-                                <Heart className={`w-4 h-4 transition-colors ${book.isBookmarked ? 'fill-pink-500 text-pink-500' : 'text-slate-300 group-hover:text-pink-400'}`} />
-                            </button>
+            {/* Top Section: Hall of Fame (Carousel) */}
+            {hallOfFameItems.length > 0 && (
+                <div className="space-y-6 bg-amber-50 p-8 rounded-[40px] border-4 border-amber-100 shadow-sm relative overflow-hidden">
+                    <div className="absolute -top-10 -right-10 w-40 h-40 bg-amber-200/50 rounded-full blur-3xl pointer-events-none"></div>
+                    {/* Header: title + criteria badges */}
+                    <div className="flex items-center justify-between relative z-10">
+                        <div className="flex items-center gap-3">
+                            <div className="w-12 h-12 bg-amber-400 rounded-2xl flex items-center justify-center shadow-lg shadow-amber-200">
+                                <Trophy className="w-6 h-6 text-white" />
+                            </div>
+                            <h3 className="text-3xl font-black text-amber-900 font-jua tracking-tight">Hall of Fame</h3>
                         </div>
-                    ))}
+                        {/* Criteria badges: heart icon only, star×5, completed */}
+                        <div className="flex items-center gap-2">
+                            <div className="flex items-center justify-center w-9 h-9 bg-white/80 backdrop-blur-sm rounded-full border-2 border-rose-200 shadow-sm">
+                                <Heart className="w-4 h-4 text-rose-500 fill-rose-500" />
+                            </div>
+                            <span className="text-slate-300 font-black">+</span>
+                            <div className="flex items-center gap-1 px-3 py-1.5 bg-white/80 backdrop-blur-sm rounded-full border-2 border-amber-300 shadow-sm">
+                                <Star className="w-4 h-4 text-amber-500 fill-amber-400" />
+                                <span className="text-xs font-black text-amber-700">×5</span>
+                            </div>
+                            <span className="text-slate-300 font-black">+</span>
+                            {/* Completed badge — same green pill style as the cover badge */}
+                            <div className="flex items-center gap-1 px-3 py-1.5 bg-emerald-500 rounded-full shadow-sm">
+                                <CheckCircle2 className="w-4 h-4 text-white" />
+                                <span className="text-xs font-black text-white">Completed</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div className="flex gap-6 overflow-x-auto pb-6 custom-scrollbar -mx-4 px-4 cursor-grab active:cursor-grabbing select-none relative z-10">
+                        {hallOfFameItems.map(({ book }) => (
+                            <div key={book.id} onClick={() => onViewInfo(book)} className="relative group cursor-pointer w-40 md:w-48 shrink-0 flex flex-col items-center">
+                                <div className="aspect-[3/4] w-full rounded-[24px] overflow-hidden shadow-xl hover:shadow-2xl hover:-translate-y-3 transition-all duration-300 border-4 border-amber-200 hover:border-amber-400 bg-white relative">
+                                    <img src={book.src} alt={book.title} className="w-full h-full object-cover pointer-events-none" />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
+                                    {/* Top-right: Completed badge */}
+                                    <div className="absolute top-2.5 right-2.5 flex items-center gap-1 px-2 py-1 bg-emerald-500 rounded-full shadow-lg">
+                                        <CheckCircle2 className="w-3 h-3 text-white" />
+                                        <span className="text-[10px] font-black text-white leading-none">Completed</span>
+                                    </div>
+                                    {/* Bottom row: ⭐×5 + heart */}
+                                    <div className="absolute bottom-2 right-2 flex items-center gap-1.5">
+                                        <div className="flex items-center gap-0.5 bg-white/95 backdrop-blur-md px-1.5 py-1 rounded-lg shadow-sm border border-amber-100">
+                                            <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
+                                            <span className="font-black text-amber-700 text-[10px] leading-none">×5</span>
+                                        </div>
+                                        <button className="w-8 h-8 bg-white/95 backdrop-blur-md rounded-full flex items-center justify-center shadow-sm border border-rose-100 hover:scale-110 active:scale-95 transition-all z-20" onClick={(e) => e.stopPropagation()}>
+                                            <Heart className="w-3.5 h-3.5 text-rose-500 fill-rose-500" />
+                                        </button>
+                                    </div>
+                                </div>
+                                <p className="mt-2 text-xs font-bold text-slate-600 text-center line-clamp-2 leading-snug max-w-[140px]">{book.title}</p>
+                            </div>
+                        ))}
+                    </div>
                 </div>
             )}
+
+            {/* Bottom Section: All Completed Books (Grid) */}
+            <div className="space-y-6">
+                <h3 className="text-2xl font-black text-slate-800 font-jua">All Completed Books</h3>
+                
+                {finishedItems.length === 0 ? (
+                    <EmptyState icon={Trophy} message={"No trophies collected yet!"} />
+                ) : (
+                    <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+                        {finishedItems.map(({ book }) => (
+                            <div key={book.id} onClick={() => onViewInfo(book)} className="relative group cursor-pointer aspect-[3/4] rounded-[20px] overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-300 border-[3px] border-slate-100 hover:border-indigo-100 bg-slate-50 w-full">
+                                <img src={book.src} alt={book.title} className="w-full h-full object-cover pointer-events-none" />
+                                <div className="absolute inset-0 bg-slate-900/10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
+                                
+                                {/* Top-right: Completed green badge */}
+                                <div className="absolute top-2 right-2 flex items-center gap-0.5 px-1.5 py-0.5 bg-emerald-500 rounded-full shadow-md">
+                                    <CheckCircle2 className="w-2.5 h-2.5 text-white" />
+                                    <span className="text-[8px] font-black text-white leading-none">Completed</span>
+                                </div>
+                                
+                                {/* Bottom-center: ⭐×5 badge (same style as Hall of Fame) */}
+                                {book.rating === 5 && (
+                                    <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-0.5 bg-white/95 backdrop-blur-sm px-1.5 py-0.5 rounded-lg shadow-sm border border-amber-100">
+                                        <Star className="w-2.5 h-2.5 text-amber-400 fill-amber-400" />
+                                        <span className="font-black text-amber-700 text-[8px] leading-none">×5</span>
+                                    </div>
+                                )}
+                                
+                                {/* Bottom-right: heart toggle */}
+                                <button className="absolute bottom-2 right-2 w-8 h-8 bg-white backdrop-blur-sm rounded-full flex items-center justify-center shadow-md hover:scale-110 active:scale-95 transition-all z-20 border-2 border-slate-50 group/btn" onClick={(e) => { e.stopPropagation(); }}>
+                                    <Heart className={`w-3.5 h-3.5 transition-colors ${book.isBookmarked ? 'fill-rose-500 text-rose-500' : 'text-slate-300 group-hover/btn:text-rose-400'}`} />
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
         </div>
     );
 };
 
-const FavoritesTab: React.FC<{
+const WishlistTab: React.FC<{
     favoriteBooks: Book[],
     readingHistory: ReadingHistory[],
-    onViewInfo: (book: Book) => void
+    onViewInfo: (book: Book) => void,
+    onNavigate: (tab: LibraryTab) => void
 }> = ({ favoriteBooks, readingHistory, onViewInfo }) => {
-    const [subCategory, setSubCategory] = useState<'All' | 'SavedForLater' | 'HallOfFame'>('All');
+
+    type WishlistSubView = 'overview' | 'reading-now-all' | 'saved-for-later-all';
+    const [subView, setSubView] = React.useState<WishlistSubView>('overview');
 
     const completedIds = useMemo(() => {
         return readingHistory.filter(h => h.completedPhases.length === 4).map(h => h.bookId);
     }, [readingHistory]);
 
-    const savedForLater = favoriteBooks.filter(b => !completedIds.includes(b.id));
-    const hallOfFame = favoriteBooks.filter(b => completedIds.includes(b.id));
+    const inProgressIds = useMemo(() => {
+        return readingHistory.filter(h => h.isActive !== false && h.completedPhases.length < 4).map(h => h.bookId);
+    }, [readingHistory]);
 
-    const renderCoverGallery = (books: Book[], isCarousel = false) => {
-        if (books.length === 0) return null;
-        
-        const wrapperClass = isCarousel 
-            ? "flex gap-6 overflow-x-auto pb-6 -mx-4 px-4 cursor-grab active:cursor-grabbing select-none custom-scrollbar" 
-            : "grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-6 animate-in fade-in slide-in-from-bottom-4";
+    const currentlyLoving = favoriteBooks.filter(b => inProgressIds.includes(b.id));
+    const savedForLater = favoriteBooks.filter(b => !completedIds.includes(b.id) && !inProgressIds.includes(b.id));
 
+    // Debug
+    console.log('[WishlistTab] favoriteBooks:', favoriteBooks.map(b => b.id));
+    console.log('[WishlistTab] inProgressIds:', inProgressIds);
+    console.log('[WishlistTab] completedIds:', completedIds);
+    console.log('[WishlistTab] currentlyLoving:', currentlyLoving.map(b => b.id));
+    console.log('[WishlistTab] savedForLater:', savedForLater.map(b => b.id));
+
+    /** 공통 북카드 렌더러 */
+    const BookCard = ({ book, hoverBorder = 'hover:border-pink-200' }: { book: Book, hoverBorder?: string }) => (
+        <div
+            onClick={() => onViewInfo(book)}
+            className={`relative group cursor-pointer aspect-[3/4] rounded-[20px] overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-300 border-[3px] border-slate-100 ${hoverBorder} bg-slate-50 w-full`}
+        >
+            <img src={book.src} alt={book.title} className="w-full h-full object-cover pointer-events-none" />
+            <div className="absolute inset-0 bg-slate-900/10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+            <button
+                className="absolute bottom-2 right-2 w-9 h-9 bg-white backdrop-blur-sm rounded-full flex items-center justify-center shadow-md hover:scale-110 active:scale-95 transition-all z-20 group/btn border-2 border-slate-50"
+                onClick={(e) => e.stopPropagation()}
+            >
+                <Heart className={`w-4 h-4 transition-colors ${book.isBookmarked ? 'fill-rose-500 text-rose-500' : 'text-slate-300 group-hover/btn:text-rose-400'}`} />
+            </button>
+        </div>
+    );
+
+    /** 서브페이지 공통 헤더 */
+    const SubPageHeader = ({ icon, iconBg, title, count, borderHover }: {
+        icon: React.ReactNode, iconBg: string, title: string, count: number, borderHover: string
+    }) => (
+        <div className="flex items-center gap-4 mb-8">
+            <button
+                onClick={() => setSubView('overview')}
+                className={`w-11 h-11 bg-white rounded-2xl flex items-center justify-center shadow-md border-2 border-slate-100 ${borderHover} hover:scale-105 active:scale-95 transition-all`}
+            >
+                <ChevronLeft className="w-6 h-6 text-slate-600" />
+            </button>
+            <div className="flex items-center gap-3">
+                <div className={`w-10 h-10 ${iconBg} rounded-xl flex items-center justify-center shadow-sm`}>
+                    {icon}
+                </div>
+                <div>
+                    <h3 className="text-3xl font-black text-slate-800 font-jua uppercase tracking-tight">{title}</h3>
+                    <p className="text-sm font-bold text-slate-400 mt-0.5">{count} books</p>
+                </div>
+            </div>
+        </div>
+    );
+
+    // ── Sub-page: Reading Now All ──────────────────────────────────────
+    if (subView === 'reading-now-all') {
         return (
-            <div className={wrapperClass}>
-                {books.map(book => (
-                    <div key={book.id} onClick={() => onViewInfo(book)} className={`relative group cursor-pointer aspect-[3/4] rounded-[20px] overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-300 border-[3px] border-slate-100 hover:border-indigo-100 bg-slate-50 ${isCarousel ? 'w-32 md:w-40 shrink-0' : 'w-full'}`}>
-                        <img src={book.src} alt={book.title} className="w-full h-full object-cover pointer-events-none" />
-                        <div className="absolute inset-0 bg-slate-900/10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
-                        
-                        <button className="absolute bottom-2 right-2 w-9 h-9 bg-white backdrop-blur-sm rounded-full flex items-center justify-center shadow-md hover:scale-110 active:scale-95 transition-all z-20 group/btn border-2 border-slate-50" onClick={(e) => { e.stopPropagation(); console.log('toggle heart'); }}>
-                            <Heart className={`w-4 h-4 transition-colors ${book.isBookmarked ? 'fill-pink-500 text-pink-500' : 'text-slate-300 group-hover:text-pink-400'}`} />
-                        </button>
-                    </div>
-                ))}
+            <div className="animate-in fade-in slide-in-from-bottom-4">
+                <SubPageHeader
+                    icon={<Heart className="w-5 h-5 text-pink-500 fill-pink-500" />}
+                    iconBg="bg-pink-100"
+                    title="📖 Reading Now"
+                    count={currentlyLoving.length}
+                    borderHover="hover:border-pink-200"
+                />
+                {currentlyLoving.length === 0
+                    ? <EmptyState icon={Heart} message="No books here yet!" />
+                    : <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-6">
+                        {currentlyLoving.map(book => <BookCard key={book.id} book={book} hoverBorder="hover:border-pink-200" />)}
+                      </div>
+                }
             </div>
         );
-    };
+    }
 
-    if (favoriteBooks.length === 0) {
+    // ── Sub-page: Saved for Later All ─────────────────────────────────
+    if (subView === 'saved-for-later-all') {
+        return (
+            <div className="animate-in fade-in slide-in-from-bottom-4">
+                <SubPageHeader
+                    icon={<BookOpen className="w-5 h-5 text-sky-500" />}
+                    iconBg="bg-sky-100"
+                    title="📌 Saved for Later"
+                    count={savedForLater.length}
+                    borderHover="hover:border-sky-200"
+                />
+                {savedForLater.length === 0
+                    ? <EmptyState icon={BookOpen} message="Nothing saved yet!" />
+                    : <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-6">
+                        {savedForLater.map(book => <BookCard key={book.id} book={book} hoverBorder="hover:border-sky-200" />)}
+                      </div>
+                }
+            </div>
+        );
+    }
+
+    // ── Overview ───────────────────────────────────────────────────────
+    if (currentlyLoving.length === 0 && savedForLater.length === 0) {
         return (
             <div className="flex flex-col items-center justify-center py-32 animate-in fade-in duration-500">
                 <div className="w-32 h-32 bg-pink-50 rounded-full flex items-center justify-center mb-6 border-8 border-white shadow-lg">
                     <Heart className="w-12 h-12 text-pink-300" />
                 </div>
-                <h2 className="text-3xl font-black text-slate-700 font-jua mb-4">No Favorites Yet</h2>
+                <h2 className="text-3xl font-black text-slate-700 font-jua mb-4">No Wishlist Yet</h2>
                 <p className="text-slate-500 font-bold text-lg">Find books you love and tap the heart icon to save them here!</p>
             </div>
         );
     }
 
-    if (subCategory === 'SavedForLater') {
-        return (
-            <div className="space-y-6 animate-in fade-in slide-in-from-right-8">
-                <div className="flex items-center gap-4 mb-8">
-                    <button onClick={() => setSubCategory('All')} className="w-12 h-12 flex items-center justify-center bg-white rounded-2xl shadow-sm border-2 border-slate-100 hover:border-slate-300 hover:bg-slate-50 transition-all group active:scale-95">
-                        <ChevronLeft className="w-6 h-6 text-slate-400 group-hover:text-slate-600 transition-colors" />
-                    </button>
-                    <div>
-                        <h3 className="text-3xl font-black text-slate-800 font-jua">Saved for Later</h3>
-                    </div>
-                </div>
-                {renderCoverGallery(savedForLater, false)}
-            </div>
-        );
-    }
-
-    if (subCategory === 'HallOfFame') {
-        return (
-            <div className="space-y-6 animate-in fade-in slide-in-from-right-8">
-                <div className="flex items-center gap-4 mb-8">
-                    <button onClick={() => setSubCategory('All')} className="w-12 h-12 flex items-center justify-center bg-white rounded-2xl shadow-sm border-2 border-slate-100 hover:border-slate-300 hover:bg-slate-50 transition-all group active:scale-95">
-                        <ChevronLeft className="w-6 h-6 text-slate-400 group-hover:text-slate-600 transition-colors" />
-                    </button>
-                    <div>
-                        <h3 className="text-3xl font-black text-amber-900 font-jua">Hall of Fame</h3>
-                    </div>
-                </div>
-                {renderCoverGallery(hallOfFame, false)}
-            </div>
-        );
-    }
-
     return (
-        <div className="space-y-16">
-            {savedForLater.length > 0 && (
+        <div className="space-y-16 animate-in fade-in slide-in-from-bottom-4">
+
+            {/* Reading Now carousel */}
+            {currentlyLoving.length > 0 && (
                 <div className="space-y-6">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-sky-100 rounded-xl flex items-center justify-center">
-                                <BookOpen className="w-5 h-5 text-sky-500" />
+                            <div className="w-10 h-10 bg-pink-100 rounded-xl flex items-center justify-center shadow-sm">
+                                <Heart className="w-5 h-5 text-pink-500 fill-pink-500" />
                             </div>
-                            <h3 className="text-3xl font-black text-slate-800 font-jua uppercase tracking-tight">Saved for Later</h3>
+                            <h3 className="text-3xl font-black text-slate-800 font-jua uppercase tracking-tight">📖 Reading Now</h3>
                         </div>
-                        <button onClick={() => setSubCategory('SavedForLater')} className="text-[#fbbf24] font-black px-5 py-2.5 bg-[#0f172a] rounded-xl hover:scale-105 active:scale-95 transition-all text-sm uppercase tracking-wider shadow-lg shadow-slate-900/20">See All</button>
+                        <button
+                            onClick={() => setSubView('reading-now-all')}
+                            className="px-5 py-2 bg-slate-900 text-[#fbbf24] rounded-2xl font-black text-sm uppercase tracking-wider hover:scale-105 active:scale-95 transition-all shadow-lg"
+                        >
+                            See All
+                        </button>
                     </div>
-                    {renderCoverGallery(savedForLater, true)}
+                    <div className="group/carousel">
+                        <div className="flex gap-6 overflow-x-auto pb-3 -mx-4 px-4 cursor-grab active:cursor-grabbing select-none [scrollbar-width:none] group-hover/carousel:[scrollbar-width:thin] [scrollbar-color:#cbd5e1_transparent]">
+                            {currentlyLoving.map(book => (
+                                <div key={book.id} onClick={() => onViewInfo(book)} className="relative group cursor-pointer w-32 md:w-40 shrink-0 aspect-[3/4] rounded-[20px] overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-300 border-[3px] border-slate-100 hover:border-pink-200 bg-slate-50">
+                                    <img src={book.src} alt={book.title} className="w-full h-full object-cover pointer-events-none" />
+                                    <div className="absolute inset-0 bg-slate-900/10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+                                    <button className="absolute bottom-2 right-2 w-8 h-8 bg-white/95 backdrop-blur-sm rounded-full flex items-center justify-center shadow-md hover:scale-110 active:scale-95 transition-all z-20 border-2 border-slate-50" onClick={(e) => e.stopPropagation()}>
+                                        <Heart className={`w-3.5 h-3.5 transition-colors ${book.isBookmarked ? 'fill-rose-500 text-rose-500' : 'text-slate-300'}`} />
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
                 </div>
             )}
-            
-            {hallOfFame.length > 0 && (
-                <div className="space-y-6">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-amber-200 rounded-xl flex items-center justify-center shadow-inner">
-                                <Trophy className="w-5 h-5 text-amber-600" />
-                            </div>
-                            <h3 className="text-3xl font-black text-amber-900 font-jua uppercase tracking-tight">Hall of Fame</h3>
+
+            {/* Saved for Later carousel - always render */}
+            <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-sky-100 rounded-xl flex items-center justify-center shadow-sm">
+                            <BookOpen className="w-5 h-5 text-sky-500" />
                         </div>
-                        <button onClick={() => setSubCategory('HallOfFame')} className="text-[#fbbf24] font-black px-5 py-2.5 bg-[#0f172a] rounded-xl hover:scale-105 active:scale-95 transition-all text-sm uppercase tracking-wider shadow-lg shadow-slate-900/20">See All</button>
+                        <h3 className="text-3xl font-black text-slate-800 font-jua uppercase tracking-tight">📌 Saved for Later</h3>
                     </div>
-                    {renderCoverGallery(hallOfFame, true)}
+                    {savedForLater.length > 0 && (
+                        <button
+                            onClick={() => setSubView('saved-for-later-all')}
+                            className="px-5 py-2 bg-slate-900 text-[#fbbf24] rounded-2xl font-black text-sm uppercase tracking-wider hover:scale-105 active:scale-95 transition-all shadow-lg"
+                        >
+                            See All
+                        </button>
+                    )}
                 </div>
-            )}
+                {savedForLater.length === 0 ? (
+                    <div className="flex items-center gap-3 py-8 px-4 bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200">
+                        <BookOpen className="w-8 h-8 text-slate-300" />
+                        <p className="text-slate-400 font-bold">Heart a book you haven't started yet to save it here.</p>
+                    </div>
+                ) : (
+                    <div className="group/carousel">
+                        <div className="flex gap-6 overflow-x-auto pb-3 -mx-4 px-4 cursor-grab active:cursor-grabbing select-none [scrollbar-width:none] group-hover/carousel:[scrollbar-width:thin] [scrollbar-color:#cbd5e1_transparent]">
+                            {savedForLater.map(book => (
+                                <div key={book.id} onClick={() => onViewInfo(book)} className="relative group cursor-pointer w-32 md:w-40 shrink-0 aspect-[3/4] rounded-[20px] overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-300 border-[3px] border-slate-100 hover:border-sky-200 bg-slate-50">
+                                    <img src={book.src} alt={book.title} className="w-full h-full object-cover pointer-events-none" />
+                                    <div className="absolute inset-0 bg-slate-900/10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+                                    <button className="absolute bottom-2 right-2 w-8 h-8 bg-white/95 backdrop-blur-sm rounded-full flex items-center justify-center shadow-md hover:scale-110 active:scale-95 transition-all z-20 border-2 border-slate-50" onClick={(e) => e.stopPropagation()}>
+                                        <Heart className={`w-3.5 h-3.5 transition-colors ${book.isBookmarked ? 'fill-rose-500 text-rose-500' : 'text-slate-300'}`} />
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+            </div>
         </div>
     );
 };

@@ -223,8 +223,17 @@ export default function Home() {
     return (
         <div className="min-h-screen">
             {/* Global GNB for Home and My Library */}
-            {(view === 'home' || view === 'my-library') && (
-                <GNB userName={userName} onNavigate={(v) => setView(v)} />
+            {view !== 'library' && view !== 'word' && view !== 'read' && (
+                <GNB 
+                    userName={userName} 
+                    currentView={view}
+                    onNavigate={(v) => {
+                        if (v === 'library') {
+                            setLibraryTab({ zone: 'Book Zone', subTab: 'For you' });
+                        }
+                        setView(v);
+                    }} 
+                />
             )}
 
             {/* View Switching Logic */}
@@ -251,6 +260,7 @@ export default function Home() {
                                 }}
                                 isDemoMode={isDemoMode}
                                 isFlashing={isFlashing}
+                                onSeeAll={() => setView('my-library')}
                             />
 
                             {/* Library + Media Section */}

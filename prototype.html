@@ -1762,7 +1762,11 @@
 
             function renderBooks() {
                 const container = document.getElementById('bookContainer');
-                container.innerHTML = booksData.map(book => `
+                container.innerHTML = booksData.filter((book, i) => {
+                    const match = book.id.match(/\d+/);
+                    const num = match ? parseInt(match[0], 10) : 0;
+                    return (num + i) % 3 === 0;
+                }).map(book => `
                 <div key="${book.id}" onclick="openModal('${book.id}', 'recommendation')" class="w-36 md:w-40 flex-shrink-0 group cursor-pointer space-y-3 relative select-none">
                     <div class="aspect-[3/4] bg-slate-50 rounded-[32px] shadow-sm border-[4px] border-white group-hover:border-sky-300 transition-all group-hover:-translate-y-3 group-hover:shadow-2xl group-hover:shadow-sky-100 overflow-hidden relative">
                         <img src="${book.src}" class="w-full h-full object-cover pointer-events-none">
@@ -4895,14 +4899,20 @@
                 }
 
                 return displayBooks.map((book, i) => {
-                    const baseId = book.id.split('__')[0];
+                    const parts = book.id.split('__');
+                    const stableIdx = parseInt(parts[parts.length - 1]);
+                    const baseId = parts[0];
                     const originalBook = booksData.find(b => b.id === baseId) || book;
                     const isFavorited = originalBook.isBookmarked;
 
                     // Determine random state for mockup (0=none, 1=in-progress, 2=completed)
                     const match = baseId.match(/\d+/);
                     const num = match ? parseInt(match[0], 10) : 0;
-                    const randomState = (num + i) % 3;
+                    const randomState = (num + stableIdx) % 3;
+                    
+                    // Filter out in-progress/completed for For you tab
+                    if (currentActiveSubTab === 'For you' && randomState !== 0) return null;
+
                     const isCompleted = randomState === 2;
                     const isInProgress = randomState === 1;
 
@@ -4940,7 +4950,7 @@
                                 ${book.title}
                             </h4>
                         </div>
-                    `}).join('');
+                    `}).filter(html => html !== null).join('');
             }
 
 

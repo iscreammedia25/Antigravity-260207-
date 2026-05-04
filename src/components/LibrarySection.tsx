@@ -276,7 +276,11 @@ const LibrarySection: React.FC<LibrarySectionProps> = ({ userName, onViewInfo, o
                     <PicksCarouselView onViewInfo={onViewInfo} />
                 ) : (
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-8 pb-32">
-                        {BOOKS_DATA.map(book => (
+                        {BOOKS_DATA.filter((book, i) => {
+                            const match = book.id.match(/\d+/);
+                            const num = match ? parseInt(match[0], 10) : 0;
+                            return (num + i) % 3 === 0;
+                        }).map(book => (
                             <div key={book.id} onClick={() => onViewInfo(book, 'recommendation')} className="group cursor-pointer flex flex-col items-center">
                                 <div className="w-full aspect-[3/4] bg-white/10 rounded-[40px] overflow-hidden relative group-hover:scale-105 transition-all duration-300 border-4 border-transparent group-hover:border-[#fbbf24]/50 shadow-2xl">
                                     <img src={book.src} alt={book.title} className="w-full h-full object-cover" />
@@ -892,13 +896,15 @@ const OriginalLibrarySlider: React.FC<Pick<LibrarySectionProps, 'userName' | 'on
                     onMouseMove={handleMouseMove}
                     className={`flex gap-3 md:gap-4 overflow-x-auto pt-8 pb-8 scroll-smooth custom-scrollbar relative z-10 cursor-grab active:cursor-grabbing ${isDragging ? 'scroll-auto' : 'scroll-smooth'}`}
                 >
-                    {books.map((book, i) => {
-                        // Determine random state for mockup (0=none, 1=in-progress, 2=completed)
+                    {books.filter((book, i) => {
                         const match = book.id.match(/\d+/);
                         const num = match ? parseInt(match[0], 10) : 0;
-                        const randomState = (num + i) % 3;
-                        const isCompleted = randomState === 2;
-                        const isInProgress = randomState === 1;
+                        return (num + i) % 3 === 0;
+                    }).map((book) => {
+                        // All books here are filtered to be unread for "For you" slider
+                        const randomState = 0;
+                        const isCompleted = false;
+                        const isInProgress = false;
 
                         return (
                         <div key={book.id} onClick={() => onViewInfo(book, 'recommendation')} className="w-36 md:w-40 flex-shrink-0 group cursor-pointer space-y-3 relative select-none">

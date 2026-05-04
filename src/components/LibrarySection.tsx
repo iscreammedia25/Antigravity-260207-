@@ -18,7 +18,7 @@ type Zone = 'Book Zone' | 'Media Zone';
 
 const LibrarySection: React.FC<LibrarySectionProps> = ({ userName, onViewInfo, onClose, onSeeAll, isFullPage = false, initialTab }) => {
     const [activeZone, setActiveZone] = useState<Zone>((initialTab?.zone as Zone) || 'Book Zone');
-    const [activeSubTab, setActiveSubTab] = useState<string>(initialTab?.subTab || (initialTab?.zone === 'Media Zone' ? 'All Media' : 'All Books'));
+    const [activeSubTab, setActiveSubTab] = useState<string>(initialTab?.subTab || (initialTab?.zone === 'Media Zone' ? 'All Media' : 'Topics'));
 
     React.useEffect(() => {
         if (initialTab) {
@@ -39,8 +39,9 @@ const LibrarySection: React.FC<LibrarySectionProps> = ({ userName, onViewInfo, o
     });
 
     // New Filter States
-    const [bookTypeFilters, setBookTypeFilters] = useState<Record<string, boolean>>({
-        'Original': true, 'Classic': true
+    const [categoryFilters, setCategoryFilters] = useState<Record<string, boolean>>({
+        'Classics': true, 'Sports': true, 'Science': true, 'Fantasy': true,
+        'Nature': true, 'World': true, 'Career': true, 'Family': true, 'Music': true, 'Body': true
     });
     const [levelFilters, setLevelFilters] = useState<Record<string, boolean>>({
         'Lv1': true, 'Lv2': true, 'Lv3': true, 'Lv4': true
@@ -58,7 +59,7 @@ const LibrarySection: React.FC<LibrarySectionProps> = ({ userName, onViewInfo, o
     const [playerStartIndex, setPlayerStartIndex] = useState(0);
 
     const zones: Record<Zone, string[]> = {
-        'Book Zone': ['All Books', 'For you', 'Topics', "MD's pick"],
+        'Book Zone': ['Picks', 'For you', 'Topics'],
         'Media Zone': ['All Media', 'Greeting', 'Movie Book', 'Audio Book']
     };
 
@@ -188,12 +189,12 @@ const LibrarySection: React.FC<LibrarySectionProps> = ({ userName, onViewInfo, o
 
                         {/* Filter Dropdown */}
                         {isFilterOpen && (
-                            <div className="absolute top-[calc(100%+8px)] right-0 w-[420px] bg-white rounded-[32px] shadow-[0_32px_80px_rgba(0,0,0,0.15)] border-2 border-slate-100 p-8 animate-in zoom-in-95 slide-in-from-top-2 duration-200 text-slate-800 max-h-[80vh] overflow-y-auto custom-scrollbar">
+                            <div className="absolute top-[calc(100%+8px)] right-0 w-[500px] bg-white rounded-[32px] shadow-[0_32px_80px_rgba(0,0,0,0.15)] border-2 border-slate-100 p-8 animate-in zoom-in-95 slide-in-from-top-2 duration-200 text-slate-800 max-h-[80vh] overflow-y-auto custom-scrollbar">
                                 <div className="space-y-8">
-                                    <FilterSection title="Book Type" options={['Original', 'Classic']} state={bookTypeFilters} setState={setBookTypeFilters} />
                                     <FilterSection title="Level" options={['Lv1', 'Lv2', 'Lv3', 'Lv4']} state={levelFilters} setState={setLevelFilters} />
                                     <FilterSection title="Lexile" options={['100~250', '251~500', '501~700', '701~900']} state={lexileFilters} setState={setLexileFilters} />
                                     <FilterSection title="Word Count" options={['100~200', '200~400', '300~500', '400~600']} state={wordCountFilters} setState={setWordCountFilters} />
+                                    <FilterSection title="Category" options={['Classics', 'Sports', 'Science', 'Fantasy', 'Nature', 'World', 'Career', 'Family', 'Music', 'Body']} state={categoryFilters} setState={setCategoryFilters} isGrid />
                                 </div>
                                 <button
                                     onClick={() => setIsFilterOpen(false)}
@@ -269,6 +270,10 @@ const LibrarySection: React.FC<LibrarySectionProps> = ({ userName, onViewInfo, o
                             setIsPlayerOpen(true);
                         }}
                     />
+                ) : activeSubTab === 'Topics' ? (
+                    <TopicsGridView onViewInfo={onViewInfo} />
+                ) : activeSubTab === 'Picks' ? (
+                    <PicksCarouselView onViewInfo={onViewInfo} />
                 ) : (
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-8 pb-32">
                         {BOOKS_DATA.map(book => (
@@ -682,13 +687,13 @@ const SearchResultsView = ({ query, onViewInfo, onPlayMedia }: { query: string, 
 };
 
 // Helper component for filter sections
-const FilterSection = ({ title, options, state, setState }: { title: string, options: string[], state: Record<string, boolean>, setState: any }) => {
+const FilterSection = ({ title, options, state, setState, isGrid }: { title: string, options: string[], state: Record<string, boolean>, setState: any, isGrid?: boolean }) => {
     return (
         <div className="space-y-4">
             <h5 className="text-sm font-black text-slate-800 uppercase tracking-widest flex items-center justify-between">
                 {title}
             </h5>
-            <div className="flex flex-wrap gap-3">
+            <div className={isGrid ? 'grid grid-cols-2 gap-3' : 'flex flex-wrap gap-3'}>
                 {options.map(opt => (
                     <button
                         key={opt}
@@ -698,6 +703,104 @@ const FilterSection = ({ title, options, state, setState }: { title: string, opt
                         {opt}
                     </button>
                 ))}
+            </div>
+        </div>
+    );
+};
+
+// Topics Tab: Grid view with category chip filter
+const TOPIC_CATEGORIES = ['All', 'Classics', 'Sports', 'Science', 'Fantasy', 'Nature', 'World', 'Career', 'Family', 'Music', 'Body'];
+
+const TopicsGridView = ({ onViewInfo }: { onViewInfo: any }) => {
+    const [activeCategory, setActiveCategory] = useState('All');
+    return (
+        <div className="flex flex-col gap-8 pb-32">
+            {/* Category chips */}
+            <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar">
+                {TOPIC_CATEGORIES.map(cat => (
+                    <button
+                        key={cat}
+                        onClick={() => setActiveCategory(cat)}
+                        className={`px-7 py-3 rounded-full font-black text-base transition-all whitespace-nowrap border-2 ${
+                            activeCategory === cat
+                                ? 'bg-[#fbbf24] text-[#0f172a] border-[#fbbf24] shadow-lg shadow-amber-200/40 scale-105'
+                                : 'bg-white/5 text-slate-400 border-white/10 hover:border-white/20 hover:text-slate-200'
+                        }`}
+                    >
+                        {cat}
+                    </button>
+                ))}
+            </div>
+            {/* Book grid */}
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-8">
+                {BOOKS_DATA.map(book => (
+                    <div key={book.id} onClick={() => onViewInfo(book, 'recommendation')} className="group cursor-pointer flex flex-col items-center">
+                        <div className="w-full aspect-[3/4] bg-white/10 rounded-[40px] overflow-hidden relative group-hover:scale-105 transition-all duration-300 border-4 border-transparent group-hover:border-[#fbbf24]/50 shadow-2xl">
+                            <img src={book.src} alt={book.title} className="w-full h-full object-cover" />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </div>
+                        <h4 className="mt-4 text-center text-xl font-black text-slate-200 font-jua group-hover:text-[#fbbf24] transition-colors leading-tight px-2">{book.title}</h4>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+};
+
+// Picks Tab: Netflix-style category carousel view
+const PICKS_CATEGORIES = ['Spring', 'Christmas', 'New', 'Award'];
+
+const PicksCarouselView = ({ onViewInfo }: { onViewInfo: any }) => {
+    const [activeCategory, setActiveCategory] = useState('All');
+    const categoriesToShow = activeCategory === 'All' ? PICKS_CATEGORIES : [activeCategory];
+    return (
+        <div className="flex flex-col gap-4 pb-32">
+            {/* Category chips */}
+            <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar mb-4">
+                {['All', ...PICKS_CATEGORIES].map(cat => (
+                    <button
+                        key={cat}
+                        onClick={() => setActiveCategory(cat)}
+                        className={`px-7 py-3 rounded-full font-black text-base transition-all whitespace-nowrap border-2 ${
+                            activeCategory === cat
+                                ? 'bg-[#fbbf24] text-[#0f172a] border-[#fbbf24] shadow-lg shadow-amber-200/40 scale-105'
+                                : 'bg-white/5 text-slate-400 border-white/10 hover:border-white/20 hover:text-slate-200'
+                        }`}
+                    >
+                        {cat}
+                    </button>
+                ))}
+            </div>
+            {/* Carousels */}
+            <div className="space-y-14">
+                {categoriesToShow.map((cat, index) => {
+                    const count = 4 + (index % 5);
+                    const books = [...BOOKS_DATA].slice(index % BOOKS_DATA.length).concat([...BOOKS_DATA]).slice(0, count);
+                    return (
+                        <div key={cat} className="space-y-5">
+                            <div className="flex items-center justify-between">
+                                <h3 className="text-2xl font-black text-white font-jua uppercase tracking-tight">{cat}</h3>
+                                <button
+                                    onClick={() => setActiveCategory(cat)}
+                                    className="text-[#fbbf24] font-black px-4 py-2 bg-[#1e293b] rounded-xl hover:scale-105 transition-all text-sm uppercase tracking-wider"
+                                >
+                                    See All
+                                </button>
+                            </div>
+                            <div className="flex gap-5 overflow-x-auto pb-3 no-scrollbar -mx-2 px-2">
+                                {books.map(book => (
+                                    <div key={book.id + cat} onClick={() => onViewInfo(book, 'recommendation')} className="group cursor-pointer w-44 shrink-0 flex flex-col items-center">
+                                        <div className="w-full aspect-[3/4] bg-white/10 rounded-3xl overflow-hidden relative group-hover:scale-105 transition-all duration-300 border-4 border-transparent group-hover:border-[#fbbf24]/50 shadow-xl">
+                                            <img src={book.src} alt={book.title} className="w-full h-full object-cover" />
+                                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                                        </div>
+                                        <h4 className="mt-3 text-center text-base font-black text-slate-200 font-jua group-hover:text-[#fbbf24] transition-colors leading-tight px-1 line-clamp-2">{book.title}</h4>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    );
+                })}
             </div>
         </div>
     );
@@ -789,33 +892,63 @@ const OriginalLibrarySlider: React.FC<Pick<LibrarySectionProps, 'userName' | 'on
                     onMouseMove={handleMouseMove}
                     className={`flex gap-3 md:gap-4 overflow-x-auto pt-8 pb-8 scroll-smooth custom-scrollbar relative z-10 cursor-grab active:cursor-grabbing ${isDragging ? 'scroll-auto' : 'scroll-smooth'}`}
                 >
-                    {books.map((book) => (
+                    {books.map((book, i) => {
+                        // Determine random state for mockup (0=none, 1=in-progress, 2=completed)
+                        const match = book.id.match(/\d+/);
+                        const num = match ? parseInt(match[0], 10) : 0;
+                        const randomState = (num + i) % 3;
+                        const isCompleted = randomState === 2;
+                        const isInProgress = randomState === 1;
+
+                        return (
                         <div key={book.id} onClick={() => onViewInfo(book, 'recommendation')} className="w-36 md:w-40 flex-shrink-0 group cursor-pointer space-y-3 relative select-none">
                             <div className="aspect-[3/4] bg-slate-50 rounded-[32px] shadow-sm border-[4px] border-white group-hover:border-sky-300 transition-all group-hover:-translate-y-3 group-hover:shadow-2xl group-hover:shadow-sky-100 overflow-hidden relative">
                                 <img src={book.src} alt={book.title} className="w-full h-full object-cover pointer-events-none" />
-                                {/* Heart Icon Badge/Button */}
-                                <div className="absolute bottom-3 right-3 z-10 transition-transform group-hover:scale-110">
-                                    <button 
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            book.isBookmarked = !book.isBookmarked;
-                                            // Force re-render simple toggle
-                                            const icon = e.currentTarget.querySelector('svg');
-                                            if (icon) {
-                                                icon.classList.toggle('fill-current');
-                                                e.currentTarget.classList.toggle('text-rose-500');
-                                                e.currentTarget.classList.toggle('text-slate-300');
-                                            }
-                                        }}
-                                        className={`w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-lg border-2 border-white transition-all active:scale-95 ${book.isBookmarked ? 'text-rose-500' : 'text-slate-300'}`}
-                                    >
-                                        <Heart className={`w-6 h-6 transition-colors ${book.isBookmarked ? 'fill-current' : ''}`} />
-                                    </button>
-                                </div>
+                                
+                                {isCompleted && (
+                                    <div className="absolute top-2 right-2 flex items-center gap-0.5 px-1.5 py-0.5 bg-emerald-500 rounded-full shadow-md z-10">
+                                        <Check className="w-2.5 h-2.5 text-white" />
+                                        <span className="text-[8px] font-black text-white leading-none">Completed</span>
+                                    </div>
+                                )}
+                                {isInProgress && (
+                                    <div className="absolute top-2 right-2 flex items-center gap-1 px-2 py-1 bg-amber-400 rounded-full shadow-lg z-10">
+                                        <svg className="w-3 h-3 text-slate-900 fill-current" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                                        <span className="text-[10px] font-black text-slate-900 leading-none">In Progress</span>
+                                    </div>
+                                )}
+
+                                {isCompleted ? (
+                                    <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-max z-20">
+                                        <div className="bg-white/95 backdrop-blur-sm px-1.5 py-0.5 rounded-lg shadow-sm border border-amber-100 text-[11px] leading-none">
+                                            {'⭐'.repeat(book.rating || 4)}
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="absolute bottom-3 right-3 z-10 transition-transform group-hover:scale-110">
+                                        <button 
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                book.isBookmarked = !book.isBookmarked;
+                                                // Force re-render simple toggle
+                                                const icon = e.currentTarget.querySelector('svg');
+                                                if (icon) {
+                                                    icon.classList.toggle('fill-current');
+                                                    e.currentTarget.classList.toggle('text-rose-500');
+                                                    e.currentTarget.classList.toggle('text-slate-300');
+                                                }
+                                            }}
+                                            className={`w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-lg border-2 border-white transition-all active:scale-95 ${book.isBookmarked ? 'text-rose-500' : 'text-slate-300'}`}
+                                        >
+                                            <Heart className={`w-6 h-6 transition-colors ${book.isBookmarked ? 'fill-current' : ''}`} />
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                             <p className="text-[10px] font-black text-center text-slate-400 truncate px-4 uppercase tracking-[0.15em] group-hover:text-sky-400 transition-colors font-fredoka">{book.title}</p>
                         </div>
-                    ))}
+                        );
+                    })}
                 </div>
 
                 <button

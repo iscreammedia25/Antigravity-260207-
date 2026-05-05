@@ -34,6 +34,9 @@ const MyLibrarySection: React.FC<MyLibrarySectionProps> = ({
 }) => {
     const [activeTab, setActiveTab] = useState<LibraryTab>('reading');
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
+    const [ratingFilters, setRatingFilters] = useState<Record<number, boolean>>({
+        5: true, 4: true, 3: true, 2: true, 1: true
+    });
 
     // --- Data processing ---
     const roadmapBooks = useMemo(() => {
@@ -144,6 +147,8 @@ const MyLibrarySection: React.FC<MyLibrarySectionProps> = ({
                         <FinishedTab 
                             readingHistory={readingHistory} 
                             onViewInfo={onViewInfo}
+                            ratingFilters={ratingFilters}
+                            setRatingFilters={setRatingFilters}
                         />
                     )}
 
@@ -249,7 +254,15 @@ const ActiveReadingTab: React.FC<{
     };
 
     if (readingItems.length === 0) {
-        return <EmptyState icon={Clock} message="No active reading yet!" />;
+        return (
+            <EmptyState 
+                icon={BookOpen} 
+                title="No adventures started!"
+                message="Every great story begins with a single page. Pick a book and start your journey!"
+                ctaText="Go to Library"
+                onCtaClick={() => onNavigate('Picks')} // Should also switch zone to Library in real app
+            />
+        );
     }
 
     return (
@@ -345,25 +358,55 @@ const ActiveReadingTab: React.FC<{
 
 const FinishedTab: React.FC<{ 
     readingHistory: ReadingHistory[], 
-    onViewInfo: (book: Book) => void 
-}> = ({ readingHistory, onViewInfo }) => {
+    onViewInfo: (book: Book) => void,
+    ratingFilters: Record<number, boolean>,
+    setRatingFilters: React.Dispatch<React.SetStateAction<Record<number, boolean>>>
+}> = ({ readingHistory, onViewInfo, ratingFilters, setRatingFilters }) => {
     
     const finishedItems = useMemo(() => {
         return readingHistory
             .filter(h => h.completedPhases.length === 4)
-            .map(h => ({
-                book: BOOKS_DATA.find(b => b.id === h.bookId) || BOOKS_DATA[0],
-                history: h
-            }));
-    }, [readingHistory]);
+            .map(h => {
+                const book = BOOKS_DATA.find(b => b.id === h.bookId) || BOOKS_DATA[0];
+                // Handle cases where rating is missing in mock data
+                const rating = book.rating || 0;
+                return { book, history: h, rating };
+            })
+            .filter(item => {
+                const r = item.book.rating || 4; // default to 4 for demo if missing
+                return ratingFilters[r as number];
+            });
+    }, [readingHistory, ratingFilters]);
 
-    const favoriteItems = finishedItems.filter(item => item.book.rating === 5);
+    const toggleRatingFilter = (rating: number) => {
+        setRatingFilters(prev => ({ ...prev, [rating]: !prev[rating] }));
+    };
+
+    // Demo enhancement: Ensure at least 4 items for "My Favorites" to show scrolling
+    const favoriteItems = useMemo(() => {
+        const actualFavorites = finishedItems.filter(item => item.book.rating === 5);
+        if (actualFavorites.length < 4) {
+            // Fill with other completed books or some default books for demo
+            const others = finishedItems.filter(item => item.book.rating !== 5);
+            return [...actualFavorites, ...others].slice(0, 4);
+        }
+        return actualFavorites;
+    }, [finishedItems]);
 
     return (
         <div className="space-y-16 animate-in fade-in slide-in-from-bottom-4">
-            
-            {/* 1. Top Section: My Reading Journey (Mini Dashboard) */}
-            <div className="bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] p-8 rounded-[40px] shadow-lg relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6 border-0">
+            {finishedItems.length === 0 ? (
+                <EmptyState 
+                    icon={Trophy} 
+                    title="No trophies yet!"
+                    message="Finish your first book to earn a shiny trophy and see your achievements here."
+                    ctaText="Complete a Book!"
+                    onCtaClick={() => onNavigate('In Progress')} 
+                />
+            ) : (
+                <>
+                    {/* 1. Top Section: My Reading Journey (Mini Dashboard) */}
+                    <div className="bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] p-8 rounded-[40px] shadow-lg relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6 border-0">
                 <div className="absolute inset-0 bg-white/5 opacity-50 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px]"></div>
                 <div className="flex items-center gap-6 relative z-10">
                     <div className="w-20 h-20 bg-[#fbbf24] rounded-full flex items-center justify-center flex-shrink-0 shadow-lg border-4 border-[#fcd34d]">
@@ -389,47 +432,51 @@ const FinishedTab: React.FC<{
                 </button>
             </div>
 
-            {/* 2. Middle Section: My Favorites (Carousel) */}
-            {favoriteItems.length > 0 && (
-                <div className="space-y-4 bg-gradient-to-br from-pink-50 to-orange-50 px-8 py-6 rounded-[40px] border-4 border-pink-100 shadow-sm relative overflow-hidden">
-                    <div className="absolute -top-10 -right-10 w-64 h-64 bg-pink-200/40 rounded-full blur-3xl pointer-events-none"></div>
-                    {/* Header */}
-                    <div className="flex items-center gap-3 relative z-10">
-                        <div className="w-12 h-12 bg-pink-400 rounded-2xl flex items-center justify-center shadow-lg shadow-pink-200">
-                            <span className="text-2xl leading-none">👑</span>
+
+            {/* 2. Bottom Section: All Completed Books (Grid) */}
+            <div className="space-y-6">
+                <div className="flex items-center justify-between flex-wrap gap-4">
+                    <div className="flex items-center gap-6">
+                        <div className="relative group">
+                            <select className="appearance-none h-12 pl-5 pr-10 bg-white border-2 border-slate-100 rounded-2xl font-bold text-slate-600 outline-none focus:border-indigo-400 transition-all cursor-pointer shadow-sm">
+                                <option>Newest First</option>
+                                <option>Oldest First</option>
+                            </select>
+                            <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
                         </div>
-                        <h3 className="text-3xl font-black text-pink-900 font-jua tracking-tight">My Favorites</h3>
-                    </div>
-                    
-                    {/* Carousel */}
-                    <div className="flex gap-6 overflow-x-auto pb-2 custom-scrollbar -mx-4 px-4 cursor-grab active:cursor-grabbing select-none relative z-10">
-                        {favoriteItems.map(({ book }) => (
-                            <div key={book.id} onClick={() => onViewInfo(book)} className="relative group cursor-pointer w-40 md:w-48 shrink-0 flex flex-col items-center">
-                                <div className="aspect-[3/4] w-full rounded-[24px] overflow-hidden shadow-xl hover:shadow-2xl hover:-translate-y-3 transition-all duration-300 border-4 border-pink-200 hover:border-pink-400 bg-white relative">
-                                    <img src={book.src} alt={book.title} className="w-full h-full object-cover pointer-events-none" />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
-                                    {/* Top-right: Completed badge */}
-                                    <div className="absolute top-2.5 right-2.5 flex items-center gap-1 px-2 py-1 bg-emerald-500 rounded-full shadow-lg">
-                                        <CheckCircle2 className="w-3 h-3 text-white" />
-                                        <span className="text-[10px] font-black text-white leading-none">Completed</span>
+
+                        {/* Rating Filters */}
+                        <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-2xl border-2 border-slate-100 shadow-sm">
+                            <span className="font-black text-slate-400 text-[10px] uppercase tracking-widest mr-2">Ratings</span>
+                            {[5, 4, 3, 2, 1].map(r => (
+                                <button
+                                    key={r}
+                                    onClick={() => toggleRatingFilter(r)}
+                                    className={`flex items-center gap-1 px-3 py-2 rounded-xl transition-all border-2 ${
+                                        ratingFilters[r] 
+                                            ? 'bg-amber-50 border-amber-200 text-amber-500 shadow-sm scale-105' 
+                                            : 'bg-slate-50 border-transparent text-slate-300 hover:border-slate-200'
+                                    }`}
+                                >
+                                    <div className="flex items-center">
+                                        {[...Array(r)].map((_, i) => (
+                                            <Star key={i} className={`w-3 h-3 ${ratingFilters[r] ? 'fill-current' : ''}`} />
+                                        ))}
                                     </div>
-                                    {/* Bottom center: ⭐⭐⭐⭐⭐ */}
-                                    <div className="absolute bottom-3 left-1/2 -translate-x-1/2 w-max">
-                                        <div className="bg-white/95 backdrop-blur-md px-2.5 py-1.5 rounded-xl shadow-md border border-amber-200 text-sm leading-none">
-                                            ⭐⭐⭐⭐⭐
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
+                                </button>
+                            ))}
+                        </div>
                     </div>
                 </div>
-            )}
 
-            {/* 3. Bottom Section: All Completed Books (Grid) */}
-            <div>
                 {finishedItems.length === 0 ? (
-                    <EmptyState icon={Trophy} message={"No trophies collected yet!"} />
+                    <EmptyState 
+                        icon={Trophy} 
+                        title="Trophy shelf is empty!"
+                        message="Complete your first book to earn a shiny trophy and see your progress grow here."
+                        ctaText="Start Your First Book"
+                        onCtaClick={() => {}} // Navigate to library logic
+                    />
                 ) : (
                     <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
                         {finishedItems.map(({ book }, idx) => {
@@ -458,8 +505,8 @@ const FinishedTab: React.FC<{
                             );
                         })}
                     </div>
-                )}
-            </div>
+                </>
+            )}
         </div>
     );
 };
@@ -471,17 +518,8 @@ const WishlistTab: React.FC<{
     onNavigate: (tab: LibraryTab) => void
 }> = ({ favoriteBooks, readingHistory, onViewInfo }) => {
 
-    const [filters, setFilters] = React.useState({ 'In Progress': true, 'Unread': true });
-
-    const toggleFilter = (type: 'In Progress' | 'Unread') => {
-        setFilters(prev => {
-            const next = { ...prev, [type]: !prev[type] };
-            if (!next['In Progress'] && !next['Unread']) {
-                return { ...next, [type]: true }; // prevent both off
-            }
-            return next;
-        });
-    };
+    const [unreadOnly, setUnreadOnly] = React.useState(false);
+    const [sortBy, setSortBy] = React.useState('Recent');
 
     const completedIds = useMemo(() => {
         return readingHistory.filter(h => h.completedPhases.length === 4).map(h => h.bookId);
@@ -499,28 +537,34 @@ const WishlistTab: React.FC<{
     }, [favoriteBooks, completedIds, inProgressIds]);
 
     const displayBooks = useMemo(() => {
-        return wishlistBooks.filter(book => {
-            if (book.isInProgress && filters['In Progress']) return true;
-            if (!book.isInProgress && filters['Unread']) return true;
-            return false;
-        });
-    }, [wishlistBooks, filters]);
+        let books = [...wishlistBooks];
+        
+        // Filter
+        if (unreadOnly) {
+            books = books.filter(book => !book.isInProgress);
+        }
 
-    const CheckIcon = () => (
-        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="20 6 9 17 4 12"></polyline>
-        </svg>
-    );
+        // Sort
+        if (sortBy === 'ABC') {
+            books.sort((a, b) => a.title.localeCompare(b.title));
+        } else if (sortBy === 'ZYX') {
+            books.sort((a, b) => b.title.localeCompare(a.title));
+        }
+        // 'Recent' is the default order (as per original array)
+
+        return books;
+    }, [wishlistBooks, unreadOnly, sortBy]);
 
     return (
         <div className="animate-in fade-in slide-in-from-bottom-4">
             {/* Top Toolbar: Sorting & Filters */}
             <div className="flex items-center justify-between mb-6 mt-2">
-                {/* Left: Sorting Dropdown (Mocked UI to match design) */}
+                {/* Left: Sorting Dropdown */}
                 <div className="relative group">
                     <select
                         className="appearance-none h-14 pl-6 pr-12 border-2 border-slate-100 rounded-2xl font-bold outline-none transition-all bg-white text-slate-600 focus:border-[#fbbf24] cursor-pointer"
-                        defaultValue="Recent"
+                        value={sortBy}
+                        onChange={(e) => setSortBy(e.target.value)}
                     >
                         <option value="Recent">Newest First</option>
                         <option value="ABC">A to Z</option>
@@ -529,23 +573,17 @@ const WishlistTab: React.FC<{
                     <svg className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
                 </div>
                 
-                {/* Right: Toggle Filters */}
-                <div className="flex items-center gap-4 bg-white px-4 py-2 rounded-2xl border-2 border-slate-100 shadow-sm">
-                    <span className="font-bold text-slate-400 text-sm uppercase tracking-wider mr-2">Filters</span>
-                    {(['In Progress', 'Unread'] as const).map(type => (
-                        <label key={type} className="flex items-center gap-2 cursor-pointer group">
-                            <div className={`relative flex items-center justify-center w-6 h-6 rounded-lg border-2 transition-all ${filters[type] ? 'bg-sky-500 border-sky-500 text-white shadow-sm' : 'border-slate-300 text-transparent bg-white group-hover:border-sky-400'}`}>
-                                <CheckIcon />
-                            </div>
-                            <span className="font-bold text-slate-600 group-hover:text-sky-500 transition-colors select-none whitespace-nowrap">{type}</span>
-                            <input 
-                                type="checkbox" 
-                                className="sr-only" 
-                                checked={filters[type]} 
-                                onChange={() => toggleFilter(type)} 
-                            />
-                        </label>
-                    ))}
+                {/* Right: Toggle Filter */}
+                <div 
+                    className="flex items-center gap-3 bg-white px-5 py-3 rounded-full border-2 border-slate-100 shadow-sm cursor-pointer hover:border-slate-200 transition-colors group"
+                    onClick={() => setUnreadOnly(!unreadOnly)}
+                >
+                    <div className={`relative w-12 h-6 rounded-full transition-colors duration-300 ${unreadOnly ? 'bg-[#fbbf24]' : 'bg-slate-200'}`}>
+                        <div className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white transition-transform duration-300 shadow-sm ${unreadOnly ? 'translate-x-6' : 'translate-x-0'}`} />
+                    </div>
+                    <span className={`font-black text-sm select-none transition-colors ${unreadOnly ? 'text-slate-800' : 'text-slate-400 group-hover:text-slate-500'}`}>
+                        Unread Only
+                    </span>
                 </div>
             </div>
 
@@ -556,13 +594,13 @@ const WishlistTab: React.FC<{
 
             {/* Grid */}
             {displayBooks.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-32 animate-in fade-in duration-500">
-                    <div className="w-32 h-32 bg-pink-50 rounded-full flex items-center justify-center mb-6 border-8 border-white shadow-lg">
-                        <Heart className="w-12 h-12 text-pink-300" />
-                    </div>
-                    <h2 className="text-3xl font-black text-slate-700 font-jua mb-4">No Books Found</h2>
-                    <p className="text-slate-500 font-bold text-lg">Try changing your filters or add more books to your wishlist!</p>
-                </div>
+                <EmptyState 
+                    icon={Heart} 
+                    title="Wishlist is lonely!"
+                    message="Find books that spark your curiosity and heart them to save for later."
+                    ctaText="Find My Favorites"
+                    onCtaClick={() => onNavigate('Picks')} 
+                />
             ) : (
                 <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
                     {displayBooks.map(book => (
@@ -592,12 +630,36 @@ const WishlistTab: React.FC<{
 };
 
 
-const EmptyState: React.FC<{ icon: any, message: string }> = ({ icon: Icon, message }) => (
-    <div className="col-span-full h-[500px] flex flex-col items-center justify-center text-slate-300">
-        <div className="w-24 h-24 bg-slate-100 rounded-full flex items-center justify-center mb-6">
-            <Icon className="w-12 h-12 opacity-30" />
+const EmptyState: React.FC<{ 
+    icon: any, 
+    title: string,
+    message: string,
+    ctaText?: string,
+    onCtaClick?: () => void
+}> = ({ icon: Icon, title, message, ctaText, onCtaClick }) => (
+    <div className="col-span-full py-24 px-6 flex flex-col items-center justify-center text-center animate-in fade-in zoom-in duration-500">
+        <div className="relative mb-8">
+            <div className="w-48 h-48 bg-slate-50 rounded-full flex items-center justify-center border-8 border-white shadow-xl">
+                <Icon className="w-20 h-20 text-slate-200" strokeWidth={1.5} />
+            </div>
+            <div className="absolute -bottom-2 -right-2 w-16 h-16 bg-white rounded-full border-4 border-slate-50 flex items-center justify-center shadow-lg">
+                <div className="w-8 h-8 bg-indigo-50 rounded-full flex items-center justify-center">
+                    <span className="text-indigo-400 font-black text-xl">?</span>
+                </div>
+            </div>
         </div>
-        <p className="text-2xl font-black font-jua uppercase tracking-tighter opacity-40">{message}</p>
+        <h3 className="text-3xl font-black text-slate-700 font-jua mb-3 uppercase tracking-tight">{title}</h3>
+        <p className="text-slate-400 font-bold text-lg max-w-sm mb-10 leading-relaxed">{message}</p>
+        
+        {ctaText && (
+            <button 
+                onClick={onCtaClick}
+                className="px-10 py-4 bg-indigo-600 text-white rounded-[24px] font-black text-xl hover:scale-105 active:scale-95 transition-all shadow-xl shadow-indigo-200 flex items-center gap-3 group"
+            >
+                {ctaText}
+                <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
+            </button>
+        )}
     </div>
 );
 

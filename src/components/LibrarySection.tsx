@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Sparkles, ChevronRight, ChevronLeft, Heart, Search, SlidersHorizontal, ArrowLeft, Check, X } from 'lucide-react';
+import { Sparkles, ChevronRight, ChevronLeft, Heart, Search, SlidersHorizontal, ArrowLeft, Check, X, Headphones, Clapperboard, BookText } from 'lucide-react';
 import { BOOKS_DATA, Book } from '../data/books';
 import UnifiedPlayer from './UnifiedPlayer';
 import { MediaItem } from '../types/media';
@@ -14,11 +14,11 @@ interface LibrarySectionProps {
     initialTab?: { zone: string; subTab: string } | null;
 }
 
-type Zone = 'Book Zone' | 'Media Zone';
+type Zone = 'Book Zone' | 'Media Zone' | 'My Library';
 
 const LibrarySection: React.FC<LibrarySectionProps> = ({ userName, onViewInfo, onClose, onSeeAll, isFullPage = false, initialTab }) => {
     const [activeZone, setActiveZone] = useState<Zone>((initialTab?.zone as Zone) || 'Book Zone');
-    const [activeSubTab, setActiveSubTab] = useState<string>(initialTab?.subTab || (initialTab?.zone === 'Media Zone' ? 'All Media' : 'Topics'));
+    const [activeSubTab, setActiveSubTab] = useState<string>(initialTab?.subTab || (activeZone === 'Media Zone' ? 'All Media' : activeZone === 'My Library' ? 'In Progress' : 'Picks'));
 
     React.useEffect(() => {
         if (initialTab) {
@@ -33,10 +33,14 @@ const LibrarySection: React.FC<LibrarySectionProps> = ({ userName, onViewInfo, o
     const [mediaSortBy, setMediaSortBy] = useState('Recent');
     const [mediaShowUnplayedOnly, setMediaShowUnplayedOnly] = useState(false);
     const [mediaFilters, setMediaFilters] = useState<Record<string, boolean>>({
-        'Greeting': true,
+        'Vocab': true,
         'Movie Book': true,
         'Audio Book': true
     });
+    const [bookSortBy, setBookSortBy] = useState('Recent');
+    const [bookShowUnreadOnly, setBookShowUnreadOnly] = useState(false);
+    const [picksActiveCategory, setPicksActiveCategory] = useState('All');
+    const [topicsActiveCategory, setTopicsActiveCategory] = useState('All');
 
     // New Filter States
     const [categoryFilters, setCategoryFilters] = useState<Record<string, boolean>>({
@@ -60,7 +64,8 @@ const LibrarySection: React.FC<LibrarySectionProps> = ({ userName, onViewInfo, o
 
     const zones: Record<Zone, string[]> = {
         'Book Zone': ['Picks', 'For you', 'Topics'],
-        'Media Zone': ['All Media', 'Greeting', 'Movie Book', 'Audio Book']
+        'Media Zone': ['All Media', 'Vocab', 'Movie Book', 'Audio Book'],
+        'My Library': ['In Progress', 'Completed', '❤️ Wishlist', 'Roadmap']
     };
 
     const handleZoneChange = (zone: Zone) => {
@@ -224,7 +229,7 @@ const LibrarySection: React.FC<LibrarySectionProps> = ({ userName, onViewInfo, o
             </header>
 
             {/* 2. Sub Navigation */}
-            {!isSearchExecuted && (
+            {!isSearchExecuted && activeZone && zones[activeZone] && (
                 <nav className="px-8 py-2 overflow-x-auto no-scrollbar border-b border-white/5">
                     <div className="flex gap-8 whitespace-nowrap min-w-max">
                         {zones[activeZone].map((tab) => (
@@ -270,40 +275,115 @@ const LibrarySection: React.FC<LibrarySectionProps> = ({ userName, onViewInfo, o
                             setIsPlayerOpen(true);
                         }}
                     />
-                ) : activeSubTab === 'Topics' ? (
-                    <TopicsGridView onViewInfo={onViewInfo} />
-                ) : activeSubTab === 'Picks' ? (
-                    <PicksCarouselView onViewInfo={onViewInfo} />
+                ) : (activeSubTab === 'Topics' || activeSubTab === 'Picks') ? (
+                    <div className="flex flex-col gap-8">
+                        <div className="flex items-center justify-between flex-wrap gap-4 mb-2">
+                            <div className="flex items-center gap-6">
+                                <div className="relative group">
+                                    {/* Sort Dropdown: Disabled in Picks > All */}
+                                    <select 
+                                        value={bookSortBy} 
+                                        onChange={e => setBookSortBy(e.target.value)}
+                                        disabled={activeSubTab === 'Picks' && picksActiveCategory === 'All'}
+                                        className={`appearance-none h-14 pl-6 pr-12 border-2 rounded-2xl font-bold outline-none transition-all ${activeSubTab === 'Picks' && picksActiveCategory === 'All' ? 'bg-slate-700/30 border-white/5 text-slate-500 cursor-not-allowed' : 'bg-white/5 border-white/5 text-slate-300 focus:border-[#fbbf24]/50 cursor-pointer'}`}
+                                    >
+                                        <option value="Recent" className="bg-[#1e293b]">Newest First</option>
+                                        <option value="ABC" className="bg-[#1e293b]">A to Z</option>
+                                        <option value="ZYX" className="bg-[#1e293b]">Z to A</option>
+                                    </select>
+                                    <ChevronRight className={`absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 pointer-events-none rotate-90 ${activeSubTab === 'Picks' && picksActiveCategory === 'All' ? 'text-slate-600' : 'text-slate-400'}`} />
+                                </div>
+                            </div>
+
+                            <div className="flex items-center justify-end flex-1 min-w-[200px]">
+                                {(() => {
+                                    const isUnreadToggleDisabled = activeSubTab === 'Picks' && picksActiveCategory === 'All';
+                                    return (
+                                        <div 
+                                            className={`flex items-center gap-3 bg-white/5 px-5 py-3 rounded-full border-2 border-white/5 shadow-sm transition-all group ${isUnreadToggleDisabled ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer hover:border-white/10'}`}
+                                            onClick={() => !isUnreadToggleDisabled && setBookShowUnreadOnly(!bookShowUnreadOnly)}
+                                        >
+                                            <div className={`relative w-12 h-6 rounded-full transition-colors duration-300 ${bookShowUnreadOnly && !isUnreadToggleDisabled ? 'bg-[#fbbf24]' : 'bg-slate-700/50 shadow-inner'}`}>
+                                                <div className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white transition-transform duration-300 shadow-md ${bookShowUnreadOnly && !isUnreadToggleDisabled ? 'translate-x-6' : 'translate-x-0'}`} />
+                                            </div>
+                                            <span className={`font-black text-sm select-none transition-colors ${isUnreadToggleDisabled ? 'text-slate-500' : bookShowUnreadOnly ? 'text-slate-200' : 'text-slate-400 group-hover:text-slate-300'}`}>
+                                                Unread Only
+                                            </span>
+                                        </div>
+                                    );
+                                })()}
+                            </div>
+                        </div>
+                        {activeSubTab === 'Topics' ? (
+                            <TopicsGridView 
+                                onViewInfo={onViewInfo} 
+                                sortBy={bookSortBy} 
+                                showUnreadOnly={bookShowUnreadOnly} 
+                                activeCategory={topicsActiveCategory}
+                                setActiveCategory={setTopicsActiveCategory}
+                            />
+                        ) : (
+                            <PicksCarouselView 
+                                onViewInfo={onViewInfo} 
+                                activeCategory={picksActiveCategory}
+                                setActiveCategory={setPicksActiveCategory}
+                                sortBy={bookSortBy}
+                                showUnreadOnly={bookShowUnreadOnly}
+                            />
+                        )}
+                    </div>
+                ) : activeZone === 'My Library' ? (
+                    <div className="animate-in fade-in slide-in-from-bottom-4">
+                        {/* Simplified My Library Content for now */}
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-8 pb-32">
+                            {BOOKS_DATA.slice(0, 12).map(book => (
+                                <div key={book.id} onClick={() => onViewInfo(book)} className="group cursor-pointer">
+                                    <div className="w-full aspect-[3/4] bg-white/10 rounded-[32px] overflow-hidden relative group-hover:scale-105 transition-all duration-300 border-4 border-transparent group-hover:border-[#fbbf24]/50 shadow-2xl">
+                                        <img src={book.src} alt={book.title} className="w-full h-full object-cover" />
+                                    </div>
+                                    <h4 className="mt-4 text-center text-lg font-bold text-slate-200 truncate px-2">{book.title}</h4>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
                 ) : (
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-8 pb-32">
                         {BOOKS_DATA.filter((book, i) => {
                             const match = book.id.match(/\d+/);
                             const num = match ? parseInt(match[0], 10) : 0;
                             return (num + i) % 3 === 0;
-                        }).map(book => (
-                            <div key={book.id} onClick={() => onViewInfo(book, 'recommendation')} className="group cursor-pointer flex flex-col items-center">
-                                <div className="w-full aspect-[3/4] bg-white/10 rounded-[40px] overflow-hidden relative group-hover:scale-105 transition-all duration-300 border-4 border-transparent group-hover:border-[#fbbf24]/50 shadow-2xl">
-                                    <img src={book.src} alt={book.title} className="w-full h-full object-cover" />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                                    
-                                    {/* Circular Heart Button */}
-                                    <button 
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            book.isBookmarked = !book.isBookmarked;
-                                            // Force re-render if needed, but for now we'll rely on the parent or next render
-                                            (e.currentTarget.querySelector('svg') as any).classList.toggle('fill-current');
-                                            (e.currentTarget.querySelector('svg') as any).classList.toggle('text-rose-500');
-                                            (e.currentTarget.querySelector('svg') as any).classList.toggle('text-slate-300');
-                                        }}
-                                        className="absolute bottom-4 right-4 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg border-2 border-white hover:scale-110 active:scale-95 transition-all z-20"
-                                    >
-                                        <Heart className={`w-5 h-5 transition-colors ${book.isBookmarked ? 'fill-current text-rose-500' : 'text-slate-300'}`} />
-                                    </button>
+                        }).map(book => {
+                            const match = book.id.match(/\d+/);
+                            const num = match ? parseInt(match[0], 10) : 0;
+                            const isCompleted = (num % 3) === 2;
+                            
+                            return (
+                                <div key={book.id} onClick={() => onViewInfo(book, 'recommendation')} className="group cursor-pointer flex flex-col items-center">
+                                    <div className="w-full aspect-[3/4] bg-white/10 rounded-[40px] overflow-hidden relative group-hover:scale-105 transition-all duration-300 border-4 border-transparent group-hover:border-[#fbbf24]/50 shadow-2xl">
+                                        <img src={book.src} alt={book.title} className="w-full h-full object-cover" />
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                                        
+                                        {/* Circular Heart Button */}
+                                        {!isCompleted && (
+                                            <button 
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    book.isBookmarked = !book.isBookmarked;
+                                                    // Force re-render if needed, but for now we'll rely on the parent or next render
+                                                    (e.currentTarget.querySelector('svg') as any).classList.toggle('fill-current');
+                                                    (e.currentTarget.querySelector('svg') as any).classList.toggle('text-rose-500');
+                                                    (e.currentTarget.querySelector('svg') as any).classList.toggle('text-slate-300');
+                                                }}
+                                                className="absolute bottom-4 right-4 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg border-2 border-white hover:scale-110 active:scale-95 transition-all z-20"
+                                            >
+                                                <Heart className={`w-5 h-5 transition-colors ${book.isBookmarked ? 'fill-current text-rose-500' : 'text-slate-300'}`} />
+                                            </button>
+                                        )}
+                                    </div>
+                                    <h4 className="mt-4 text-center text-xl font-black text-slate-200 font-jua group-hover:text-[#fbbf24] transition-colors leading-tight px-2">{book.title}</h4>
                                 </div>
-                                <h4 className="mt-4 text-center text-xl font-black text-slate-200 font-jua group-hover:text-[#fbbf24] transition-colors leading-tight px-2">{book.title}</h4>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 )}
             </main>
@@ -324,7 +404,7 @@ const mockMediaData = BOOKS_DATA.map(book => {
     const hash = book.id.length;
     // Map to Unified Player's MediaItem format
     const greeting: MediaItem = { 
-        id: `${book.id}__greeting`, bookId: book.id, type: 'Greeting', title: book.title, 
+        id: `${book.id}__greeting`, bookId: book.id, type: 'Vocab', title: book.title, 
         src: book.videoUrl || 'https://vjs.zencdn.net/v/oceans.mp4', 
         thumbnail: book.src, duration: '01:20', isUnplayed: hash % 2 === 0, bookTitle: book.title 
     };
@@ -364,7 +444,7 @@ const MediaZoneContent = ({ activeSubTab, mediaSortBy, setMediaSortBy, mediaShow
             <div key={item.id} className={`group cursor-pointer ${isGrid ? 'w-full' : 'w-64 shrink-0'} flex flex-col gap-3 transition-all duration-300 transform origin-left focus:outline-none`}
                 onClick={() => onPlayMedia(items, idx)}>
                 <div className="aspect-video bg-slate-900/5 rounded-3xl overflow-hidden shadow-sm group-hover:shadow-xl group-hover:-translate-y-1.5 transition-all duration-300 relative border-4 border-white ring-1 ring-slate-100 pointer-events-none flex items-center justify-center">
-                    {item.type === 'Greeting' ? (
+                    {item.type === 'Vocab' ? (
                         <video 
                             src={`${item.src}#t=0.001`} 
                             className="w-full h-full object-cover" 
@@ -391,13 +471,20 @@ const MediaZoneContent = ({ activeSubTab, mediaSortBy, setMediaSortBy, mediaShow
                         <div className="absolute top-3 left-3 px-3 py-1 bg-[#fbbf24] text-[#0f172a] font-black text-[9px] uppercase tracking-widest rounded-full shadow-md z-10 border-2 border-transparent group-hover:border-white/50 transition-colors">NEW</div>
                     )}
                 </div>
-                <div className="px-1 pointer-events-none">
+                <div className="px-1 mt-3">
                     <h4 className="text-[15px] font-bold text-slate-700 line-clamp-1 group-hover:text-sky-500 transition-colors font-jua">
-                        {item.type === 'Greeting' ? item.title : item.title}
+                        {item.title}
                     </h4>
-                    <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest mt-1.5 flex items-center gap-1.5">
-                        {item.type}
-                    </p>
+                    {/* Media Type Icon Badge */}
+                    <div className={`absolute top-3 right-3 w-9 h-9 backdrop-blur-md rounded-xl flex items-center justify-center shadow-lg border-2 transition-all group-hover:scale-110 ${
+                        item.type === 'Vocab' ? 'bg-purple-50 border-purple-100 text-purple-500' : 
+                        item.type === 'Movie Book' ? 'bg-orange-50 border-orange-100 text-orange-500' : 
+                        'bg-sky-50 border-sky-100 text-sky-500'
+                    }`}>
+                        {item.type === 'Vocab' && <BookText className="w-5 h-5" />}
+                        {item.type === 'Movie Book' && <Clapperboard className="w-5 h-5" />}
+                        {item.type === 'Audio Book' && <Headphones className="w-5 h-5" />}
+                    </div>
                 </div>
             </div>
         ));
@@ -406,6 +493,7 @@ const MediaZoneContent = ({ activeSubTab, mediaSortBy, setMediaSortBy, mediaShow
     return (
         <div className="flex flex-col h-full w-full">
             <div className="flex items-center justify-between mb-8 flex-wrap gap-4">
+                {/* Left Side: Sorting and Media Type Filters (only in All Media) */}
                 <div className="flex items-center gap-6">
                     <div className="relative group">
                         <select value={mediaSortBy} onChange={e => setMediaSortBy(e.target.value)}
@@ -416,29 +504,37 @@ const MediaZoneContent = ({ activeSubTab, mediaSortBy, setMediaSortBy, mediaShow
                         </select>
                         <svg className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
                     </div>
-                    <label className="flex items-center gap-3 cursor-pointer group">
-                        <div className="relative">
-                            <input type="checkbox" className="sr-only peer" checked={mediaShowUnplayedOnly} onChange={() => setMediaShowUnplayedOnly(!mediaShowUnplayedOnly)} />
-                            <div className="w-12 h-6 bg-white/10 rounded-full peer peer-checked:bg-[#fbbf24] transition-all border border-white/10"></div>
-                            <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full peer-checked:translate-x-6 transition-transform shadow-md"></div>
+                    
+                    {activeSubTab === 'All Media' && (
+                        <div className="flex items-center gap-4 bg-white/5 px-6 py-2.5 rounded-2xl border-2 border-white/5 shadow-sm animate-in fade-in slide-in-from-right-4">
+                            <span className="font-bold text-slate-500 text-xs uppercase tracking-widest mr-2">Filters</span>
+                            {['Vocab', 'Movie Book', 'Audio Book'].map(type => (
+                                <label key={type} className="flex items-center gap-2 cursor-pointer group">
+                                    <div className={`relative flex items-center justify-center w-6 h-6 rounded-lg border-2 transition-all ${mediaFilters[type] ? 'bg-sky-500 border-sky-500 text-white shadow-sm' : 'border-white/20 text-transparent bg-transparent group-hover:border-sky-400'}`}>
+                                        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                        <input type="checkbox" className="sr-only" checked={mediaFilters[type]} onChange={() => toggleMediaFilter(type)} />
+                                    </div>
+                                    <span className="font-bold text-slate-400 group-hover:text-slate-200 transition-colors select-none whitespace-nowrap text-sm">{type}</span>
+                                </label>
+                            ))}
                         </div>
-                        <span className="font-bold text-slate-400 group-hover:text-slate-200 transition-colors">Unplayed Only</span>
-                    </label>
+                    )}
                 </div>
-                {activeSubTab === 'All Media' && (
-                    <div className="flex items-center gap-4 bg-white/5 px-6 py-3 rounded-2xl border-2 border-white/5 shadow-sm animate-in fade-in slide-in-from-right-4">
-                        <span className="font-bold text-slate-500 text-xs uppercase tracking-widest mr-2">Filters</span>
-                        {['Greeting', 'Movie Book', 'Audio Book'].map(type => (
-                            <label key={type} className="flex items-center gap-2 cursor-pointer group">
-                                <div className={`relative flex items-center justify-center w-6 h-6 rounded-lg border-2 transition-all ${mediaFilters[type] ? 'bg-sky-500 border-sky-500 text-white shadow-sm' : 'border-white/20 text-transparent bg-transparent group-hover:border-sky-400'}`}>
-                                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                                    <input type="checkbox" className="sr-only" checked={mediaFilters[type]} onChange={() => toggleMediaFilter(type)} />
-                                </div>
-                                <span className="font-bold text-slate-400 group-hover:text-slate-200 transition-colors select-none whitespace-nowrap text-sm">{type}</span>
-                            </label>
-                        ))}
+
+                {/* Right Side: Unplayed Only Toggle */}
+                <div className="flex items-center justify-end flex-1 min-w-[200px]">
+                    <div 
+                        className="flex items-center gap-3 bg-white/5 px-5 py-3 rounded-full border-2 border-white/5 shadow-sm cursor-pointer hover:border-white/10 transition-colors group"
+                        onClick={() => setMediaShowUnplayedOnly(!mediaShowUnplayedOnly)}
+                    >
+                        <div className={`relative w-12 h-6 rounded-full transition-colors duration-300 ${mediaShowUnplayedOnly ? 'bg-[#fbbf24]' : 'bg-slate-700/50 shadow-inner'}`}>
+                            <div className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white transition-transform duration-300 shadow-md ${mediaShowUnplayedOnly ? 'translate-x-6' : 'translate-x-0'}`} />
+                        </div>
+                        <span className={`font-black text-sm select-none transition-colors ${mediaShowUnplayedOnly ? 'text-slate-200' : 'text-slate-400 group-hover:text-slate-300'}`}>
+                            Unplayed Only
+                        </span>
                     </div>
-                )}
+                </div>
             </div>
 
             {activeSubTab === 'All Media' ? (
@@ -450,21 +546,80 @@ const MediaZoneContent = ({ activeSubTab, mediaSortBy, setMediaSortBy, mediaShow
 
                         return (
                             <div key={group.baseId} className="animate-in fade-in slide-in-from-bottom-2 duration-500 bg-white/5 p-6 rounded-[40px] shadow-sm border-2 border-white/5 flex gap-8 overflow-hidden relative group/row">
-                                <div className="w-36 shrink-0 flex flex-col items-center justify-center border-r-2 border-white/5 pr-8">
-                                    <div className="w-full aspect-[3/4] rounded-2xl overflow-hidden shadow-2xl border-2 border-white/10 group-hover/row:scale-105 transition-transform duration-300">
+                                <div className="w-36 shrink-0 flex flex-col items-center justify-center border-r-2 border-white/5 pr-8 relative">
+                                    <div className="w-full aspect-[3/4] rounded-2xl overflow-hidden shadow-2xl border-2 border-white/10 group-hover/row:scale-105 transition-transform duration-300 relative">
                                         <img src={BOOKS_DATA.find(b => b.id === group.baseId)?.src} alt={group.bookTitle} className="w-full h-full object-cover" />
+                                        
+                                        {/* Random Status Badges for Media Zone Book Cover */}
+                                        {(() => {
+                                            const match = group.baseId.match(/\d+/);
+                                            const num = match ? parseInt(match[0], 10) : 0;
+                                            const randomState = (num + 1) % 3; // Offset to diversify from other sections
+                                            
+                                            if (randomState === 2) {
+                                                return (
+                                                    <>
+                                                        <div className="absolute top-2 right-2 flex items-center gap-0.5 px-1.5 py-0.5 bg-emerald-500 rounded-full shadow-md z-10">
+                                                            <Check className="w-2.5 h-2.5 text-white" />
+                                                            <span className="text-[8px] font-black text-white leading-none">Completed</span>
+                                                        </div>
+                                                        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-max z-20">
+                                                            <div className="bg-white/95 backdrop-blur-sm px-1.5 py-0.5 rounded-lg shadow-sm border border-amber-100 text-[10px] leading-none">
+                                                                {'⭐'.repeat(3 + (num % 3))}
+                                                            </div>
+                                                        </div>
+                                                    </>
+                                                );
+                                            } else if (randomState === 1) {
+                                                return (
+                                                    <div className="absolute top-2 right-2 flex items-center gap-1 px-2 py-1 bg-amber-400 rounded-full shadow-lg z-10">
+                                                        <svg className="w-3 h-3 text-slate-900 fill-current" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                                                        <span className="text-[10px] font-black text-slate-900 leading-none">In Progress</span>
+                                                    </div>
+                                                );
+                                            }
+                                            return null;
+                                        })()}
+
+                                        {/* Heart Toggle for Book Cover (if not completed) */}
+                                        {(() => {
+                                            const match = group.baseId.match(/\d+/);
+                                            const num = match ? parseInt(match[0], 10) : 0;
+                                            const randomState = (num + 1) % 3;
+                                            const book = BOOKS_DATA.find(b => b.id === group.baseId);
+                                            
+                                            if (randomState !== 2 && book) {
+                                                return (
+                                                    <button 
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            book.isBookmarked = !book.isBookmarked;
+                                                            const icon = e.currentTarget.querySelector('svg');
+                                                            if (icon) {
+                                                                icon.classList.toggle('fill-current');
+                                                                e.currentTarget.classList.toggle('text-rose-500');
+                                                                e.currentTarget.classList.toggle('text-slate-300');
+                                                            }
+                                                        }}
+                                                        className={`absolute bottom-2 right-2 w-8 h-8 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg border border-white transition-all active:scale-95 z-20 ${book.isBookmarked ? 'text-rose-500' : 'text-slate-300'}`}
+                                                    >
+                                                        <Heart className={`w-4 h-4 transition-colors ${book.isBookmarked ? 'fill-current' : ''}`} />
+                                                    </button>
+                                                );
+                                            }
+                                            return null;
+                                        })()}
                                     </div>
-                                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-4 text-center">{items.length} Series</p>
                                 </div>
                                 <div className="flex gap-6 overflow-x-auto custom-scrollbar pb-2 flex-1">
                                     {items.map((item, idx) => (
-                                        <div key={item.id} className="group cursor-pointer w-64 shrink-0 flex flex-col gap-3 transition-all duration-300 transform origin-left"
+                                        <div key={item.id} className="group cursor-pointer w-64 shrink-0 flex flex-col transition-all duration-300 transform origin-left"
                                              onClick={(e) => {
                                                  e.stopPropagation();
                                                  onPlayMedia(items, idx);
                                              }}>
                                             <div className="aspect-video bg-slate-900/5 rounded-3xl overflow-hidden shadow-sm group-hover:shadow-xl group-hover:-translate-y-1.5 transition-all duration-300 relative border-4 border-white ring-1 ring-slate-100 pointer-events-none flex items-center justify-center">
-                                                {item.type === 'Greeting' ? (
+                                                {item.type === 'Vocab' ? (
                                                     <video 
                                                         src={`${item.src}#t=0.001`} 
                                                         className="w-full h-full object-cover" 
@@ -487,17 +642,17 @@ const MediaZoneContent = ({ activeSubTab, mediaSortBy, setMediaSortBy, mediaShow
                                                 <div className="absolute bottom-3 right-3 px-2.5 py-1 bg-black/70 backdrop-blur-md rounded-lg text-white font-black text-xs tabular-nums tracking-wider shadow-sm border border-white/20">
                                                     {item.duration}
                                                 </div>
-                                                {item.isUnplayed && (
-                                                    <div className="absolute top-3 left-3 px-3 py-1 bg-[#fbbf24] text-[#0f172a] font-black text-[9px] uppercase tracking-widest rounded-full shadow-md z-10 border-2 border-transparent group-hover:border-white/50 transition-colors">NEW</div>
-                                                )}
-                                            </div>
-                                            <div className="px-1">
-                                                <h4 className="text-[15px] font-bold text-slate-700 line-clamp-1 group-hover:text-sky-500 transition-colors font-jua">
-                                                    {item.type === 'Greeting' ? item.title : item.title}
-                                                </h4>
-                                                <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest mt-1.5 flex items-center gap-1.5">
-                                                    {item.type}
-                                                </p>
+                                                
+                                                {/* Media Type Icon Badge */}
+                                                <div className={`absolute top-3 right-3 w-9 h-9 backdrop-blur-md rounded-xl flex items-center justify-center shadow-lg border-2 transition-all group-hover:scale-110 ${
+                                                    item.type === 'Vocab' ? 'bg-purple-50 border-purple-100 text-purple-500' : 
+                                                    item.type === 'Movie Book' ? 'bg-orange-50 border-orange-100 text-orange-500' : 
+                                                    'bg-sky-50 border-sky-100 text-sky-500'
+                                                }`}>
+                                                    {item.type === 'Vocab' && <BookText className="w-5 h-5" />}
+                                                    {item.type === 'Movie Book' && <Clapperboard className="w-5 h-5" />}
+                                                    {item.type === 'Audio Book' && <Headphones className="w-5 h-5" />}
+                                                </div>
                                             </div>
                                         </div>
                                     ))}
@@ -527,13 +682,13 @@ const MediaZoneContent = ({ activeSubTab, mediaSortBy, setMediaSortBy, mediaShow
                     return (
                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-x-6 gap-y-10 animate-in fade-in pb-20">
                             {items.map((item, idx) => (
-                                <div key={item.id} className="group cursor-pointer w-full flex flex-col gap-3 transition-all duration-300 transform origin-left"
+                                <div key={item.id} className="group cursor-pointer w-full flex flex-col transition-all duration-300 transform origin-left"
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         onPlayMedia(items, idx);
                                     }}>
                                     <div className="aspect-video bg-slate-900/5 rounded-3xl overflow-hidden shadow-sm group-hover:shadow-xl group-hover:-translate-y-1.5 transition-all duration-300 relative border-4 border-white ring-1 ring-slate-100 pointer-events-none flex items-center justify-center">
-                                        {item.type === 'Greeting' ? (
+                                        {item.type === 'Vocab' ? (
                                             <video 
                                                 src={`${item.src}#t=0.001`} 
                                                 className="w-full h-full object-cover" 
@@ -556,17 +711,22 @@ const MediaZoneContent = ({ activeSubTab, mediaSortBy, setMediaSortBy, mediaShow
                                         <div className="absolute bottom-3 right-3 px-2.5 py-1 bg-black/70 backdrop-blur-md rounded-lg text-white font-black text-xs tabular-nums tracking-wider shadow-sm border border-white/20">
                                             {item.duration}
                                         </div>
-                                        {item.isUnplayed && (
-                                            <div className="absolute top-3 left-3 px-3 py-1 bg-[#fbbf24] text-[#0f172a] font-black text-[9px] uppercase tracking-widest rounded-full shadow-md z-10 border-2 border-transparent group-hover:border-white/50 transition-colors">NEW</div>
-                                        )}
+                                        
+                                        {/* Media Type Icon Badge */}
+                                        <div className={`absolute top-3 right-3 w-9 h-9 backdrop-blur-md rounded-xl flex items-center justify-center shadow-lg border-2 transition-all group-hover:scale-110 ${
+                                            item.type === 'Vocab' ? 'bg-purple-50 border-purple-100 text-purple-500' : 
+                                            item.type === 'Movie Book' ? 'bg-orange-50 border-orange-100 text-orange-500' : 
+                                            'bg-sky-50 border-sky-100 text-sky-500'
+                                        }`}>
+                                            {item.type === 'Vocab' && <BookText className="w-5 h-5" />}
+                                            {item.type === 'Movie Book' && <Clapperboard className="w-5 h-5" />}
+                                            {item.type === 'Audio Book' && <Headphones className="w-5 h-5" />}
+                                        </div>
                                     </div>
-                                    <div className="px-1">
+                                    <div className="px-1 mt-3">
                                         <h4 className="text-[15px] font-bold text-slate-700 line-clamp-1 group-hover:text-sky-500 transition-colors font-jua">
-                                            {item.type === 'Greeting' ? item.title : item.title}
+                                            {item.title}
                                         </h4>
-                                        <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest mt-1.5 flex items-center gap-1.5">
-                                            {item.type}
-                                        </p>
                                     </div>
                                 </div>
                             ))}
@@ -649,7 +809,7 @@ const SearchResultsView = ({ query, onViewInfo, onPlayMedia }: { query: string, 
                             <div key={item.id} className="group cursor-pointer w-[280px] shrink-0 flex flex-col gap-3 transition-all duration-300 hover:-translate-y-2"
                                 onClick={() => onPlayMedia(matchedMedia, idx)}>
                                 <div className="aspect-video bg-slate-100 rounded-[32px] overflow-hidden shadow-sm group-hover:shadow-xl group-hover:shadow-amber-200 transition-all duration-300 relative border-4 border-white pointer-events-none flex items-center justify-center">
-                                    {item.type === 'Greeting' ? (
+                                    {item.type === 'Vocab' ? (
                                         <video 
                                             src={`${item.src}#t=0.001`} 
                                             className="w-full h-full object-cover" 
@@ -715,8 +875,41 @@ const FilterSection = ({ title, options, state, setState, isGrid }: { title: str
 // Topics Tab: Grid view with category chip filter
 const TOPIC_CATEGORIES = ['All', 'Classics', 'Sports', 'Science', 'Fantasy', 'Nature', 'World', 'Career', 'Family', 'Music', 'Body'];
 
-const TopicsGridView = ({ onViewInfo }: { onViewInfo: any }) => {
-    const [activeCategory, setActiveCategory] = useState('All');
+const TopicsGridView = ({ onViewInfo, sortBy, showUnreadOnly, activeCategory, setActiveCategory }: { onViewInfo: any, sortBy: string, showUnreadOnly: boolean, activeCategory: string, setActiveCategory: any }) => {
+    const filteredBooks = React.useMemo(() => {
+        let books = [...BOOKS_DATA];
+
+        // 1. Category Filter
+        if (activeCategory !== 'All') {
+            books = books.filter(b => {
+                // Mock category filtering based on hash since BOOKS_DATA doesn't have categories yet
+                const hash = b.id.length + b.title.length;
+                const cats = ['Classics', 'Sports', 'Science', 'Fantasy', 'Nature', 'World', 'Career', 'Family', 'Music', 'Body'];
+                const bookCat = cats[hash % cats.length];
+                return bookCat === activeCategory;
+            });
+        }
+
+        // 2. Unread Filter
+        if (showUnreadOnly) {
+            books = books.filter(b => {
+                const match = b.id.match(/\d+/);
+                const num = match ? parseInt(match[0], 10) : 0;
+                const randomState = num % 3;
+                return randomState === 0; // 0: Unread, 1: In Progress, 2: Completed
+            });
+        }
+
+        // 3. Sorting
+        if (sortBy === 'ABC') {
+            books.sort((a, b) => a.title.localeCompare(b.title));
+        } else if (sortBy === 'ZYX') {
+            books.sort((a, b) => b.title.localeCompare(a.title));
+        }
+
+        return books;
+    }, [activeCategory, showUnreadOnly, sortBy]);
+
     return (
         <div className="flex flex-col gap-8 pb-32">
             {/* Category chips */}
@@ -737,28 +930,74 @@ const TopicsGridView = ({ onViewInfo }: { onViewInfo: any }) => {
             </div>
             {/* Book grid */}
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-8">
-                {BOOKS_DATA.map(book => (
-                    <div key={book.id} onClick={() => onViewInfo(book, 'recommendation')} className="group cursor-pointer flex flex-col items-center">
-                        <div className="w-full aspect-[3/4] bg-white/10 rounded-[40px] overflow-hidden relative group-hover:scale-105 transition-all duration-300 border-4 border-transparent group-hover:border-[#fbbf24]/50 shadow-2xl">
-                            <img src={book.src} alt={book.title} className="w-full h-full object-cover" />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                {filteredBooks.map(book => {
+                    const match = book.id.match(/\d+/);
+                    const num = match ? parseInt(match[0], 10) : 0;
+                    const randomState = num % 3;
+                    const isCompleted = randomState === 2;
+                    const isInProgress = randomState === 1;
+
+                    return (
+                        <div key={book.id} onClick={() => onViewInfo(book, 'recommendation')} className="group cursor-pointer flex flex-col items-center">
+                            <div className="w-full aspect-[3/4] bg-white/10 rounded-[40px] overflow-hidden relative group-hover:scale-105 transition-all duration-300 border-4 border-transparent group-hover:border-[#fbbf24]/50 shadow-2xl">
+                                <img src={book.src} alt={book.title} className="w-full h-full object-cover" />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                                
+                                {isCompleted && (
+                                    <div className="absolute top-4 right-4 flex items-center gap-1 px-3 py-1.5 bg-emerald-500 rounded-full shadow-lg z-10">
+                                        <Check className="w-4 h-4 text-white" />
+                                        <span className="text-xs font-black text-white leading-none">Completed</span>
+                                    </div>
+                                )}
+                                {isInProgress && (
+                                    <div className="absolute top-4 right-4 flex items-center gap-1.5 px-4 py-2 bg-amber-400 rounded-full shadow-xl z-10">
+                                        <svg className="w-4 h-4 text-slate-900 fill-current" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                                        <span className="text-xs font-black text-slate-900 leading-none">In Progress</span>
+                                    </div>
+                                )}
+
+                                {/* Floating Heart Button */}
+                                {!isCompleted && (
+                                    <button 
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            book.isBookmarked = !book.isBookmarked;
+                                            const svg = e.currentTarget.querySelector('svg');
+                                            if (svg) {
+                                                svg.classList.toggle('fill-current');
+                                                svg.classList.toggle('text-rose-500');
+                                                svg.classList.toggle('text-slate-300');
+                                            }
+                                        }}
+                                        className="absolute bottom-4 right-4 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg border-2 border-white hover:scale-110 active:scale-95 transition-all z-20"
+                                    >
+                                        <Heart className={`w-5 h-5 transition-colors ${book.isBookmarked ? 'fill-current text-rose-500' : 'text-slate-300'}`} />
+                                    </button>
+                                )}
+                            </div>
+                            <h4 className="mt-4 text-center text-xl font-black text-slate-200 font-jua group-hover:text-[#fbbf24] transition-colors leading-tight px-2">{book.title}</h4>
                         </div>
-                        <h4 className="mt-4 text-center text-xl font-black text-slate-200 font-jua group-hover:text-[#fbbf24] transition-colors leading-tight px-2">{book.title}</h4>
-                    </div>
-                ))}
+                    );
+                })}
             </div>
         </div>
     );
 };
 
-// Picks Tab: Netflix-style category carousel view
+// Picks Tab: Thematic featured categories
 const PICKS_CATEGORIES = ['Spring', 'Christmas', 'New', 'Award'];
 
-const PicksCarouselView = ({ onViewInfo }: { onViewInfo: any }) => {
-    const [activeCategory, setActiveCategory] = useState('All');
+const PICKS_THEMES: Record<string, { icon: string, titleColor: string, comment: string }> = {
+    'Spring': { icon: '🌸', titleColor: 'text-emerald-500', comment: 'Enjoy the fresh stories! 😊' },
+    'Christmas': { icon: '🎄', titleColor: 'text-rose-500', comment: 'Warm your heart with winter tales ❄️' },
+    'New': { icon: '✨', titleColor: 'text-sky-500', comment: "Check out this week's fresh arrivals!" },
+    'Award': { icon: '🏆', titleColor: 'text-amber-500', comment: 'Bestsellers everyone is talking about!' }
+};
+
+const PicksCarouselView = ({ onViewInfo, activeCategory, setActiveCategory, sortBy, showUnreadOnly }: { onViewInfo: any, activeCategory: string, setActiveCategory: any, sortBy: string, showUnreadOnly: boolean }) => {
     const categoriesToShow = activeCategory === 'All' ? PICKS_CATEGORIES : [activeCategory];
     return (
-        <div className="flex flex-col gap-4 pb-32">
+        <div className="flex flex-col gap-10 pb-32">
             {/* Category chips */}
             <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar mb-4">
                 {['All', ...PICKS_CATEGORIES].map(cat => (
@@ -775,32 +1014,250 @@ const PicksCarouselView = ({ onViewInfo }: { onViewInfo: any }) => {
                     </button>
                 ))}
             </div>
-            {/* Carousels */}
-            <div className="space-y-14">
+            {/* Thematic Category Blocks or Full Grid View */}
+            <div className="space-y-16">
                 {categoriesToShow.map((cat, index) => {
-                    const count = 4 + (index % 5);
-                    const books = [...BOOKS_DATA].slice(index % BOOKS_DATA.length).concat([...BOOKS_DATA]).slice(0, count);
+                    const theme = PICKS_THEMES[cat] || { icon: '📌', titleColor: 'text-slate-800', comment: 'Handpicked for you!' };
+                    
+                    if (activeCategory !== 'All') {
+                        // Detailed Grid View for a specific category
+                        const fullBooksCount = 18; // Show more books for the grid view
+                        let fullBooks = [...BOOKS_DATA].slice((index * 3) % BOOKS_DATA.length).concat([...BOOKS_DATA]).slice(0, fullBooksCount);
+                        
+                        // Apply Unread Only Filter
+                        if (showUnreadOnly) {
+                            fullBooks = fullBooks.filter(book => {
+                                const match = book.id.match(/\d+/);
+                                const num = match ? parseInt(match[0], 10) : 0;
+                                return (num % 3) === 0; // 0: Unread, 1: In Progress, 2: Completed
+                            });
+                        }
+                        
+                        return (
+                            <div key={cat} className="flex flex-col gap-10 animate-in fade-in slide-in-from-bottom-4">
+                                {/* Thematic Hero Header */}
+                                <div className="bg-white rounded-[40px] p-10 md:p-14 shadow-xl flex flex-col md:flex-row items-center md:items-start gap-8 relative overflow-hidden">
+                                    <div className="absolute -top-20 -right-20 w-64 h-64 bg-slate-50 rounded-full blur-3xl pointer-events-none" />
+                                    <div className="w-32 h-32 bg-slate-50 rounded-full flex items-center justify-center shadow-inner shrink-0 relative z-10 border-4 border-white">
+                                        <span className="text-7xl drop-shadow-md">{theme.icon}</span>
+                                    </div>
+                                    <div className="text-center md:text-left relative z-10 mt-2 md:mt-4">
+                                        <h2 className={`text-5xl md:text-6xl font-black font-jua uppercase tracking-tight mb-3 ${theme.titleColor}`}>
+                                            {cat}
+                                        </h2>
+                                        <p className="text-xl font-bold text-slate-500">
+                                            {theme.comment}
+                                        </p>
+                                    </div>
+                                </div>
+                                
+                                {/* Full Grid of Books */}
+                                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-6 gap-y-10">
+                                    {fullBooks.map(book => {
+                                        const match = book.id.match(/\d+/);
+                                        const num = match ? parseInt(match[0], 10) : 0;
+                                        const randomState = num % 3;
+                                        const isCompleted = randomState === 2;
+                                        const isInProgress = randomState === 1;
+
+                                        return (
+                                            <div key={book.id + cat} onClick={() => onViewInfo(book, 'recommendation')} className="group cursor-pointer flex flex-col items-center">
+                                                <div className="w-full aspect-[3/4] bg-slate-100 rounded-[28px] overflow-hidden relative group-hover:-translate-y-2 transition-transform duration-300 shadow-md group-hover:shadow-2xl border-4 border-white group-hover:border-sky-100">
+                                                    <img src={book.src} alt={book.title} className="w-full h-full object-cover" />
+                                                    <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                                    {isCompleted && (
+                                                        <>
+                                                            <div className="absolute top-3 right-3 flex items-center gap-0.5 px-2 py-1 bg-emerald-500 rounded-full shadow-md z-10">
+                                                                <Check className="w-3 h-3 text-white" />
+                                                                <span className="text-[9px] font-black text-white leading-none">Completed</span>
+                                                            </div>
+                                                            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 w-max z-20">
+                                                                <div className="bg-white/95 backdrop-blur-sm px-2 py-1 rounded-xl shadow-md border border-amber-100 text-[10px] leading-none">
+                                                                    {'⭐'.repeat(3 + (num % 3))}
+                                                                </div>
+                                                            </div>
+                                                        </>
+                                                    )}
+                                                    {isInProgress && (
+                                                        <div className="absolute top-3 right-3 flex items-center gap-1 px-2.5 py-1 bg-amber-400 rounded-full shadow-lg z-10">
+                                                            <svg className="w-3.5 h-3.5 text-slate-900 fill-current" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                                                            <span className="text-[11px] font-black text-slate-900 leading-none">In Progress</span>
+                                                        </div>
+                                                    )}
+                                                    
+                                                    {/* Floating Heart Button */}
+                                                    {!isCompleted && (
+                                                        <button 
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                book.isBookmarked = !book.isBookmarked;
+                                                                const svg = e.currentTarget.querySelector('svg');
+                                                                if (svg) {
+                                                                    svg.classList.toggle('fill-current');
+                                                                    svg.classList.toggle('text-rose-500');
+                                                                    svg.classList.toggle('text-slate-300');
+                                                                }
+                                                            }}
+                                                            className="absolute bottom-3 right-3 w-8 h-8 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg border border-white hover:scale-110 active:scale-95 transition-all z-20"
+                                                        >
+                                                            <Heart className={`w-4 h-4 transition-colors ${book.isBookmarked ? 'fill-current text-rose-500' : 'text-slate-300'}`} />
+                                                        </button>
+                                                    )}
+                                                </div>
+                                                <h4 className="mt-4 text-center text-[15px] font-black text-slate-700 font-jua group-hover:text-sky-500 transition-colors leading-tight px-1 line-clamp-2">{book.title}</h4>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        );
+                    }
+
+                    // Standard "All" view (Featured + Horizontal Scroll)
+                    const count = 5 + (index % 5);
+                    const books = [...BOOKS_DATA].slice((index * 3) % BOOKS_DATA.length).concat([...BOOKS_DATA]).slice(0, count);
+                    const featuredBook = books[0];
+                    const listBooks = books.slice(1);
+
                     return (
-                        <div key={cat} className="space-y-5">
-                            <div className="flex items-center justify-between">
-                                <h3 className="text-2xl font-black text-white font-jua uppercase tracking-tight">{cat}</h3>
+                        <div key={cat} className="bg-white rounded-[40px] p-8 md:p-10 shadow-2xl flex flex-col gap-8 relative overflow-hidden">
+                            {/* Thematic Header */}
+                            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 relative z-10">
+                                <div className="flex items-center gap-5">
+                                    <span className="text-6xl drop-shadow-sm">{theme.icon}</span>
+                                    <div>
+                                        <h3 className={`text-4xl font-black font-jua uppercase tracking-tight ${theme.titleColor}`}>
+                                            {cat}
+                                        </h3>
+                                        <p className="text-slate-500 font-bold text-lg mt-1">MD comment: <span className="text-slate-700">{theme.comment}</span></p>
+                                    </div>
+                                </div>
                                 <button
                                     onClick={() => setActiveCategory(cat)}
-                                    className="text-[#fbbf24] font-black px-4 py-2 bg-[#1e293b] rounded-xl hover:scale-105 transition-all text-sm uppercase tracking-wider"
+                                    className="text-slate-400 hover:text-slate-600 font-black px-6 py-3 bg-slate-100 rounded-2xl hover:bg-slate-200 transition-all text-sm uppercase tracking-wider active:scale-95"
                                 >
                                     See All
                                 </button>
                             </div>
-                            <div className="flex gap-5 overflow-x-auto pb-3 no-scrollbar -mx-2 px-2">
-                                {books.map(book => (
-                                    <div key={book.id + cat} onClick={() => onViewInfo(book, 'recommendation')} className="group cursor-pointer w-44 shrink-0 flex flex-col items-center">
-                                        <div className="w-full aspect-[3/4] bg-white/10 rounded-3xl overflow-hidden relative group-hover:scale-105 transition-all duration-300 border-4 border-transparent group-hover:border-[#fbbf24]/50 shadow-xl">
-                                            <img src={book.src} alt={book.title} className="w-full h-full object-cover" />
-                                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+
+                            {/* Content Layout */}
+                            <div className="flex flex-col lg:flex-row gap-8 relative z-10">
+                                {/* Featured Book (Hero) */}
+                                {featuredBook && (() => {
+                                    const match = featuredBook.id.match(/\d+/);
+                                    const num = match ? parseInt(match[0], 10) : 0;
+                                    const randomState = num % 3;
+                                    const isCompleted = randomState === 2;
+                                    const isInProgress = randomState === 1;
+
+                                    return (
+                                        <div 
+                                            onClick={() => onViewInfo(featuredBook, 'recommendation')}
+                                            className="w-full lg:w-[35%] shrink-0 group cursor-pointer"
+                                        >
+                                            <div className="w-full aspect-[3/4] bg-slate-100 rounded-[32px] overflow-hidden relative group-hover:-translate-y-2 transition-transform duration-300 shadow-md group-hover:shadow-2xl">
+                                                <img src={featuredBook.src} alt={featuredBook.title} className="w-full h-full object-cover" />
+                                                {isCompleted && (
+                                                    <>
+                                                        <div className="absolute top-4 right-4 flex items-center gap-1 px-3 py-1.5 bg-emerald-500 rounded-full shadow-lg z-10">
+                                                            <Check className="w-4 h-4 text-white" />
+                                                            <span className="text-xs font-black text-white leading-none">Completed</span>
+                                                        </div>
+                                                        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-max z-20">
+                                                            <div className="bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-xl shadow-lg border border-amber-100 text-xs leading-none">
+                                                                {'⭐'.repeat(3 + (num % 3))}
+                                                            </div>
+                                                        </div>
+                                                    </>
+                                                )}
+                                                {isInProgress && (
+                                                    <div className="absolute top-4 right-4 flex items-center gap-1.5 px-4 py-2 bg-amber-400 rounded-full shadow-xl z-10">
+                                                        <svg className="w-4 h-4 text-slate-900 fill-current" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                                                        <span className="text-xs font-black text-slate-900 leading-none">In Progress</span>
+                                                    </div>
+                                                )}
+                                                
+                                                {/* Floating Heart Button */}
+                                                {!isCompleted && (
+                                                    <button 
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            featuredBook.isBookmarked = !featuredBook.isBookmarked;
+                                                            const svg = e.currentTarget.querySelector('svg');
+                                                            if (svg) {
+                                                                svg.classList.toggle('fill-current');
+                                                                svg.classList.toggle('text-rose-500');
+                                                                svg.classList.toggle('text-slate-300');
+                                                            }
+                                                        }}
+                                                        className="absolute bottom-4 right-4 w-11 h-11 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg border-2 border-white hover:scale-110 active:scale-95 transition-all z-20"
+                                                    >
+                                                        <Heart className={`w-6 h-6 transition-colors ${featuredBook.isBookmarked ? 'fill-current text-rose-500' : 'text-slate-300'}`} />
+                                                    </button>
+                                                )}
+                                            </div>
                                         </div>
-                                        <h4 className="mt-3 text-center text-base font-black text-slate-200 font-jua group-hover:text-[#fbbf24] transition-colors leading-tight px-1 line-clamp-2">{book.title}</h4>
+                                    );
+                                })()}
+
+                                {/* Horizontal Scroll of Other Books (2 Rows) */}
+                                <div className="flex-1 overflow-x-auto pb-6 custom-scrollbar min-w-0">
+                                    <div className="grid grid-rows-2 grid-flow-col gap-x-6 gap-y-6 auto-cols-max">
+                                        {listBooks.map(book => {
+                                            const match = book.id.match(/\d+/);
+                                            const num = match ? parseInt(match[0], 10) : 0;
+                                            const randomState = num % 3;
+                                            const isCompleted = randomState === 2;
+                                            const isInProgress = randomState === 1;
+
+                                            return (
+                                                <div key={book.id + cat} onClick={() => onViewInfo(book, 'recommendation')} className="group cursor-pointer w-36 md:w-44 shrink-0 flex flex-col items-center">
+                                                    <div className="w-full aspect-[3/4] bg-slate-100 rounded-[24px] overflow-hidden relative group-hover:-translate-y-2 transition-transform duration-300 shadow-sm group-hover:shadow-xl border-4 border-transparent group-hover:border-slate-100">
+                                                        <img src={book.src} alt={book.title} className="w-full h-full object-cover" />
+                                                        {isCompleted && (
+                                                            <>
+                                                                <div className="absolute top-2 right-2 flex items-center gap-0.5 px-1.5 py-0.5 bg-emerald-500 rounded-full shadow-md z-10">
+                                                                    <Check className="w-2.5 h-2.5 text-white" />
+                                                                    <span className="text-[8px] font-black text-white leading-none">Completed</span>
+                                                                </div>
+                                                                <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-max z-20">
+                                                                    <div className="bg-white/95 backdrop-blur-sm px-1.5 py-0.5 rounded-lg shadow-sm border border-amber-100 text-[9px] leading-none">
+                                                                        {'⭐'.repeat(3 + (num % 3))}
+                                                                    </div>
+                                                                </div>
+                                                            </>
+                                                        )}
+                                                        {isInProgress && (
+                                                            <div className="absolute top-2 right-2 flex items-center gap-1 px-2 py-1 bg-amber-400 rounded-full shadow-lg z-10">
+                                                                <svg className="w-3 h-3 text-slate-900 fill-current" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                                                                <span className="text-[10px] font-black text-slate-900 leading-none">In Progress</span>
+                                                            </div>
+                                                        )}
+
+                                                        {/* Floating Heart Button */}
+                                                        {!isCompleted && (
+                                                            <button 
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    book.isBookmarked = !book.isBookmarked;
+                                                                    const svg = e.currentTarget.querySelector('svg');
+                                                                    if (svg) {
+                                                                        svg.classList.toggle('fill-current');
+                                                                        svg.classList.toggle('text-rose-500');
+                                                                        svg.classList.toggle('text-slate-300');
+                                                                    }
+                                                                }}
+                                                                className="absolute bottom-2 right-2 w-7 h-7 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg border border-white hover:scale-110 active:scale-95 transition-all z-20"
+                                                            >
+                                                                <Heart className={`w-3.5 h-3.5 transition-colors ${book.isBookmarked ? 'fill-current text-rose-500' : 'text-slate-300'}`} />
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
                                     </div>
-                                ))}
+                                </div>
                             </div>
                         </div>
                     );

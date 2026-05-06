@@ -215,6 +215,8 @@ const ActiveReadingTab: React.FC<{
     selectedIds: string[],
     setSelectedIds: (ids: string[]) => void
 }> = ({ readingHistory, onStartLearning, onStopReading, selectedIds, setSelectedIds }) => {
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+
     const readingItems = useMemo(() => {
         return readingHistory
             .filter(h => h.isActive !== false && h.completedPhases.length < 4)
@@ -241,9 +243,14 @@ const ActiveReadingTab: React.FC<{
     };
 
     const handleBulkDelete = () => {
-        if (!confirm('Are you sure you want to remove the selected books from your active list?')) return;
+        if (selectedIds.length === 0) return;
+        setShowDeleteModal(true);
+    };
+
+    const confirmDelete = () => {
         selectedIds.forEach(id => onStopReading(id));
         setSelectedIds([]);
+        setShowDeleteModal(false);
     };
 
     // Smart navigation helper
@@ -258,9 +265,8 @@ const ActiveReadingTab: React.FC<{
             <EmptyState 
                 icon={BookOpen} 
                 title="No adventures started!"
-                message="Every great story begins with a single page. Pick a book and start your journey!"
                 ctaText="Go to Library"
-                onCtaClick={() => onNavigate('Picks')} // Should also switch zone to Library in real app
+                onCtaClick={() => {}}
             />
         );
     }
@@ -352,6 +358,42 @@ const ActiveReadingTab: React.FC<{
                     );
                 })}
             </div>
+
+            {/* Remove Confirmation Modal (4-1) */}
+            {showDeleteModal && (
+                <div className="fixed inset-0 z-[2000] flex items-center justify-center p-4">
+                    {/* Backdrop */}
+                    <div 
+                        className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-in fade-in duration-300"
+                        onClick={() => setShowDeleteModal(false)}
+                    />
+                    
+                    {/* Modal Content */}
+                    <div className="relative bg-white w-full max-w-[400px] rounded-[32px] p-10 shadow-2xl animate-in zoom-in slide-in-from-bottom-4 duration-300 flex flex-col items-center text-center border border-slate-100">
+                        <div className="w-16 h-16 bg-rose-50 rounded-full flex items-center justify-center mb-6 border-4 border-white shadow-sm">
+                            <XCircle className="w-8 h-8 text-rose-500" />
+                        </div>
+                        
+                        <h3 className="text-3xl font-black text-slate-800 font-jua mb-2 uppercase tracking-tight">Remove?</h3>
+                        <p className="text-slate-500 font-bold mb-10 text-sm">(Your progress will be lost forever.)</p>
+                        
+                        <div className="flex gap-4 w-full">
+                            <button
+                                onClick={confirmDelete}
+                                className="flex-1 py-4 bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-2xl font-black text-lg transition-all active:scale-95"
+                            >
+                                YES
+                            </button>
+                            <button
+                                onClick={() => setShowDeleteModal(false)}
+                                className="flex-1 py-4 bg-[#fbbf24] hover:bg-amber-400 text-[#0f172a] rounded-2xl font-black text-lg transition-all shadow-lg shadow-amber-200/40 active:scale-95"
+                            >
+                                NO
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
@@ -399,7 +441,6 @@ const FinishedTab: React.FC<{
                 <EmptyState 
                     icon={Trophy} 
                     title="No trophies yet!"
-                    message="Finish your first book to earn a shiny trophy and see your achievements here."
                     ctaText="Complete a Book!"
                     onCtaClick={() => onNavigate('In Progress')} 
                 />
@@ -473,7 +514,6 @@ const FinishedTab: React.FC<{
                     <EmptyState 
                         icon={Trophy} 
                         title="Trophy shelf is empty!"
-                        message="Complete your first book to earn a shiny trophy and see your progress grow here."
                         ctaText="Start Your First Book"
                         onCtaClick={() => {}} // Navigate to library logic
                     />
@@ -557,8 +597,8 @@ const WishlistTab: React.FC<{
 
     return (
         <div className="animate-in fade-in slide-in-from-bottom-4">
-            {/* Top Toolbar: Sorting & Filters */}
-            <div className="flex items-center justify-between mb-6 mt-2">
+            {/* Top Toolbar: Sorting & Filters - Empty State일 때 숨김 */}
+            {wishlistBooks.length > 0 && <div className="flex items-center justify-between mb-6 mt-2">
                 {/* Left: Sorting Dropdown */}
                 <div className="relative group">
                     <select
@@ -585,7 +625,7 @@ const WishlistTab: React.FC<{
                         Unread Only
                     </span>
                 </div>
-            </div>
+            </div>}
 
             {/* Title */}
             <div className="flex items-center gap-6 mb-6">
@@ -597,7 +637,6 @@ const WishlistTab: React.FC<{
                 <EmptyState 
                     icon={Heart} 
                     title="Wishlist is lonely!"
-                    message="Find books that spark your curiosity and heart them to save for later."
                     ctaText="Find My Favorites"
                     onCtaClick={() => onNavigate('Picks')} 
                 />
@@ -633,10 +672,9 @@ const WishlistTab: React.FC<{
 const EmptyState: React.FC<{ 
     icon: any, 
     title: string,
-    message: string,
     ctaText?: string,
     onCtaClick?: () => void
-}> = ({ icon: Icon, title, message, ctaText, onCtaClick }) => (
+}> = ({ icon: Icon, title, ctaText, onCtaClick }) => (
     <div className="col-span-full py-24 px-6 flex flex-col items-center justify-center text-center animate-in fade-in zoom-in duration-500">
         <div className="relative mb-8">
             <div className="w-48 h-48 bg-slate-50 rounded-full flex items-center justify-center border-8 border-white shadow-xl">
@@ -648,8 +686,7 @@ const EmptyState: React.FC<{
                 </div>
             </div>
         </div>
-        <h3 className="text-3xl font-black text-slate-700 font-jua mb-3 uppercase tracking-tight">{title}</h3>
-        <p className="text-slate-400 font-bold text-lg max-w-sm mb-10 leading-relaxed">{message}</p>
+        <h3 className="text-3xl font-black text-slate-700 font-jua mb-8 uppercase tracking-tight">{title}</h3>
         
         {ctaText && (
             <button 

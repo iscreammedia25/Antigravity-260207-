@@ -4471,11 +4471,11 @@
                                 <div class="relative group">
                                     <select onchange="setLibrarySort(this.value)" 
                                         class="appearance-none h-14 pl-6 pr-12 bg-white border-2 border-slate-100 rounded-2xl font-bold text-slate-600 outline-none focus:border-[#fbbf24] transition-all cursor-pointer">
-                                        <option value="Recent" ${librarySortBy === 'Recent' ? 'selected' : ''}>Newest First</option>
+                                        <option value="Recent" ${librarySortBy === 'Recent' ? 'selected' : ''}>Recent</option>
                                         <option value="ABC" ${librarySortBy === 'ABC' ? 'selected' : ''}>A to Z</option>
                                         <option value="ZYX" ${librarySortBy === 'ZYX' ? 'selected' : ''}>Z to A</option>
-                                        <option value="Level-ASC" ${librarySortBy === 'Level-ASC' ? 'selected' : ''}>Level: Easy to Hard</option>
-                                        <option value="Level-DESC" ${librarySortBy === 'Level-DESC' ? 'selected' : ''}>Level: Hard to Easy</option>
+                                        <option value="Level-ASC" ${librarySortBy === 'Level-ASC' ? 'selected' : ''}>Level (↑)</option>
+                                        <option value="Level-DESC" ${librarySortBy === 'Level-DESC' ? 'selected' : ''}>Level (↓)</option>
                                     </select>
                                     <i data-lucide="chevron-down" class="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none"></i>
                                 </div>
@@ -4756,7 +4756,6 @@
                                             <div class="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                                             ${badgeHtml}
                                         </div>
-                                        <h4 class="mt-4 text-center text-[15px] font-black text-slate-700 font-jua group-hover:text-sky-500 transition-colors leading-tight px-1 line-clamp-2">${book.title}</h4>
                                     </div>
                                     `;
                                 }).join('')}
@@ -4854,9 +4853,11 @@
                                         <div class="relative group">
                                             <select onchange="setLibrarySort(this.value)"
                                                 class="appearance-none h-14 pl-6 pr-12 border-2 border-slate-100 rounded-2xl font-bold outline-none transition-all bg-white text-slate-600 focus:border-[#fbbf24] cursor-pointer shadow-sm">
-                                                <option value="Recent" ${librarySortBy === 'Recent' ? 'selected' : ''}>Newest First</option>
+                                                <option value="Recent" ${librarySortBy === 'Recent' ? 'selected' : ''}>Recent</option>
                                                 <option value="ABC" ${librarySortBy === 'ABC' ? 'selected' : ''}>A to Z</option>
                                                 <option value="ZYX" ${librarySortBy === 'ZYX' ? 'selected' : ''}>Z to A</option>
+                                                <option value="Level-ASC" ${librarySortBy === 'Level-ASC' ? 'selected' : ''}>Level (↑)</option>
+                                                <option value="Level-DESC" ${librarySortBy === 'Level-DESC' ? 'selected' : ''}>Level (↓)</option>
                                             </select>
                                             <i data-lucide="chevron-down" class="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none"></i>
                                         </div>
@@ -5089,7 +5090,7 @@
                                 </div>
                                 
                                 <!-- Media Type Icon Badge -->
-                                <div class="absolute top-3 right-3 w-9 h-9 backdrop-blur-md rounded-xl flex items-center justify-center shadow-lg border-2 transition-all group-hover:scale-110 ${
+                                <div class="absolute top-3 left-3 w-9 h-9 backdrop-blur-md rounded-xl flex items-center justify-center shadow-lg border-2 transition-all group-hover:scale-110 ${
                                     item.type === 'Vocab' ? 'bg-purple-50 border-purple-100 text-purple-500' : 
                                     item.type === 'Movie Book' ? 'bg-orange-50 border-orange-100 text-orange-500' : 
                                     'bg-sky-50 border-sky-100 text-sky-500'
@@ -5225,9 +5226,6 @@
                                     </button>
                                 `}
                             </div>
-                            <h4 class="mt-4 text-lg font-bold text-slate-700 line-clamp-2 leading-tight group-hover:text-sky-500 transition-colors font-jua cursor-pointer" onclick="openModal('${baseId}', 'library')">
-                                ${book.title}
-                            </h4>
                         </div>
                     `}).filter(html => html !== null).join('');
             }

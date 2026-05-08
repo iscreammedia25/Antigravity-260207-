@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { X, ChevronRight, Volume2, RotateCw, BookOpen, Lock, MessageCircle } from 'lucide-react';
+import { X, ChevronRight, Volume2, RotateCw, BookOpen, Lock, MessageCircle, HelpCircle } from 'lucide-react';
 import { Book } from '../data/books';
 import { speakWithElevenLabs } from '../utils/elevenlabs';
 
@@ -244,25 +244,25 @@ const WordSection: React.FC<WordSectionProps> = ({ book, onNext, onClose, onSwit
                         Vocabulary
                     </button>
                     <button 
-                        onClick={onNext}
+                        onClick={() => onSwitchPhase && onSwitchPhase('read')}
                         className="relative px-6 py-2.5 rounded-[18px] text-sm font-black transition-all flex items-center gap-2 group overflow-hidden text-slate-400 hover:text-slate-700"
                     >
                         <BookOpen size={16} />
                         Reading
                     </button>
                     <button 
-                        disabled
-                        className="relative px-6 py-2.5 rounded-[18px] text-sm font-black transition-all flex items-center gap-2 group overflow-hidden opacity-40 grayscale cursor-not-allowed text-slate-400"
+                        onClick={() => onSwitchPhase && onSwitchPhase('quiz')}
+                        className="relative px-6 py-2.5 rounded-[18px] text-sm font-black transition-all flex items-center gap-2 group overflow-hidden text-slate-400 hover:text-slate-700"
+                    >
+                        <HelpCircle size={16} />
+                        Quiz
+                    </button>
+                    <button 
+                        onClick={() => onSwitchPhase && onSwitchPhase('speak')}
+                        className="relative px-6 py-2.5 rounded-[18px] text-sm font-black transition-all flex items-center gap-2 group overflow-hidden text-slate-400 hover:text-slate-700"
                     >
                         <MessageCircle size={16} />
                         Talking
-                    </button>
-                    <button 
-                        disabled
-                        className="relative px-6 py-2.5 rounded-[18px] text-sm font-black transition-all flex items-center gap-2 group overflow-hidden opacity-40 grayscale cursor-not-allowed text-slate-400"
-                    >
-                        <Lock size={16} />
-                        Quiz
                     </button>
                 </div>
 

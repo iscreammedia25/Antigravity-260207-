@@ -278,18 +278,18 @@ const ReadSection: React.FC<ReadSectionProps> = ({ book, onClose, onSwitchPhase 
                             Reading
                         </button>
                         <button
-                            disabled
-                            className="relative px-6 py-2.5 rounded-[18px] text-sm font-black transition-all flex items-center gap-2 group overflow-hidden opacity-40 grayscale cursor-not-allowed text-slate-400"
+                            onClick={() => onSwitchPhase && onSwitchPhase('quiz')}
+                            className="relative px-6 py-2.5 rounded-[18px] text-sm font-black transition-all flex items-center gap-2 group overflow-hidden text-slate-400 hover:text-slate-700"
+                        >
+                            <HelpCircle size={16} />
+                            Quiz
+                        </button>
+                        <button
+                            onClick={() => onSwitchPhase && onSwitchPhase('speak')}
+                            className="relative px-6 py-2.5 rounded-[18px] text-sm font-black transition-all flex items-center gap-2 group overflow-hidden text-slate-400 hover:text-slate-700"
                         >
                             <MessageCircle size={16} />
                             Talking
-                        </button>
-                        <button
-                            disabled
-                            className="relative px-6 py-2.5 rounded-[18px] text-sm font-black transition-all flex items-center gap-2 group overflow-hidden opacity-40 grayscale cursor-not-allowed text-slate-400"
-                        >
-                            <Lock size={16} />
-                            Quiz
                         </button>
                     </div>
 
@@ -616,10 +616,10 @@ const ReadSection: React.FC<ReadSectionProps> = ({ book, onClose, onSwitchPhase 
                         {readStep === 'viewing' && currentSceneIndex === filteredScenes.length - 1 && (
                             <div className="absolute bottom-12 right-12 animate-in fade-in slide-in-from-right duration-500 delay-500 z-[120]">
                                 <button
-                                    onClick={() => setShowPraise(true)}
-                                    className="bg-sky-400 text-white pl-10 pr-6 py-5 rounded-[40px] flex items-center gap-6 shadow-2xl hover:bg-sky-500 active:scale-95 transition-all group pointer-events-auto"
+                                    onClick={() => onSwitchPhase && onSwitchPhase('quiz')}
+                                    className="bg-purple-500 text-white pl-10 pr-6 py-5 rounded-[40px] flex items-center gap-6 shadow-2xl hover:bg-purple-600 active:scale-95 transition-all group pointer-events-auto"
                                 >
-                                    <span className="text-3xl font-black font-fredoka uppercase tracking-wider">Talking</span>
+                                    <span className="text-3xl font-black font-fredoka uppercase tracking-wider">Quiz</span>
                                     <div className="w-16 h-16 bg-white/20 rounded-3xl flex items-center justify-center group-hover:translate-x-2 transition-transform">
                                         <ChevronRight size={44} strokeWidth={4} />
                                     </div>
@@ -816,7 +816,8 @@ const ReadSection: React.FC<ReadSectionProps> = ({ book, onClose, onSwitchPhase 
                                 className="fixed inset-0 z-[200] bg-black/80 backdrop-blur-md flex items-center justify-center animate-in fade-in duration-500 cursor-pointer"
                                 onClick={() => {
                                     setShowPraise(false);
-                                    onClose();
+                                    if (onSwitchPhase) onSwitchPhase('quiz');
+                                    else onClose();
                                 }}
                             >
                                 <div className="relative flex flex-col items-center justify-center animate-in zoom-in-50 duration-500">

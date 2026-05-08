@@ -518,6 +518,27 @@
         .animate-soft-glow {
             animation: soft-glow 3s ease-in-out infinite;
         }
+
+        /* Talking Section Specifics */
+        @keyframes ripple {
+            0% { transform: scale(1); opacity: 0.4; }
+            100% { transform: scale(1.5); opacity: 0; }
+        }
+        .animate-ripple {
+            animation: ripple 2s linear infinite;
+        }
+
+        .stt-word {
+            display: inline-block;
+            transition: all 0.2s ease;
+            margin-right: 0.2em;
+        }
+        .stt-word.highlight {
+            color: #fb923c; /* orange-400 */
+            transform: scale(1.1);
+            text-shadow: 0 0 15px rgba(251, 146, 60, 0.4);
+            font-weight: 900;
+        }
     </style>
 </head>
 
@@ -1202,14 +1223,14 @@
                                 <i data-lucide="book-open" class="w-4 h-4"></i> Reading <i data-lucide="lock"
                                     class="w-3 h-3"></i>
                             </button>
-                            <button id="tab-talk" onclick="setPhase('talk')"
-                                class="px-6 py-2.5 rounded-xl font-black text-sm transition-all flex items-center gap-2 text-slate-400 opacity-50 cursor-not-allowed">
-                                <i data-lucide="message-circle" class="w-4 h-4"></i> Talking <i data-lucide="lock"
-                                    class="w-3 h-3"></i>
-                            </button>
                             <button id="tab-quiz" onclick="setPhase('quiz')"
                                 class="px-6 py-2.5 rounded-xl font-black text-sm transition-all flex items-center gap-2 text-slate-400 opacity-50 cursor-not-allowed">
                                 <i data-lucide="help-circle" class="w-4 h-4"></i> Quiz <i data-lucide="lock"
+                                    class="w-3 h-3"></i>
+                            </button>
+                            <button id="tab-talk" onclick="setPhase('talk')"
+                                class="px-6 py-2.5 rounded-xl font-black text-sm transition-all flex items-center gap-2 text-slate-400 opacity-50 cursor-not-allowed">
+                                <i data-lucide="message-circle" class="w-4 h-4"></i> Talking <i data-lucide="lock"
                                     class="w-3 h-3"></i>
                             </button>
                         </div>
@@ -1403,6 +1424,76 @@
                         <div id="read-step-viewing" class="relative z-10 flex-1 flex flex-col p-8 hidden">
                             <!-- Injected by renderReadPhase -->
                         </div>
+                    </div>
+
+                    <!-- Quiz Phase -->
+                    <div id="phase-quiz" class="w-full h-full flex flex-col hidden bg-[#f8fafc]">
+                        <div class="flex-1 flex flex-col items-center justify-center p-8">
+                             <div class="max-w-4xl w-full bg-white rounded-[48px] shadow-2xl p-12 flex flex-col items-center gap-10 border-8 border-slate-50">
+                                <div class="w-24 h-24 bg-amber-100 rounded-3xl flex items-center justify-center text-amber-500 shadow-inner">
+                                    <i data-lucide="help-circle" class="w-12 h-12"></i>
+                                </div>
+                                <h2 class="text-5xl font-black text-slate-800 font-jua">Quiz Time!</h2>
+                                <p class="text-2xl text-slate-500 font-bold text-center">Show what you've learned from the story.</p>
+                                
+                                <div class="grid grid-cols-1 gap-6 w-full max-w-2xl mt-4">
+                                    <button onclick="finishQuiz()" class="p-8 bg-slate-50 hover:bg-sky-50 border-4 border-slate-100 hover:border-sky-300 rounded-[32px] text-left transition-all group flex items-center gap-6">
+                                        <div class="w-12 h-12 bg-white rounded-2xl flex items-center justify-center font-black text-2xl text-slate-400 group-hover:text-sky-500 shadow-sm">1</div>
+                                        <span class="text-2xl font-black text-slate-700 group-hover:text-sky-600">Start the Quiz</span>
+                                        <i data-lucide="arrow-right" class="w-8 h-8 ml-auto text-slate-300 group-hover:text-sky-400 group-hover:translate-x-2 transition-all"></i>
+                                    </button>
+                                </div>
+                             </div>
+                        </div>
+                    </div>
+
+                    <!-- Talking Phase: 16:9 Split Layout -->
+                    <div id="phase-talk" class="w-full h-full flex flex-row items-stretch hidden bg-gradient-to-r from-white to-[#f0f9ff] overflow-hidden">
+                         
+                         <!-- Left Side: Character Area -->
+                         <div class="flex-1 flex flex-col items-center justify-center p-12 relative border-r-4 border-slate-50">
+                             <div class="relative">
+                                <div class="absolute -inset-16 bg-sky-400/20 blur-[80px] rounded-full scale-150 transition-all"></div>
+                                <div id="talkRipple" class="absolute inset-0 border-[6px] border-sky-400 rounded-full opacity-0"></div>
+                                <div class="w-80 h-80 lg:w-[480px] lg:h-[480px] rounded-full border-[16px] border-white shadow-2xl overflow-hidden bg-white relative z-10">
+                                    <img src="https://api.dicebear.com/7.x/bottts-neutral/svg?seed=Ami&backgroundColor=FFD700" class="w-full h-full object-cover" />
+                                </div>
+                                <div class="absolute -bottom-8 left-1/2 -translate-x-1/2 bg-sky-500 text-white px-12 py-3 rounded-[24px] font-black text-3xl shadow-2xl z-20 border-4 border-white whitespace-nowrap font-jua">Ami</div>
+                             </div>
+                         </div>
+
+                         <!-- Right Side: Dialogue & Controls Area -->
+                         <div class="w-[45%] lg:w-[40%] bg-white/40 backdrop-blur-md flex flex-col items-center justify-center p-16 gap-16 border-l border-white/50">
+                             <!-- STT Sentence Box -->
+                             <div class="w-full flex flex-col items-center gap-10 text-center animate-in slide-in-from-right duration-700">
+                                <div class="bg-sky-500 text-white px-8 py-2 rounded-full font-black text-xl uppercase tracking-[0.2em] shadow-lg mb-4">Repeat After Me</div>
+                                <div class="min-h-[240px] flex flex-col justify-center">
+                                    <p id="talkSentenceDisplay" class="text-5xl lg:text-7xl font-black text-slate-800 leading-[1.2] font-fredoka">
+                                        <!-- Dynamic text with highlighting -->
+                                        "I found my color—me!"
+                                    </p>
+                                </div>
+                             </div>
+
+                             <!-- Control Bar -->
+                             <div class="flex flex-col items-center gap-10">
+                                 <div class="flex items-center gap-12">
+                                    <button onclick="playTalkGuide()" class="w-24 h-24 bg-white rounded-3xl flex items-center justify-center text-sky-500 shadow-xl hover:scale-110 active:scale-95 transition-all border-4 border-sky-50 group">
+                                        <i data-lucide="volume-2" class="w-12 h-12 group-hover:animate-pulse"></i>
+                                    </button>
+                                    
+                                    <button id="recordBtn" onclick="toggleTalkRecording()" class="w-36 h-36 bg-[#FF6B00] rounded-full flex items-center justify-center text-white shadow-2xl hover:scale-110 active:scale-95 transition-all relative group">
+                                        <div id="recordGlow" class="absolute inset-0 bg-orange-400 rounded-full opacity-0 blur-2xl"></div>
+                                        <i data-lucide="mic" id="recordIcon" class="w-16 h-16 relative z-10"></i>
+                                    </button>
+
+                                    <button onclick="finishTalking()" class="w-24 h-24 bg-emerald-500 rounded-3xl flex items-center justify-center text-white shadow-xl hover:scale-110 active:scale-95 transition-all group">
+                                        <i data-lucide="check" class="w-12 h-12 group-hover:scale-125 transition-transform"></i>
+                                    </button>
+                                 </div>
+                                 <p class="text-xl font-bold text-slate-400 uppercase tracking-widest">Listen & Record</p>
+                             </div>
+                         </div>
                     </div>
             </div>
             </main>
@@ -2842,13 +2933,21 @@
                     renderReadPhase();
                 }
 
+                if (phase === 'talk') {
+                    renderTalkPhase();
+                }
+
+                if (phase === 'quiz') {
+                    renderQuizPhase();
+                }
+
                 // Update Tabs
-                const tabs = ['voca', 'read', 'talk', 'quiz'];
+                const tabs = ['voca', 'read', 'quiz', 'talk'];
                 tabs.forEach(t => {
                     const btn = document.getElementById(`tab-${t}`);
                     if (btn) {
                         // Check if this tab is unlocked
-                        const isUnlocked = (t === 'voca') || (t === 'read') || (t === 'talk') || (t === 'quiz');
+                        const isUnlocked = (t === 'voca') || (t === 'read') || (t === 'quiz') || (t === 'talk');
 
                         // Reset all tabs to default state
                         btn.classList.remove('bg-white', 'text-orange-500', 'shadow-sm', 'opacity-50', 'cursor-not-allowed', 'text-slate-400', 'text-slate-700');
@@ -3211,8 +3310,8 @@
                 overlay.className = 'fixed inset-0 z-[110] bg-black/80 backdrop-blur-sm flex items-center justify-center animate-in fade-in duration-500 cursor-pointer';
                 overlay.onclick = () => {
                     overlay.remove();
-                    // Direct transition to Talking phase
-                    setPhase('talk');
+                    // Lead to Quiz phase
+                    setPhase('quiz');
                 };
                 overlay.innerHTML = `
                 <div class="relative flex flex-col items-center justify-center animate-in zoom-in-50 duration-500">
@@ -3220,12 +3319,114 @@
                     <div class="absolute inset-0 bg-yellow-400/30 blur-[100px] rounded-full"></div>
                     
                     <!-- Praise Badge Image -->
-                    <img src="./public/UI/praise_badge.png" alt="Great! Let's speak" class="w-[600px] h-auto object-contain drop-shadow-2xl relative z-10 hover:scale-105 transition-transform duration-300" />
+                    <img src="./public/UI/praise_badge.png" alt="Great! Let's Quiz" class="w-[600px] h-auto object-contain drop-shadow-2xl relative z-10 hover:scale-105 transition-transform duration-300" />
                     
                     <p class="mt-8 text-white text-2xl font-fredoka font-bold animate-pulse">Click to continue</p>
                 </div>
             `;
                 document.body.appendChild(overlay);
+            }
+
+            // --- Quiz & Talking JS Helpers ---
+            window.renderQuizPhase = function() {
+                lucide.createIcons();
+            }
+
+            window.finishQuiz = function() {
+                setPhase('talk');
+            }
+
+            let isTalkRecording = false;
+            let talkSttInterval = null;
+
+            window.renderTalkPhase = function() {
+                const book = booksData.find(b => b.id === currentModalBookId) || booksData[0];
+                const sentenceDisplay = document.getElementById('talkSentenceDisplay');
+                
+                // Get the final sentence of the book or a key sentence
+                const scenes = mockScenes.filter(s => s.id === (currentModalBookId || 'OG0046'));
+                const finalScene = scenes[scenes.length - 1];
+                const sentence = finalScene ? finalScene.script.split('\n')[0].replace(/[".]/g, '') : "I found my color!";
+                
+                // Wrap words for highlighting
+                const words = sentence.split(' ');
+                sentenceDisplay.innerHTML = words.map((w, i) => `<span class="stt-word" id="talk-word-${i}">${w}</span>`).join(' ');
+                
+                lucide.createIcons();
+            }
+
+            window.toggleTalkRecording = function() {
+                isTalkRecording = !isTalkRecording;
+                const btn = document.getElementById('recordBtn');
+                const icon = document.getElementById('recordIcon');
+                const glow = document.getElementById('recordGlow');
+                const ripple = document.getElementById('talkRipple');
+
+                if (isTalkRecording) {
+                    btn.classList.add('bg-red-500', 'animate-pulse');
+                    btn.classList.remove('bg-[#FF6B00]');
+                    icon.setAttribute('data-lucide', 'square');
+                    glow.classList.add('opacity-100');
+                    ripple.classList.add('animate-ripple');
+                    
+                    // Mock STT highlighting
+                    let wordIndex = 0;
+                    const words = document.querySelectorAll('.stt-word');
+                    clearInterval(talkSttInterval);
+                    talkSttInterval = setInterval(() => {
+                        if (wordIndex < words.length) {
+                            words.forEach(w => w.classList.remove('highlight'));
+                            words[wordIndex].classList.add('highlight');
+                            wordIndex++;
+                        } else {
+                            clearInterval(talkSttInterval);
+                        }
+                    }, 400);
+                } else {
+                    btn.classList.remove('bg-red-500', 'animate-pulse');
+                    btn.classList.add('bg-[#FF6B00]');
+                    icon.setAttribute('data-lucide', 'mic');
+                    glow.classList.remove('opacity-100');
+                    ripple.classList.remove('animate-ripple');
+                    clearInterval(talkSttInterval);
+                }
+                lucide.createIcons();
+            }
+
+            window.playTalkGuide = function() {
+                const sentence = document.getElementById('talkSentenceDisplay').innerText;
+                if ('speechSynthesis' in window) {
+                    window.speechSynthesis.cancel();
+                    const utterance = new SpeechSynthesisUtterance(sentence);
+                    utterance.lang = 'en-US';
+                    window.speechSynthesis.speak(utterance);
+                }
+            }
+
+            window.finishTalking = function() {
+                // Show final completion praise
+                showFinalCompletionPraise();
+            }
+
+            function showFinalCompletionPraise() {
+                const overlay = document.createElement('div');
+                overlay.className = 'fixed inset-0 z-[120] bg-black/90 backdrop-blur-md flex items-center justify-center animate-in fade-in duration-700';
+                overlay.innerHTML = `
+                    <div class="flex flex-col items-center gap-12 animate-in zoom-in-90 duration-500">
+                        <div class="w-48 h-48 bg-emerald-500 rounded-full flex items-center justify-center text-white shadow-[0_0_50px_rgba(16,185,129,0.4)] animate-bounce">
+                            <i data-lucide="trophy" class="w-24 h-24"></i>
+                        </div>
+                        <div class="text-center space-y-4">
+                            <h2 class="text-6xl font-black text-white font-jua">Great Job!</h2>
+                            <p class="text-2xl text-emerald-400 font-bold">You finished the entire lesson!</p>
+                        </div>
+                        <button onclick="exitLearningMode(); this.closest('div').parentElement.remove();" class="px-12 py-5 bg-white text-slate-900 rounded-[32px] font-black text-3xl shadow-2xl hover:scale-105 active:scale-95 transition-all">
+                            Back to Home
+                        </button>
+                    </div>
+                `;
+                document.body.appendChild(overlay);
+                lucide.createIcons();
             }
 
 

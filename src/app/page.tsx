@@ -12,11 +12,13 @@ import { ReadingHistory } from '@/types/learning';
 import { getReadingHistory } from '@/utils/storage';
 import MyLibrarySection from '@/components/MyLibrarySection';
 import GNB from '@/components/GNB';
+import QuizSection from '@/components/QuizSection';
+import TalkSection from '@/components/TalkSection';
 
 
 export default function Home() {
     const userName = "Ami";
-    const [view, setView] = useState<'home' | 'word' | 'read' | 'library' | 'my-library'>('home');
+    const [view, setView] = useState<'home' | 'word' | 'read' | 'quiz' | 'speak' | 'library' | 'my-library'>('home');
     const [libraryTab, setLibraryTab] = useState<{ zone: string, subTab: string } | null>(null);
     const [currentBook, setCurrentBook] = useState<Book | null>(null);
     const [isDemoMode, setIsDemoMode] = useState(true);
@@ -248,7 +250,7 @@ export default function Home() {
     return (
         <div className="min-h-screen">
             {/* Global GNB for Home and My Library */}
-            {view !== 'library' && view !== 'word' && view !== 'read' && (
+            {view !== 'library' && view !== 'word' && view !== 'read' && view !== 'quiz' && view !== 'speak' && (
                 <GNB 
                     userName={userName} 
                     currentView={view}
@@ -511,6 +513,22 @@ export default function Home() {
 
             {view === 'read' && currentBook && (
                 <ReadSection
+                    book={currentBook}
+                    onClose={() => setView('home')}
+                    onSwitchPhase={(phase) => setView(phase as any)}
+                />
+            )}
+
+            {view === 'quiz' && currentBook && (
+                <QuizSection
+                    onNext={() => setView('speak')}
+                    onClose={() => setView('home')}
+                    onSwitchPhase={(phase) => setView(phase as any)}
+                />
+            )}
+
+            {view === 'speak' && currentBook && (
+                <TalkSection
                     book={currentBook}
                     onClose={() => setView('home')}
                     onSwitchPhase={(phase) => setView(phase as any)}

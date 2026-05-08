@@ -21,7 +21,7 @@ export default function Home() {
     const [currentBook, setCurrentBook] = useState<Book | null>(null);
     const [isDemoMode, setIsDemoMode] = useState(true);
 
-    // Mock History for Demo (Initial state: Silent Stick, Hans, Milo)
+    // Mock History for Demo (Initial state: Silent Stick, Hans, Milo + 4 completed books)
     const mockHistory: ReadingHistory[] = [
         {
             bookId: 'OG0046',
@@ -34,7 +34,32 @@ export default function Home() {
             currentPhase: 'read',
             completedPhases: ['word'],
             lastUpdateTime: Date.now() - 30000
-        }
+        },
+        // Completed books for demo (all 4 phases done)
+        {
+            bookId: 'OG0021',
+            currentPhase: 'quiz',
+            completedPhases: ['word', 'read', 'quiz', 'review'],
+            lastUpdateTime: Date.now() - 100000
+        },
+        {
+            bookId: 'OG0050',
+            currentPhase: 'quiz',
+            completedPhases: ['word', 'read', 'quiz', 'review'],
+            lastUpdateTime: Date.now() - 200000
+        },
+        {
+            bookId: 'OG00XX_missing_planet',
+            currentPhase: 'quiz',
+            completedPhases: ['word', 'read', 'quiz', 'review'],
+            lastUpdateTime: Date.now() - 300000
+        },
+        {
+            bookId: 'OG00XX_rainbow',
+            currentPhase: 'quiz',
+            completedPhases: ['word', 'read', 'quiz', 'review'],
+            lastUpdateTime: Date.now() - 400000
+        },
     ];
 
     const [readingHistory, setReadingHistory] = useState<ReadingHistory[]>([]);

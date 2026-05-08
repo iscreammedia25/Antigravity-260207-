@@ -69,7 +69,7 @@ const MyLibrarySection: React.FC<MyLibrarySectionProps> = ({
     const leftTabs = [
         { id: 'reading', label: 'In Progress', icon: Clock },
         { id: 'completed', label: 'Completed', icon: Trophy },
-        { id: 'wishlist', label: '❤️ Wishlist', icon: Heart },
+        { id: 'wishlist', label: 'Wishlist', icon: Heart },
     ];
 
     return (
@@ -77,47 +77,47 @@ const MyLibrarySection: React.FC<MyLibrarySectionProps> = ({
             {/* Sub-Navigation Header */}
             <div className="bg-white border-b border-slate-200 sticky top-24 z-40 shadow-sm">
                 <div className="max-w-[1400px] mx-auto w-full px-8 flex items-center justify-between h-16">
-                    <div className="flex items-center gap-8">
+                    <div className="flex items-center gap-6">
                         <h2 className="text-xl font-black text-slate-800 font-jua flex items-center gap-2">
                             My Library
                         </h2>
 
-                        {/* Roadmap on the left now */}
-                        <button
-                            onClick={() => setActiveTab('roadmap')}
-                            className={`flex items-center gap-3 px-6 py-2.5 rounded-2xl font-black transition-all border-2 border-transparent active:scale-95 ${
-                                activeTab === 'roadmap'
-                                    ? 'bg-[#fbbf24] text-[#0f172a] shadow-[0_0_20px_rgba(251,191,36,0.4)] scale-105'
-                                    : 'bg-amber-50 text-amber-600 hover:bg-amber-100'
-                            }`}
-                        >
-                            <Map className={`w-5 h-5 ${activeTab === 'roadmap' ? 'animate-bounce' : ''}`} />
-                            <span className="text-sm uppercase tracking-widest">Roadmap</span>
-                        </button>
-                    </div>
-
-                    <div className="flex items-center gap-6">
-                        {/* Text Tabs on the right */}
-                        <div className="flex items-center gap-2 mr-4">
+                        {/* In Progress / Completed / Wishlist — Library Zone 탭과 동일한 디자인 */}
+                        <div className="flex gap-4 p-1.5 bg-black/30 rounded-[28px] w-fit border-2 border-white/5 shadow-inner">
                             {leftTabs.map((tab) => (
                                 <button
                                     key={tab.id}
                                     onClick={() => setActiveTab(tab.id as LibraryTab)}
-                                    className={`flex items-center gap-2 px-5 py-2 rounded-xl font-black transition-all ${
-                                        activeTab === tab.id 
-                                            ? 'bg-slate-800 text-white shadow-md' 
-                                            : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100'
+                                    className={`flex items-center gap-2 px-8 py-3 rounded-[22px] font-black text-lg transition-all ${
+                                        activeTab === tab.id
+                                            ? 'bg-[#fbbf24] text-[#0f172a] shadow-xl shadow-amber-500/20 transform scale-[1.05]'
+                                            : 'text-slate-500 hover:text-slate-300'
                                     }`}
                                 >
                                     <tab.icon className="w-4 h-4" />
-                                    <span className="text-sm uppercase tracking-widest">{tab.label}</span>
+                                    <span>{tab.label}</span>
                                 </button>
                             ))}
                         </div>
-                        
+                    </div>
+
+                    <div className="flex items-center gap-4">
+                        {/* Roadmap — 우측 outline 버튼 스타일 */}
+                        <button
+                            onClick={() => setActiveTab('roadmap')}
+                            className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl font-black text-sm transition-all border-2 active:scale-95 ${
+                                activeTab === 'roadmap'
+                                    ? 'bg-slate-800 text-white border-slate-800 shadow-lg'
+                                    : 'text-slate-500 border-slate-200 hover:border-slate-400 hover:text-slate-700'
+                            }`}
+                        >
+                            <Map className="w-4 h-4" />
+                            <span className="uppercase tracking-widest">Roadmap</span>
+                        </button>
+
                         <div className="w-px h-8 bg-slate-200" />
 
-                        <button 
+                        <button
                             onClick={onClose}
                             className="w-10 h-10 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all"
                         >
@@ -398,57 +398,45 @@ const ActiveReadingTab: React.FC<{
     );
 };
 
-const FinishedTab: React.FC<{ 
-    readingHistory: ReadingHistory[], 
+const COMPLETED_MOCK_RATINGS: Record<string, number> = {
+    'CS0003': 5, 'OG0021': 5, 'OG0046': 5, 'OG0050': 4,
+    'OG00XX_missing_planet': 3, 'OG00XX_rainbow': 4,
+    'OG00XX_two_friends': 5, 'OG00XX_silent_seed': 4,
+};
+
+const FinishedTab: React.FC<{
+    readingHistory: ReadingHistory[],
     onViewInfo: (book: Book) => void,
     ratingFilters: Record<number, boolean>,
     setRatingFilters: React.Dispatch<React.SetStateAction<Record<number, boolean>>>
-}> = ({ readingHistory, onViewInfo, ratingFilters, setRatingFilters }) => {
-    
-    const finishedItems = useMemo(() => {
-        return readingHistory
-            .filter(h => h.completedPhases.length === 4)
-            .map(h => {
-                const book = BOOKS_DATA.find(b => b.id === h.bookId) || BOOKS_DATA[0];
-                // Handle cases where rating is missing in mock data
-                const rating = book.rating || 0;
-                return { book, history: h, rating };
-            })
-            .filter(item => {
-                const r = item.book.rating || 4; // default to 4 for demo if missing
-                return ratingFilters[r as number];
-            });
-    }, [readingHistory, ratingFilters]);
+}> = ({ onViewInfo, ratingFilters, setRatingFilters }) => {
 
-    const toggleRatingFilter = (rating: number) => {
-        setRatingFilters(prev => ({ ...prev, [rating]: !prev[rating] }));
-    };
+    // BOOKS_DATA에서 목업으로 사용할 책 수량 확대 (18권)
+    const allCompletedMock = useMemo(() =>
+        BOOKS_DATA.slice(0, 18).map((book, idx) => {
+            // 별점 분포: 1~5점이 골고루 나오도록 (idx % 5 + 1)
+            // 특정 ID에 대해서는 고정값 사용
+            const fixedRating = COMPLETED_MOCK_RATINGS[book.id];
+            const dynamicRating = (5 - (idx % 5)); // 5, 4, 3, 2, 1 순서로 반복
+            return {
+                book,
+                rating: fixedRating ?? dynamicRating
+            };
+        })
+    , []);
 
-    // Demo enhancement: Ensure at least 4 items for "My Favorites" to show scrolling
-    const favoriteItems = useMemo(() => {
-        const actualFavorites = finishedItems.filter(item => item.book.rating === 5);
-        if (actualFavorites.length < 4) {
-            // Fill with other completed books or some default books for demo
-            const others = finishedItems.filter(item => item.book.rating !== 5);
-            return [...actualFavorites, ...others].slice(0, 4);
-        }
-        return actualFavorites;
-    }, [finishedItems]);
+    const finishedItems = useMemo(() =>
+        allCompletedMock.filter(item => ratingFilters[item.rating] !== false)
+    , [allCompletedMock, ratingFilters]);
+
+    const toggleRatingFilter = (r: number) =>
+        setRatingFilters(prev => ({ ...prev, [r]: !prev[r] }));
 
     return (
-        <div className="space-y-16 animate-in fade-in slide-in-from-bottom-4">
-            {finishedItems.length === 0 ? (
-                <EmptyState 
-                    icon={Trophy} 
-                    title="No trophies yet!"
-                    ctaText="Complete a Book!"
-                    onCtaClick={() => onNavigate('In Progress')} 
-                />
-            ) : (
-                <>
-                    {/* 1. Top Section: My Reading Journey (Mini Dashboard) */}
-                    <div className="bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] p-8 rounded-[40px] shadow-lg relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6 border-0">
-                <div className="absolute inset-0 bg-white/5 opacity-50 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px]"></div>
+        <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4">
+            {/* 1. My Reading Journey Banner */}
+            <div className="bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] p-8 rounded-[40px] shadow-lg relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6">
+                <div className="absolute inset-0 opacity-30 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px]" />
                 <div className="flex items-center gap-6 relative z-10">
                     <div className="w-20 h-20 bg-[#fbbf24] rounded-full flex items-center justify-center flex-shrink-0 shadow-lg border-4 border-[#fcd34d]">
                         <Trophy className="w-10 h-10 text-white fill-white" />
@@ -457,96 +445,74 @@ const FinishedTab: React.FC<{
                         <h3 className="text-3xl font-black text-white font-jua uppercase tracking-tight mb-1 drop-shadow-sm">My Reading Journey</h3>
                         <div className="flex items-end gap-3">
                             <p className="text-xl font-bold text-white/90">
-                                Wow! You've successfully finished <span className="text-[#fde047] font-black text-3xl drop-shadow-md mx-1">{finishedItems.length}</span> books!
+                                Wow! You&apos;ve successfully finished{' '}
+                                <span className="text-[#fde047] font-black text-3xl drop-shadow-md mx-1">{allCompletedMock.length}</span>
+                                books!
                             </p>
-                            {/* Mini decorative bar chart */}
                             <div className="flex items-end gap-1.5 ml-2 mb-1.5">
-                                <div className="w-2.5 h-4 bg-[#6ee7b7] rounded-full shadow-sm"></div>
-                                <div className="w-2.5 h-6 bg-[#67e8f9] rounded-full shadow-sm"></div>
-                                <div className="w-2.5 h-8 bg-[#f9a8d4] rounded-full shadow-sm"></div>
+                                <div className="w-2.5 h-4 bg-[#6ee7b7] rounded-full" />
+                                <div className="w-2.5 h-6 bg-[#67e8f9] rounded-full" />
+                                <div className="w-2.5 h-8 bg-[#f9a8d4] rounded-full" />
                             </div>
                         </div>
                     </div>
                 </div>
-                <button className="px-8 py-4 bg-[#14b8a6] hover:bg-[#0d9488] text-white rounded-full font-black text-lg shadow-[0_6px_0_#0f766e] active:shadow-[0_0px_0_#0f766e] active:translate-y-1.5 transition-all relative z-10 whitespace-nowrap">
+                <button className="px-8 py-4 bg-[#14b8a6] hover:bg-[#0d9488] text-white rounded-full font-black text-lg shadow-[0_6px_0_#0f766e] active:shadow-none active:translate-y-1.5 transition-all relative z-10 whitespace-nowrap">
                     View My Report
                 </button>
             </div>
 
-
-            {/* 2. Bottom Section: All Completed Books (Grid) */}
+            {/* 2. Completed Books Grid */}
             <div className="space-y-6">
-                <div className="flex items-center justify-between flex-wrap gap-4">
-                    <div className="flex items-center gap-6">
-                        <div className="relative group">
-                            <select className="appearance-none h-12 pl-5 pr-10 bg-white border-2 border-slate-100 rounded-2xl font-bold text-slate-600 outline-none focus:border-indigo-400 transition-all cursor-pointer shadow-sm">
-                                <option>Newest First</option>
-                                <option>Oldest First</option>
-                            </select>
-                            <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-                        </div>
-
-                        {/* Rating Filters */}
-                        <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-2xl border-2 border-slate-100 shadow-sm">
-                            <span className="font-black text-slate-400 text-[10px] uppercase tracking-widest mr-2">Ratings</span>
-                            {[5, 4, 3, 2, 1].map(r => (
-                                <button
-                                    key={r}
-                                    onClick={() => toggleRatingFilter(r)}
-                                    className={`flex items-center gap-1 px-3 py-2 rounded-xl transition-all border-2 ${
-                                        ratingFilters[r] 
-                                            ? 'bg-amber-50 border-amber-200 text-amber-500 shadow-sm scale-105' 
-                                            : 'bg-slate-50 border-transparent text-slate-300 hover:border-slate-200'
-                                    }`}
-                                >
-                                    <div className="flex items-center">
-                                        {[...Array(r)].map((_, i) => (
-                                            <Star key={i} className={`w-3 h-3 ${ratingFilters[r] ? 'fill-current' : ''}`} />
-                                        ))}
-                                    </div>
-                                </button>
-                            ))}
-                        </div>
+                {/* Toolbar */}
+                <div className="flex items-center gap-6 flex-wrap">
+                    <div className="relative">
+                        <select className="appearance-none h-12 pl-5 pr-10 bg-white border-2 border-slate-100 rounded-2xl font-bold text-slate-600 outline-none focus:border-indigo-400 transition-all cursor-pointer shadow-sm">
+                            <option>Recent</option>
+                            <option>Level (↑)</option>
+                            <option>Level (↓)</option>
+                        </select>
+                        <i data-lucide="chevron-down" class="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none"></i>
+                    </div>
+                    {/* Rating Filters */}
+                    <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-2xl border-2 border-slate-100 shadow-sm">
+                        {[5, 4, 3, 2, 1].map(r => (
+                            <button key={r} onClick={() => toggleRatingFilter(r)}
+                                className={`flex items-center gap-0.5 px-3 py-2 rounded-xl transition-all border-2 ${ratingFilters[r] ? 'bg-amber-50 border-amber-200 text-amber-500 shadow-sm scale-105' : 'bg-slate-50 border-transparent text-slate-300 hover:border-slate-200'}`}
+                            >
+                                {[...Array(r)].map((_, i) => <Star key={i} className={`w-3 h-3 ${ratingFilters[r] ? 'fill-current' : ''}`} />)}
+                            </button>
+                        ))}
                     </div>
                 </div>
 
-                {finishedItems.length === 0 ? (
-                    <EmptyState 
-                        icon={Trophy} 
-                        title="Trophy shelf is empty!"
-                        ctaText="Start Your First Book"
-                        onCtaClick={() => {}} // Navigate to library logic
-                    />
-                ) : (
-                    <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
-                        {finishedItems.map(({ book }, idx) => {
-                            let rating = book.rating;
-                            if (!rating || rating <= 0) {
-                                rating = idx % 2 === 0 ? 4 : 2;
-                            }
-                            return (
-                                <div key={book.id} onClick={() => onViewInfo(book)} className="relative group cursor-pointer aspect-[3/4] rounded-[20px] overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-300 border-[3px] border-slate-100 hover:border-indigo-100 bg-slate-50 w-full">
-                                    <img src={book.src} alt={book.title} className="w-full h-full object-cover pointer-events-none" />
-                                    <div className="absolute inset-0 bg-slate-900/10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
-                                    
-                                    {/* Top-right: Completed green badge */}
-                                    <div className="absolute top-2 right-2 flex items-center gap-0.5 px-1.5 py-0.5 bg-emerald-500 rounded-full shadow-md">
-                                        <CheckCircle2 className="w-2.5 h-2.5 text-white" />
-                                        <span className="text-[8px] font-black text-white leading-none">Completed</span>
-                                    </div>
-                                    
-                                    {/* Bottom center: star emoji */}
-                                    <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-max">
-                                        <div className="bg-white/95 backdrop-blur-sm px-1.5 py-0.5 rounded-lg shadow-sm border border-amber-100 text-[11px] leading-none">
-                                            {'⭐'.repeat(rating)}
-                                        </div>
-                                    </div>
+                {/* Book Grid */}
+                <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+                    {finishedItems.map(({ book, rating }, idx) => (
+                        <div key={`${book.id}-${idx}`} onClick={() => onViewInfo(book)}
+                            className="relative group cursor-pointer aspect-[3/4] rounded-[24px] overflow-hidden shadow-md hover:shadow-xl hover:-translate-y-2 transition-all duration-300 border-[3px] border-white bg-slate-200"
+                        >
+                            <img src={book.src} alt={book.title} className="w-full h-full object-cover pointer-events-none" />
+                            <div className="absolute inset-0 bg-slate-900/15 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+
+                            {/* ✅ Top-right: Completed badge (Pill style) */}
+                            <div className="absolute top-3 right-3 flex items-center gap-1 px-2.5 py-1 bg-emerald-500 rounded-full shadow-lg z-10">
+                                <CheckCircle2 className="w-3.5 h-3.5 text-white" />
+                                <span className="text-[10px] font-black text-white leading-none tracking-wide uppercase">Completed</span>
+                            </div>
+
+                            {/* ⭐ Bottom center: Star rating (White pill) */}
+                            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20">
+                                <div className="bg-white/95 backdrop-blur-sm px-2.5 py-1 rounded-xl shadow-md border border-amber-100 flex items-center gap-1">
+                                    {[...Array(rating)].map((_, i) => (
+                                        <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                                    ))}
                                 </div>
-                            );
-                        })}
-                    </div>
-                </>
-            )}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
         </div>
     );
 };
@@ -606,7 +572,7 @@ const WishlistTab: React.FC<{
                         value={sortBy}
                         onChange={(e) => setSortBy(e.target.value)}
                     >
-                        <option value="Recent">Newest First</option>
+                        <option value="Recent">Recent</option>
                         <option value="ABC">A to Z</option>
                         <option value="ZYX">Z to A</option>
                     </select>
@@ -638,7 +604,7 @@ const WishlistTab: React.FC<{
                     icon={Heart} 
                     title="Wishlist is lonely!"
                     ctaText="Find My Favorites"
-                    onCtaClick={() => onNavigate('Picks')} 
+                    onCtaClick={() => {}} 
                 />
             ) : (
                 <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">

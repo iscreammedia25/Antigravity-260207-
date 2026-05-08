@@ -215,13 +215,23 @@ const LibrarySection: React.FC<LibrarySectionProps> = ({ userName, onViewInfo, o
                 {/* Zone Toggle Tabs */}
                 {!isSearchExecuted && (
                     <div className="flex gap-4 p-1.5 bg-black/30 rounded-[28px] w-fit border-2 border-white/5 shadow-inner">
-                        {(Object.keys(zones) as Zone[]).map((zone) => (
+                        {(Object.keys(zones) as Zone[]).filter(z => z !== 'My Library').map((zone) => (
                             <button
                                 key={zone}
                                 onClick={() => handleZoneChange(zone)}
-                                className={`px-8 py-3 rounded-[22px] font-black text-lg transition-all ${activeZone === zone ? 'bg-[#fbbf24] text-[#0f172a] shadow-xl shadow-amber-500/20 transform scale-[1.05]' : 'text-slate-500 hover:text-slate-300'}`}
+                                className={`inline-flex flex-row items-center gap-2.5 px-8 py-3 rounded-[22px] font-black text-lg transition-all whitespace-nowrap ${activeZone === zone ? 'bg-[#fbbf24] text-[#0f172a] shadow-xl shadow-amber-500/20 transform scale-[1.05]' : 'text-slate-500 hover:text-slate-300'}`}
                             >
-                                {zone}
+                                {zone === 'Book Zone' ? (
+                                    <div className="flex flex-row items-center gap-2 justify-center">
+                                        <BookOpen className="w-5 h-5 shrink-0" />
+                                        <span className="whitespace-nowrap">Book</span>
+                                    </div>
+                                ) : (
+                                    <div className="flex flex-row items-center gap-2 justify-center">
+                                        <Play className="w-5 h-5 fill-current shrink-0" />
+                                        <span className="whitespace-nowrap">Media</span>
+                                    </div>
+                                )}
                             </button>
                         ))}
                     </div>
@@ -287,9 +297,9 @@ const LibrarySection: React.FC<LibrarySectionProps> = ({ userName, onViewInfo, o
                                         disabled={activeSubTab === 'Picks' && picksActiveCategory === 'All'}
                                         className={`appearance-none h-14 pl-6 pr-12 border-2 rounded-2xl font-bold outline-none transition-all ${activeSubTab === 'Picks' && picksActiveCategory === 'All' ? 'bg-slate-700/30 border-white/5 text-slate-500 cursor-not-allowed' : 'bg-white/5 border-white/5 text-slate-300 focus:border-[#fbbf24]/50 cursor-pointer'}`}
                                     >
-                                        <option value="Recent" className="bg-[#1e293b]">Newest First</option>
-                                        <option value="ABC" className="bg-[#1e293b]">A to Z</option>
-                                        <option value="ZYX" className="bg-[#1e293b]">Z to A</option>
+                                        <option value="Recent" className="bg-[#1e293b]">Recent</option>
+                                        <option value="Level-ASC" className="bg-[#1e293b]">Level (↑)</option>
+                                        <option value="Level-DESC" className="bg-[#1e293b]">Level (↓)</option>
                                     </select>
                                     <ChevronRight className={`absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 pointer-events-none rotate-90 ${activeSubTab === 'Picks' && picksActiveCategory === 'All' ? 'text-slate-600' : 'text-slate-400'}`} />
                                 </div>
@@ -465,7 +475,8 @@ const MediaZoneContent = ({ activeSubTab, mediaSortBy, setMediaSortBy, mediaShow
                         </div>
                     </div>
                     <div className="absolute bottom-3 right-3 px-2.5 py-1 bg-black/70 backdrop-blur-md rounded-lg text-white font-black text-xs tabular-nums tracking-wider shadow-sm border border-white/20">
-                        {item.duration}
+                        <option>Recent</option>
+                        <option>Oldest First</option>
                     </div>
                     {item.isUnplayed && (
                         <div className="absolute top-3 left-3 px-3 py-1 bg-[#fbbf24] text-[#0f172a] font-black text-[9px] uppercase tracking-widest rounded-full shadow-md z-10 border-2 border-transparent group-hover:border-white/50 transition-colors">NEW</div>
@@ -498,9 +509,9 @@ const MediaZoneContent = ({ activeSubTab, mediaSortBy, setMediaSortBy, mediaShow
                     <div className="relative group">
                         <select value={mediaSortBy} onChange={e => setMediaSortBy(e.target.value)}
                             className="appearance-none h-14 pl-6 pr-12 bg-white/5 border-2 border-white/5 rounded-2xl font-bold text-slate-300 outline-none focus:border-[#fbbf24]/50 transition-all cursor-pointer">
-                            <option value="Recent" className="bg-[#1e293b]">Newest First</option>
-                            <option value="ABC" className="bg-[#1e293b]">A to Z</option>
-                            <option value="ZYX" className="bg-[#1e293b]">Z to A</option>
+                            <option value="Recent">Recent</option>
+                            <option value="ABC">A to Z</option>
+                            <option value="ZYX">Z to A</option>
                         </select>
                         <svg className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
                     </div>

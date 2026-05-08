@@ -558,7 +558,7 @@
                                 <span
                                     class="font-bold text-lg tracking-wide group-hover:text-amber-500 transition-colors">Vocabulary</span>
                             </button>
-                            <button onclick="openLibraryFullPage('My Library', 'Roadmap'); toggleProfileMenu();"
+                            <button onclick="openLibraryFullPage('My Library', 'In Progress'); toggleProfileMenu();"
                                 class="w-full flex items-center gap-4 px-4 py-3 bg-white hover:bg-slate-50 text-slate-700 rounded-2xl transition-colors text-left group">
                                 <div
                                     class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center group-hover:bg-rose-100 transition-colors">
@@ -977,7 +977,7 @@
                                                 <span
                                                     class="font-bold text-lg tracking-wide group-hover:text-amber-500 transition-colors">Vocabulary</span>
                                             </button>
-                                            <button onclick="openLibraryFullPage('My Library', 'Roadmap'); toggleProfileMenu(event);"
+                                            <button onclick="openLibraryFullPage('My Library', 'In Progress'); toggleProfileMenu(event);"
                                                 class="w-full flex items-center gap-4 px-4 py-3 bg-white hover:bg-slate-50 text-slate-700 rounded-2xl transition-colors text-left group">
                                                 <div
                                                     class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center group-hover:bg-rose-100 transition-colors">
@@ -1140,12 +1140,18 @@
                         <div class="global-container h-16 flex items-center justify-between">
                             <div id="zoneToggleGroup" class="flex gap-2 p-1 bg-black/30 rounded-[28px] border border-white/5 w-fit">
                                 <button onclick="setActiveZone('Book Zone')" id="zone-book"
-                                    class="px-8 py-2.5 rounded-[22px] font-black text-base transition-all bg-[#fbbf24] text-[#0f172a] shadow-xl">
-                                    Book Zone
+                                    class="flex flex-row items-center justify-center gap-2 px-8 py-2.5 rounded-[22px] font-black text-base transition-all bg-[#fbbf24] text-[#0f172a] shadow-xl whitespace-nowrap">
+                                    <div class="flex flex-row items-center gap-2">
+                                        <i data-lucide="book-open" class="w-5 h-5"></i>
+                                        <span>Book</span>
+                                    </div>
                                 </button>
                                 <button onclick="setActiveZone('Media Zone')" id="zone-media"
-                                    class="px-8 py-2.5 rounded-[22px] font-black text-base transition-all text-white/50 hover:text-white">
-                                    Media Zone
+                                    class="flex flex-row items-center justify-center gap-2 px-8 py-2.5 rounded-[22px] font-black text-base transition-all text-white/50 hover:text-white whitespace-nowrap">
+                                    <div class="flex flex-row items-center gap-2">
+                                        <i data-lucide="play" class="w-5 h-5 fill-current"></i>
+                                        <span>Media</span>
+                                    </div>
                                 </button>
                             </div>
 
@@ -1461,7 +1467,7 @@
             const MY_LIBRARY_DUMMY_DATA = {
                 roadmap: booksData.slice(0, 15), // First 15 books for roadmap
                 inProgress: [booksData[0], booksData[1]],
-                completed: [booksData[2], booksData[3], booksData[4], booksData[5]],
+                completed: booksData.slice(0, 18),
                 wishlist: [booksData[6], booksData[7], booksData[8], booksData[9]]
             };
 
@@ -3688,36 +3694,46 @@
                 const tabs = libraryZones[currentActiveZone];
 
                 if (currentActiveZone === 'My Library') {
-                    let leftTabs = '';
-                    let rightTabs = '';
+                    let leftTabsHtml = '';
+                    let rightTabHtml = '';
 
                     tabs.forEach(tab => {
                         const safeTab = tab.replace(/'/g, "\\'");
                         if (tab === 'Roadmap') {
-                            leftTabs += `
-                                <div class="flex items-center pr-4">
-                                    <button onclick="setActiveSubTab('${safeTab}')"
-                                        class="relative px-6 py-2.5 rounded-2xl font-black transition-all flex items-center gap-3 border-2 border-transparent active:scale-95 ${currentActiveSubTab === tab ? 'bg-[#fbbf24] text-[#0f172a] shadow-[0_0_20px_rgba(251,191,36,0.4)] scale-105' : 'bg-amber-500/10 text-amber-500 hover:bg-amber-500/20'}">
-                                        <i data-lucide="map" class="w-5 h-5 ${currentActiveSubTab === tab ? 'animate-bounce' : ''}"></i>
-                                        <span class="uppercase tracking-widest text-sm">${tab}</span>
-                                    </button>
-                                </div>
+                            // Roadmap: 우측 outline 버튼
+                            rightTabHtml = `
+                                <button onclick="setActiveSubTab('${safeTab}')"
+                                    class="flex items-center gap-2 px-5 py-2.5 rounded-2xl font-black text-sm transition-all border-2 active:scale-95 ${currentActiveSubTab === tab ? 'bg-white text-slate-800 border-white shadow-lg' : 'text-slate-300 border-slate-600 hover:border-slate-400 hover:text-white'}">
+                                    <i data-lucide="map" class="w-4 h-4"></i>
+                                    <span class="uppercase tracking-widest">Roadmap</span>
+                                </button>
                             `;
                         } else {
-                            rightTabs += `
+                            // In Progress / Completed / Wishlist: 좌측 pill-group (dark navy)
+                            let iconHtml = '';
+                            if (tab === 'In Progress') {
+                                iconHtml = '<i data-lucide="clock" class="w-4 h-4"></i>';
+                            } else if (tab === 'Completed') {
+                                iconHtml = '<i data-lucide="trophy" class="w-4 h-4"></i>';
+                            } else if (tab.includes('Wishlist')) {
+                                iconHtml = '<i data-lucide="heart" class="w-4 h-4"></i>';
+                            }
+                            leftTabsHtml += `
                                 <button onclick="setActiveSubTab('${safeTab}')"
-                                    class="relative py-4 text-xl font-black transition-all flex items-center gap-3 ${currentActiveSubTab === tab ? 'text-[#fbbf24]' : 'text-slate-300 hover:text-white'}">
+                                    class="flex items-center gap-2 px-8 py-3 rounded-[22px] font-black text-lg transition-all ${currentActiveSubTab === tab ? 'bg-[#fbbf24] text-[#0f172a] shadow-xl shadow-amber-500/20 scale-[1.05]' : 'text-slate-500 hover:text-slate-300'}">
+                                    ${iconHtml}
                                     <span>${tab}</span>
-                                    ${currentActiveSubTab === tab ? '<div class="absolute bottom-0 left-0 right-0 h-1.5 bg-[#fbbf24] rounded-full animate-in fade-in slide-in-from-bottom-1"></div>' : ''}
                                 </button>
                             `;
                         }
                     });
 
                     container.innerHTML = `
-                        ${leftTabs}
-                        <div class="ml-auto flex items-center gap-8 pr-8">
-                            ${rightTabs}
+                        <div class="flex gap-4 p-1.5 bg-black/30 rounded-[28px] w-fit border-2 border-white/5 shadow-inner">
+                            ${leftTabsHtml}
+                        </div>
+                        <div class="ml-auto flex items-center gap-4 pr-4">
+                            ${rightTabHtml}
                         </div>
                     `;
                 } else {
@@ -4516,11 +4532,11 @@
                                 <div class="relative group">
                                     <select onchange="setLibrarySort(this.value)" ${isSortDisabled ? 'disabled' : ''}
                                         class="appearance-none h-14 pl-6 pr-12 border-2 border-slate-100 rounded-2xl font-bold outline-none transition-all ${isSortDisabled ? 'bg-slate-100 text-slate-400 opacity-70 cursor-not-allowed' : 'bg-white text-slate-600 focus:border-[#fbbf24] cursor-pointer'}">
-                                        <option value="Recent" ${librarySortBy === 'Recent' ? 'selected' : ''}>Newest First</option>
+                                        <option value="Recent" ${librarySortBy === 'Recent' ? 'selected' : ''}>Recent</option>
                                         <option value="ABC" ${librarySortBy === 'ABC' ? 'selected' : ''}>A to Z</option>
                                         <option value="ZYX" ${librarySortBy === 'ZYX' ? 'selected' : ''}>Z to A</option>
-                                        <option value="Level-ASC" ${librarySortBy === 'Level-ASC' ? 'selected' : ''}>Level: Easy to Hard</option>
-                                        <option value="Level-DESC" ${librarySortBy === 'Level-DESC' ? 'selected' : ''}>Level: Hard to Easy</option>
+                                        <option value="Level-ASC" ${librarySortBy === 'Level-ASC' ? 'selected' : ''}>Level (↑)</option>
+                                        <option value="Level-DESC" ${librarySortBy === 'Level-DESC' ? 'selected' : ''}>Level (↓)</option>
                                     </select>
                                     <i data-lucide="chevron-down" class="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none"></i>
                                 </div>
@@ -4832,39 +4848,66 @@
                         
                         // 2. Toolbar & Bottom Section: All Completed Books (Grid)
                         html += `
-                            <div class="flex items-center justify-between mt-0 mb-6">
-                                <div class="flex items-center gap-6">
-                                    <div class="relative group">
-                                        <select onchange="setLibrarySort(this.value)"
-                                            class="appearance-none h-14 pl-6 pr-12 border-2 border-slate-100 rounded-2xl font-bold outline-none transition-all bg-white text-slate-600 focus:border-[#fbbf24] cursor-pointer">
-                                            <option value="Recent" ${librarySortBy === 'Recent' ? 'selected' : ''}>Newest First</option>
-                                            <option value="ABC" ${librarySortBy === 'ABC' ? 'selected' : ''}>A to Z</option>
-                                            <option value="ZYX" ${librarySortBy === 'ZYX' ? 'selected' : ''}>Z to A</option>
-                                        </select>
-                                        <i data-lucide="chevron-down" class="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none"></i>
-                                    </div>
+                            <div class="space-y-6">
+                                <div class="flex items-center justify-between mb-6">
+                                    <div class="flex items-center gap-6">
+                                        <div class="relative group">
+                                            <select onchange="setLibrarySort(this.value)"
+                                                class="appearance-none h-14 pl-6 pr-12 border-2 border-slate-100 rounded-2xl font-bold outline-none transition-all bg-white text-slate-600 focus:border-[#fbbf24] cursor-pointer shadow-sm">
+                                                <option value="Recent" ${librarySortBy === 'Recent' ? 'selected' : ''}>Newest First</option>
+                                                <option value="ABC" ${librarySortBy === 'ABC' ? 'selected' : ''}>A to Z</option>
+                                                <option value="ZYX" ${librarySortBy === 'ZYX' ? 'selected' : ''}>Z to A</option>
+                                            </select>
+                                            <i data-lucide="chevron-down" class="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none"></i>
+                                        </div>
 
-                                    <!-- Rating Filters -->
-                                    <div class="flex items-center gap-2 bg-white px-4 py-2 rounded-2xl border-2 border-slate-100 shadow-sm">
-                                        <span class="font-black text-slate-400 text-[10px] uppercase tracking-widest mr-2">Ratings</span>
-                                        ${[5, 4, 3, 2, 1].map(r => `
-                                            <button onclick="toggleLibraryRatingFilter(${r})"
-                                                class="flex items-center gap-1 px-3 py-2 rounded-xl transition-all border-2 ${
-                                                    libraryRatingFilters[r] 
-                                                        ? 'bg-amber-50 border-amber-200 text-amber-500 shadow-sm scale-105' 
-                                                        : 'bg-slate-50 border-transparent text-slate-300 hover:border-slate-200'
-                                                }">
-                                                <div class="flex items-center">
-                                                    ${Array(r).fill(0).map(() => `<i data-lucide="star" class="w-3 h-3 ${libraryRatingFilters[r] ? 'fill-current' : ''}"></i>`).join('')}
-                                                </div>
-                                            </button>
-                                        `).join('')}
+                                        <!-- Rating Filters -->
+                                        <div class="flex items-center gap-2 bg-white px-4 py-2 rounded-2xl border-2 border-slate-100 shadow-sm">
+                                            ${[5, 4, 3, 2, 1].map(r => `
+                                                <button onclick="toggleLibraryRatingFilter(${r})"
+                                                    class="flex items-center gap-1 px-3 py-2 rounded-xl transition-all border-2 ${
+                                                        libraryRatingFilters[r] 
+                                                            ? 'bg-amber-50 border-amber-200 text-amber-500 shadow-sm scale-105' 
+                                                            : 'bg-slate-50 border-transparent text-slate-300 hover:border-slate-200'
+                                                    }">
+                                                    <div class="flex items-center">
+                                                        ${Array(r).fill(0).map(() => `<i data-lucide="star" class="w-3 h-3 ${libraryRatingFilters[r] ? 'fill-current' : ''}"></i>`).join('')}
+                                                    </div>
+                                                </button>
+                                            `).join('')}
+                                        </div>
                                     </div>
+                                </div>
+
+                                <div class="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
+                                    ${completedBooks.map((book, idx) => ({ book, rating: (5 - (idx % 5)) }))
+                                      .filter(item => libraryRatingFilters[item.rating] !== false)
+                                      .map(({ book, rating }) => {
+                                        const stars = '⭐'.repeat(rating);
+                                        
+                                        return `
+                                            <div onclick="openModal('${book.id}', 'library')" class="relative group cursor-pointer aspect-[3/4] rounded-[24px] overflow-hidden shadow-md hover:shadow-xl hover:-translate-y-2 transition-all duration-300 border-[3px] border-white bg-slate-200">
+                                                <img src="${book.src}" class="w-full h-full object-cover pointer-events-none">
+                                                <div class="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                                
+                                                <!-- Top-right: Completed badge -->
+                                                <div class="absolute top-2.5 right-2.5 flex items-center gap-1 px-2.5 py-1 bg-emerald-500 rounded-full shadow-lg z-10">
+                                                    <i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-white"></i>
+                                                    <span class="text-[10px] font-black text-white leading-none tracking-wide uppercase">Completed</span>
+                                                </div>
+
+                                                <!-- Bottom center: Star rating -->
+                                                <div class="absolute bottom-3 left-1/2 -translate-x-1/2 z-20">
+                                                    <div class="bg-white/95 backdrop-blur-sm px-2.5 py-1 rounded-xl shadow-md border border-amber-100 text-[11px] leading-none flex items-center gap-1">
+                                                        <span class="text-amber-400 font-bold">${stars}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        `;
+                                    }).join('')}
                                 </div>
                             </div>
-                            
-                                </div>
-                            </div>`;
+                        `;
                         }
                     } else if (currentActiveSubTab === '❤️ Wishlist') {
                         wishlistSubView = 'overview'; // reset on tab switch

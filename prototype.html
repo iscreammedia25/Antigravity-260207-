@@ -1442,6 +1442,8 @@
             let currentActiveSubTab = 'Picks';
             let currentSubCategory = 'All';
             let librarySortBy = 'New';
+            let mediaSortBy = 'New';
+            let myLibrarySortBy = 'Recent';
             let libraryShowUnreadOnly = false;
             let wishlistUnreadOnly = false;
 
@@ -4470,11 +4472,11 @@
                                 <div class="relative group">
                                     <select onchange="setLibrarySort(this.value)" 
                                         class="appearance-none h-14 pl-6 pr-12 bg-white border-2 border-slate-100 rounded-2xl font-bold text-slate-600 outline-none focus:border-[#fbbf24] transition-all cursor-pointer">
-                                        <option value="New" ${librarySortBy === 'New' ? 'selected' : ''}>New</option>
-                                        <option value="ABC" ${librarySortBy === 'ABC' ? 'selected' : ''}>A to Z</option>
-                                        <option value="ZYX" ${librarySortBy === 'ZYX' ? 'selected' : ''}>Z to A</option>
-                                        <option value="Level-ASC" ${librarySortBy === 'Level-ASC' ? 'selected' : ''}>Level (↑)</option>
-                                        <option value="Level-DESC" ${librarySortBy === 'Level-DESC' ? 'selected' : ''}>Level (↓)</option>
+                                        <option value="New" ${mediaSortBy === 'New' ? 'selected' : ''}>New</option>
+                                        <option value="ABC" ${mediaSortBy === 'ABC' ? 'selected' : ''}>A to Z</option>
+                                        <option value="ZYX" ${mediaSortBy === 'ZYX' ? 'selected' : ''}>Z to A</option>
+                                        <option value="Level-ASC" ${mediaSortBy === 'Level-ASC' ? 'selected' : ''}>Level (↑)</option>
+                                        <option value="Level-DESC" ${mediaSortBy === 'Level-DESC' ? 'selected' : ''}>Level (↓)</option>
                                     </select>
                                     <i data-lucide="chevron-down" class="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none"></i>
                                 </div>
@@ -4531,11 +4533,11 @@
                                 <div class="relative group">
                                     <select onchange="setLibrarySort(this.value)" ${isSortDisabled ? 'disabled' : ''}
                                         class="appearance-none h-14 pl-6 pr-12 border-2 border-slate-100 rounded-2xl font-bold outline-none transition-all ${isSortDisabled ? 'bg-slate-100 text-slate-400 opacity-70 cursor-not-allowed' : 'bg-white text-slate-600 focus:border-[#fbbf24] cursor-pointer'}">
-                                        <option value="New" ${librarySortBy === 'New' ? 'selected' : ''}>New</option>
-                                        <option value="ABC" ${librarySortBy === 'ABC' ? 'selected' : ''}>A to Z</option>
-                                        <option value="ZYX" ${librarySortBy === 'ZYX' ? 'selected' : ''}>Z to A</option>
-                                        <option value="Level-ASC" ${librarySortBy === 'Level-ASC' ? 'selected' : ''}>Level (↑)</option>
-                                        <option value="Level-DESC" ${librarySortBy === 'Level-DESC' ? 'selected' : ''}>Level (↓)</option>
+                                        <option value="${currentActiveZone === 'My Library' ? 'Recent' : 'New'}" ${(currentActiveZone === 'My Library' ? myLibrarySortBy : librarySortBy) === (currentActiveZone === 'My Library' ? 'Recent' : 'New') ? 'selected' : ''}>${currentActiveZone === 'My Library' ? 'Recent' : 'New'}</option>
+                                        <option value="ABC" ${(currentActiveZone === 'My Library' ? myLibrarySortBy : librarySortBy) === 'ABC' ? 'selected' : ''}>A to Z</option>
+                                        <option value="ZYX" ${(currentActiveZone === 'My Library' ? myLibrarySortBy : librarySortBy) === 'ZYX' ? 'selected' : ''}>Z to A</option>
+                                        <option value="Level-ASC" ${(currentActiveZone === 'My Library' ? myLibrarySortBy : librarySortBy) === 'Level-ASC' ? 'selected' : ''}>Level (↑)</option>
+                                        <option value="Level-DESC" ${(currentActiveZone === 'My Library' ? myLibrarySortBy : librarySortBy) === 'Level-DESC' ? 'selected' : ''}>Level (↓)</option>
                                     </select>
                                     <i data-lucide="chevron-down" class="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none"></i>
                                 </div>
@@ -4852,11 +4854,11 @@
                                         <div class="relative group">
                                             <select onchange="setLibrarySort(this.value)"
                                                 class="appearance-none h-14 pl-6 pr-12 border-2 border-slate-100 rounded-2xl font-bold outline-none transition-all bg-white text-slate-600 focus:border-[#fbbf24] cursor-pointer shadow-sm">
-                                                <option value="New" ${librarySortBy === 'New' ? 'selected' : ''}>New</option>
-                                                <option value="ABC" ${librarySortBy === 'ABC' ? 'selected' : ''}>A to Z</option>
-                                                <option value="ZYX" ${librarySortBy === 'ZYX' ? 'selected' : ''}>Z to A</option>
-                                                <option value="Level-ASC" ${librarySortBy === 'Level-ASC' ? 'selected' : ''}>Level (↑)</option>
-                                                <option value="Level-DESC" ${librarySortBy === 'Level-DESC' ? 'selected' : ''}>Level (↓)</option>
+                                                <option value="Recent" ${myLibrarySortBy === 'Recent' ? 'selected' : ''}>Recent</option>
+                                                <option value="ABC" ${myLibrarySortBy === 'ABC' ? 'selected' : ''}>A to Z</option>
+                                                <option value="ZYX" ${myLibrarySortBy === 'ZYX' ? 'selected' : ''}>Z to A</option>
+                                                <option value="Level-ASC" ${myLibrarySortBy === 'Level-ASC' ? 'selected' : ''}>Level (↑)</option>
+                                                <option value="Level-DESC" ${myLibrarySortBy === 'Level-DESC' ? 'selected' : ''}>Level (↓)</option>
                                             </select>
                                             <i data-lucide="chevron-down" class="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none"></i>
                                         </div>

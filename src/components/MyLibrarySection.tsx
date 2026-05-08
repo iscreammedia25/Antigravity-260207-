@@ -468,7 +468,7 @@ const FinishedTab: React.FC<{
                 <div className="flex items-center gap-6 flex-wrap">
                     <div className="relative">
                         <select className="appearance-none h-12 pl-5 pr-10 bg-white border-2 border-slate-100 rounded-2xl font-bold text-slate-600 outline-none focus:border-indigo-400 transition-all cursor-pointer shadow-sm">
-                            <option>New</option>
+                            <option>Recent</option>
                             <option>Level (↑)</option>
                             <option>Level (↓)</option>
                         </select>
@@ -525,7 +525,7 @@ const WishlistTab: React.FC<{
 }> = ({ favoriteBooks, readingHistory, onViewInfo }) => {
 
     const [unreadOnly, setUnreadOnly] = React.useState(false);
-    const [sortBy, setSortBy] = React.useState('New');
+    const [sortBy, setSortBy] = React.useState('Recent');
 
     const completedIds = useMemo(() => {
         return readingHistory.filter(h => h.completedPhases.length === 4).map(h => h.bookId);
@@ -572,7 +572,7 @@ const WishlistTab: React.FC<{
                         value={sortBy}
                         onChange={(e) => setSortBy(e.target.value)}
                     >
-                        <option value="New">New</option>
+                        <option value="Recent">Recent</option>
                         <option value="ABC">A to Z</option>
                         <option value="ZYX">Z to A</option>
                     </select>

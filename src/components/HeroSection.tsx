@@ -63,7 +63,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ userName, readingHistory, fre
   const handlePrev = () => setCurrentIndex((prev) => (prev - 1 + cards.length) % cards.length);
 
   return (
-    <section className={`relative overflow-hidden card-bubble p-6 md:p-10 transition-all duration-700 border-none shadow-2xl flex items-center min-h-[380px] ${isHistoryMode ? 'bg-[#0f172a]' : 'bg-[#fbbf24]'}`} style={{ borderRadius: '48px' }}>
+    <section className={`relative overflow-hidden p-6 md:p-10 transition-all duration-700 border-none shadow-2xl flex items-center min-h-[400px] card-bubble !bg-opacity-100 ${isHistoryMode ? 'bg-[#0f172a] text-white' : 'bg-[#fbbf24] text-[#0f172a]'}`} style={{ borderRadius: '48px' }}>
       {/* SEE ALL Button in Top Right */}
       {onSeeAll && (
         <div className="absolute top-8 right-8 z-20">
@@ -127,7 +127,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ userName, readingHistory, fre
                   <div className="absolute top-4 left-4 z-20">
                     <div className={`px-4 py-1.5 rounded-full border-2 shadow-lg backdrop-blur-md flex items-center gap-2 ${isHistoryMode ? 'bg-orange-500/90 border-orange-400 text-white' : 'bg-sky-500/90 border-sky-400 text-white'}`}>
                       <div className={`w-2 h-2 rounded-full animate-pulse ${isHistoryMode ? 'bg-yellow-300' : 'bg-white'}`} />
-                      <p className="font-black text-[10px] uppercase tracking-wider">{isHistoryMode ? 'In Progress' : 'Recommended'}</p>
+                      <p className="font-black text-[10px] uppercase tracking-wider">{isHistoryMode ? 'Now Reading' : 'Recommended'}</p>
                     </div>
                   </div>
                   <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex flex-col justify-end p-5 min-h-[40%]">
@@ -175,7 +175,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ userName, readingHistory, fre
         {/* Text and Actions (Indented right) */}
         <div className={`flex-1 space-y-8 md:pl-16 transition-all duration-700 ${isHistoryMode ? 'text-white' : 'text-[#0f172a]'}`}>
           <div className="space-y-4">
-            <h2 className="text-5xl md:text-7xl font-black drop-shadow-md leading-tight font-fredoka tracking-tight whitespace-nowrap">
+            <h2 className="text-5xl md:text-7xl font-black drop-shadow-md leading-tight font-fredoka tracking-tight">
               {isHistoryMode ? `Continue Your\nAdventure, ${userName}!` : `Start Your\nAdventure, ${userName}!`}
             </h2>
           </div>

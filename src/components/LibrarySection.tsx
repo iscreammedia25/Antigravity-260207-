@@ -18,7 +18,7 @@ type Zone = 'Book Zone' | 'Media Zone' | 'My Library';
 
 const LibrarySection: React.FC<LibrarySectionProps> = ({ userName, onViewInfo, onClose, onSeeAll, isFullPage = false, initialTab }) => {
     const [activeZone, setActiveZone] = useState<Zone>((initialTab?.zone as Zone) || 'Book Zone');
-    const [activeSubTab, setActiveSubTab] = useState<string>(initialTab?.subTab || (activeZone === 'Media Zone' ? 'All Media' : activeZone === 'My Library' ? 'In Progress' : 'Picks'));
+    const [activeSubTab, setActiveSubTab] = useState<string>(initialTab?.subTab || (activeZone === 'Media Zone' ? 'All Media' : activeZone === 'My Library' ? 'Now Reading' : 'Picks'));
 
     React.useEffect(() => {
         if (initialTab) {
@@ -30,14 +30,14 @@ const LibrarySection: React.FC<LibrarySectionProps> = ({ userName, onViewInfo, o
     const [searchQuery, setSearchQuery] = useState('');
     const [isSearchExecuted, setIsSearchExecuted] = useState(false);
     const [searchSelectedIndex, setSearchSelectedIndex] = useState(-1);
-    const [mediaSortBy, setMediaSortBy] = useState('Recent');
+    const [mediaSortBy, setMediaSortBy] = useState('New');
     const [mediaShowUnplayedOnly, setMediaShowUnplayedOnly] = useState(false);
     const [mediaFilters, setMediaFilters] = useState<Record<string, boolean>>({
         'Vocab': true,
         'Movie Book': true,
         'Audio Book': true
     });
-    const [bookSortBy, setBookSortBy] = useState('Recent');
+    const [bookSortBy, setBookSortBy] = useState('New');
     const [bookShowUnreadOnly, setBookShowUnreadOnly] = useState(false);
     const [picksActiveCategory, setPicksActiveCategory] = useState('All');
     const [topicsActiveCategory, setTopicsActiveCategory] = useState('All');
@@ -65,7 +65,7 @@ const LibrarySection: React.FC<LibrarySectionProps> = ({ userName, onViewInfo, o
     const zones: Record<Zone, string[]> = {
         'Book Zone': ['Picks', 'For you', 'Topics'],
         'Media Zone': ['All Media', 'Vocab', 'Movie Book', 'Audio Book'],
-        'My Library': ['In Progress', 'Completed', '❤️ Wishlist', 'Roadmap']
+        'My Library': ['Now Reading', 'Completed', '❤️ Wishlist', 'Roadmap']
     };
 
     const handleZoneChange = (zone: Zone) => {
@@ -297,7 +297,7 @@ const LibrarySection: React.FC<LibrarySectionProps> = ({ userName, onViewInfo, o
                                         disabled={activeSubTab === 'Picks' && picksActiveCategory === 'All'}
                                         className={`appearance-none h-14 pl-6 pr-12 border-2 rounded-2xl font-bold outline-none transition-all ${activeSubTab === 'Picks' && picksActiveCategory === 'All' ? 'bg-slate-700/30 border-white/5 text-slate-500 cursor-not-allowed' : 'bg-white/5 border-white/5 text-slate-300 focus:border-[#fbbf24]/50 cursor-pointer'}`}
                                     >
-                                        <option value="Recent" className="bg-[#1e293b]">Recent</option>
+                                        <option value="New" className="bg-[#1e293b]">New</option>
                                         <option value="Level-ASC" className="bg-[#1e293b]">Level (↑)</option>
                                         <option value="Level-DESC" className="bg-[#1e293b]">Level (↓)</option>
                                     </select>
@@ -508,7 +508,7 @@ const MediaZoneContent = ({ activeSubTab, mediaSortBy, setMediaSortBy, mediaShow
                     <div className="relative group">
                         <select value={mediaSortBy} onChange={e => setMediaSortBy(e.target.value)}
                             className="appearance-none h-14 pl-6 pr-12 bg-white/5 border-2 border-white/5 rounded-2xl font-bold text-slate-300 outline-none focus:border-[#fbbf24]/50 transition-all cursor-pointer">
-                            <option>Recent</option>
+                            <option>New</option>
                             <option>Level (↑)</option>
                             <option>Level (↓)</option>
                         </select>
@@ -583,8 +583,7 @@ const MediaZoneContent = ({ activeSubTab, mediaSortBy, setMediaSortBy, mediaShow
                                             } else if (randomState === 1) {
                                                 return (
                                                     <div className="absolute top-2 right-2 flex items-center gap-1 px-2 py-1 bg-amber-400 rounded-full shadow-lg z-10">
-                                                        <svg className="w-3 h-3 text-slate-900 fill-current" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-                                                        <span className="text-[10px] font-black text-slate-900 leading-none">In Progress</span>
+                                                        <span className="text-[10px] font-black text-slate-900 leading-none">Now Reading</span>
                                                     </div>
                                                 );
                                             }
@@ -644,11 +643,6 @@ const MediaZoneContent = ({ activeSubTab, mediaSortBy, setMediaSortBy, mediaShow
                                                 ) : (
                                                     <img src={item.thumbnail} onError={(e: any) => { e.currentTarget.src = `https://api.dicebear.com/7.x/shapes/svg?seed=${item.id}`; }} className="w-full h-full object-cover" alt="" />
                                                 )}
-                                                <div className="absolute inset-0 bg-slate-900/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
-                                                    <div className="w-16 h-16 bg-white/95 backdrop-blur-md rounded-full flex items-center justify-center scale-75 group-hover:scale-100 transition-transform duration-300 shadow-2xl">
-                                                        <svg className="w-8 h-8 ml-1 text-sky-500 fill-current" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-                                                    </div>
-                                                </div>
                                                 <div className="absolute bottom-3 right-3 px-2.5 py-1 bg-black/70 backdrop-blur-md rounded-lg text-white font-black text-xs tabular-nums tracking-wider shadow-sm border border-white/20">
                                                     {item.duration}
                                                 </div>
@@ -713,11 +707,6 @@ const MediaZoneContent = ({ activeSubTab, mediaSortBy, setMediaSortBy, mediaShow
                                         ) : (
                                             <img src={item.thumbnail} onError={(e: any) => { e.currentTarget.src = `https://api.dicebear.com/7.x/shapes/svg?seed=${item.id}`; }} className="w-full h-full object-cover" alt="" />
                                         )}
-                                        <div className="absolute inset-0 bg-slate-900/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                            <div className="w-16 h-16 bg-white/95 backdrop-blur-md rounded-full flex items-center justify-center scale-75 group-hover:scale-100 transition-transform duration-300 shadow-2xl">
-                                                <svg className="w-8 h-8 ml-1 text-sky-500 fill-current" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-                                            </div>
-                                        </div>
                                         <div className="absolute bottom-3 right-3 px-2.5 py-1 bg-black/70 backdrop-blur-md rounded-lg text-white font-black text-xs tabular-nums tracking-wider shadow-sm border border-white/20">
                                             {item.duration}
                                         </div>
@@ -834,14 +823,6 @@ const SearchResultsView = ({ query, onViewInfo, onPlayMedia }: { query: string, 
                                     ) : (
                                         <img src={item.thumbnail} onError={(e: any) => { e.currentTarget.src = `https://api.dicebear.com/7.x/shapes/svg?seed=${item.id}`; }} className="w-full h-full object-cover" alt="" />
                                     )}
-                                    <div className="absolute inset-0 bg-slate-900/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
-                                        <div className="w-16 h-16 bg-white/95 backdrop-blur-md rounded-full flex items-center justify-center scale-75 group-hover:scale-100 transition-transform duration-300 shadow-2xl">
-                                            <svg className="w-8 h-8 ml-1 text-amber-500 fill-current" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-                                        </div>
-                                    </div>
-                                    
-                                    {/* Badges */}
-                                    <div className="absolute top-3 left-3 px-3 py-1 bg-[#0f172a] text-[#fbbf24] font-black text-[9px] uppercase tracking-widest rounded-full shadow-md z-10">{item.type}</div>
                                     <div className="absolute bottom-3 right-3 px-2.5 py-1 bg-black/70 backdrop-blur-md rounded-lg text-white font-black text-xs tabular-nums tracking-wider shadow-sm border border-white/20">
                                         {item.duration}
                                     </div>
@@ -961,8 +942,7 @@ const TopicsGridView = ({ onViewInfo, sortBy, showUnreadOnly, activeCategory, se
                                 )}
                                 {isInProgress && (
                                     <div className="absolute top-4 right-4 flex items-center gap-1.5 px-4 py-2 bg-amber-400 rounded-full shadow-xl z-10">
-                                        <svg className="w-4 h-4 text-slate-900 fill-current" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-                                        <span className="text-xs font-black text-slate-900 leading-none">In Progress</span>
+                                        <span className="text-xs font-black text-slate-900 leading-none">Now Reading</span>
                                     </div>
                                 )}
 
@@ -1044,7 +1024,6 @@ const PicksCarouselView = ({ onViewInfo, activeCategory, setActiveCategory, sort
                         
                         return (
                             <div key={cat} className="flex flex-col gap-10 animate-in fade-in slide-in-from-bottom-4">
-                                {/* Thematic Hero Header */}
                                 <div className="bg-white rounded-[40px] p-10 md:p-14 shadow-xl flex flex-col md:flex-row items-center md:items-start gap-8 relative overflow-hidden">
                                     <div className="absolute -top-20 -right-20 w-64 h-64 bg-slate-50 rounded-full blur-3xl pointer-events-none" />
                                     <div className="w-32 h-32 bg-slate-50 rounded-full flex items-center justify-center shadow-inner shrink-0 relative z-10 border-4 border-white">
@@ -1088,9 +1067,8 @@ const PicksCarouselView = ({ onViewInfo, activeCategory, setActiveCategory, sort
                                                         </>
                                                     )}
                                                     {isInProgress && (
-                                                        <div className="absolute top-3 right-3 flex items-center gap-1 px-2.5 py-1 bg-amber-400 rounded-full shadow-lg z-10">
-                                                            <svg className="w-3.5 h-3.5 text-slate-900 fill-current" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-                                                            <span className="text-[11px] font-black text-slate-900 leading-none">In Progress</span>
+                                                        <div className="absolute top-3 right-3 flex items-center gap-1 px-3 py-1 bg-amber-400 rounded-full shadow-lg z-10">
+                                                            <span className="text-[11px] font-black text-slate-900 leading-none">Now Reading</span>
                                                         </div>
                                                     )}
                                                     
@@ -1180,8 +1158,7 @@ const PicksCarouselView = ({ onViewInfo, activeCategory, setActiveCategory, sort
                                                 )}
                                                 {isInProgress && (
                                                     <div className="absolute top-4 right-4 flex items-center gap-1.5 px-4 py-2 bg-amber-400 rounded-full shadow-xl z-10">
-                                                        <svg className="w-4 h-4 text-slate-900 fill-current" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-                                                        <span className="text-xs font-black text-slate-900 leading-none">In Progress</span>
+                                                        <span className="text-xs font-black text-slate-900 leading-none">Now Reading</span>
                                                     </div>
                                                 )}
                                                 
@@ -1236,9 +1213,8 @@ const PicksCarouselView = ({ onViewInfo, activeCategory, setActiveCategory, sort
                                                             </>
                                                         )}
                                                         {isInProgress && (
-                                                            <div className="absolute top-2 right-2 flex items-center gap-1 px-2 py-1 bg-amber-400 rounded-full shadow-lg z-10">
-                                                                <svg className="w-3 h-3 text-slate-900 fill-current" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-                                                                <span className="text-[10px] font-black text-slate-900 leading-none">In Progress</span>
+                                                            <div className="absolute top-2 right-2 flex items-center gap-1 px-2.5 py-1 bg-amber-400 rounded-full shadow-lg z-10">
+                                                                <span className="text-[10px] font-black text-slate-900 leading-none">Now Reading</span>
                                                             </div>
                                                         )}
 
@@ -1383,9 +1359,8 @@ const OriginalLibrarySlider: React.FC<Pick<LibrarySectionProps, 'userName' | 'on
                                     </div>
                                 )}
                                 {isInProgress && (
-                                    <div className="absolute top-2 right-2 flex items-center gap-1 px-2 py-1 bg-amber-400 rounded-full shadow-lg z-10">
-                                        <svg className="w-3 h-3 text-slate-900 fill-current" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-                                        <span className="text-[10px] font-black text-slate-900 leading-none">In Progress</span>
+                                    <div className="absolute top-2 right-2 flex items-center gap-1 px-2.5 py-1 bg-amber-400 rounded-full shadow-lg z-10">
+                                        <span className="text-[10px] font-black text-slate-900 leading-none">Now Reading</span>
                                     </div>
                                 )}
 

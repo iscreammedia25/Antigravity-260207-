@@ -558,7 +558,7 @@
                                 <span
                                     class="font-bold text-lg tracking-wide group-hover:text-amber-500 transition-colors">Vocabulary</span>
                             </button>
-                            <button onclick="openLibraryFullPage('My Library', 'In Progress'); toggleProfileMenu();"
+                            <button onclick="openLibraryFullPage('My Library', 'Now Reading'); toggleProfileMenu();"
                                 class="w-full flex items-center gap-4 px-4 py-3 bg-white hover:bg-slate-50 text-slate-700 rounded-2xl transition-colors text-left group">
                                 <div
                                     class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center group-hover:bg-rose-100 transition-colors">
@@ -977,7 +977,7 @@
                                                 <span
                                                     class="font-bold text-lg tracking-wide group-hover:text-amber-500 transition-colors">Vocabulary</span>
                                             </button>
-                                            <button onclick="openLibraryFullPage('My Library', 'In Progress'); toggleProfileMenu(event);"
+                                            <button onclick="openLibraryFullPage('My Library', 'Now Reading'); toggleProfileMenu(event);"
                                                 class="w-full flex items-center gap-4 px-4 py-3 bg-white hover:bg-slate-50 text-slate-700 rounded-2xl transition-colors text-left group">
                                                 <div
                                                     class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center group-hover:bg-rose-100 transition-colors">
@@ -1441,7 +1441,7 @@
             let currentActiveZone = 'Book Zone';
             let currentActiveSubTab = 'Picks';
             let currentSubCategory = 'All';
-            let librarySortBy = 'Recent';
+            let librarySortBy = 'New';
             let libraryShowUnreadOnly = false;
             let wishlistUnreadOnly = false;
 
@@ -1460,7 +1460,7 @@
             const libraryZones = {
                 'Book Zone': ['Picks', 'For you', 'Topics'],
                 'Media Zone': ['All Media', 'Vocab', 'Movie Book', 'Audio Book'],
-                'My Library': ['In Progress', 'Completed', '❤️ Wishlist', 'Roadmap']
+                'My Library': ['Now Reading', 'Completed', '❤️ Wishlist', 'Roadmap']
             };
 
             // My Library Dummy Data
@@ -1667,7 +1667,7 @@
                     
                     <!-- SEE ALL Button in Top Right -->
                     <div class="absolute top-8 right-8 z-20">
-                        <button onclick="openLibraryFullPage('My Library', 'In Progress')"
+                        <button onclick="openLibraryFullPage('My Library', 'Now Reading')"
                             class="px-5 py-2.5 bg-[#0f172a] text-[#fbbf24] font-black rounded-2xl text-xs flex items-center gap-2 hover:scale-105 active:scale-95 transition-all group font-fredoka uppercase tracking-widest shadow-xl border border-[#fbbf24]/20">
                             SEE ALL <i data-lucide="chevron-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
                         </button>
@@ -1710,7 +1710,7 @@
                                         <div class="absolute top-4 left-4 z-20">
                                             <div class="bg-black/40 backdrop-blur-md px-3 py-1 rounded-full border border-white/20 flex items-center gap-2">
                                                 <div class="w-2 h-2 rounded-full bg-yellow-400 animate-pulse"></div>
-                                                <p class="text-white font-black text-[9px] uppercase tracking-widest opacity-90">${isHistory ? 'In Progress' : 'Recommended'}</p>
+                                                <p class="text-white font-black text-[9px] uppercase tracking-widest opacity-90">${isHistory ? 'Now Reading' : 'Recommended'}</p>
                                             </div>
                                         </div>
                                         <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex flex-col justify-end p-5 min-h-[40%]">
@@ -3711,7 +3711,7 @@
                         } else {
                             // In Progress / Completed / Wishlist: 좌측 pill-group (dark navy)
                             let iconHtml = '';
-                            if (tab === 'In Progress') {
+                            if (tab === 'Now Reading') {
                                 iconHtml = '<i data-lucide="clock" class="w-4 h-4"></i>';
                             } else if (tab === 'Completed') {
                                 iconHtml = '<i data-lucide="trophy" class="w-4 h-4"></i>';
@@ -3985,7 +3985,7 @@
                                     <img src="${book.src}" class="w-full h-full object-cover">
                                     
                                     ${isCompleted ? '<div class="absolute top-0 right-0 bg-emerald-500 text-white text-[10px] font-bold px-3 py-1.5 rounded-bl-[16px] z-20 shadow-sm flex items-center gap-1"><i data-lucide="check-circle-2" class="w-3 h-3"></i> COMPLETED</div>' : ''}
-                                    ${isCurrent ? '<div class="absolute top-0 right-0 bg-indigo-500 text-white text-[10px] font-black px-3 py-1.5 rounded-bl-[16px] z-20 shadow-sm flex items-center gap-1"><i data-lucide="zap" class="w-3 h-3"></i> IN PROGRESS</div>' : ''}
+                                    ${isCurrent ? '<div class="absolute top-0 right-0 bg-indigo-500 text-white text-[10px] font-black px-3 py-1.5 rounded-bl-[16px] z-20 shadow-sm flex items-center gap-1"><i data-lucide="zap" class="w-3 h-3"></i> NOW READING</div>' : ''}
                                     
                                     ${isCurrent ? '<div class="absolute inset-0 bg-indigo-500/10 mix-blend-overlay"></div>' : ''}
                                 </div>
@@ -4268,9 +4268,8 @@
                                     <div class="absolute inset-0 bg-slate-900/10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
                                     
                                     ${book.isInProgress ? `
-                                        <div class="absolute top-2.5 right-2.5 flex items-center gap-1 px-2 py-1 bg-amber-400 rounded-full shadow-lg">
-                                            <i data-lucide="play" class="w-3 h-3 text-slate-900 fill-current"></i>
-                                            <span class="text-[10px] font-black text-slate-900 leading-none">In Progress</span>
+                                        <div class="absolute top-2.5 right-2.5 flex items-center gap-1 px-3 py-1 bg-amber-400 rounded-full shadow-lg">
+                                            <span class="text-[10px] font-black text-slate-900 leading-none">Now Reading</span>
                                         </div>
                                     ` : ''}
                                     
@@ -4471,7 +4470,7 @@
                                 <div class="relative group">
                                     <select onchange="setLibrarySort(this.value)" 
                                         class="appearance-none h-14 pl-6 pr-12 bg-white border-2 border-slate-100 rounded-2xl font-bold text-slate-600 outline-none focus:border-[#fbbf24] transition-all cursor-pointer">
-                                        <option value="Recent" ${librarySortBy === 'Recent' ? 'selected' : ''}>Recent</option>
+                                        <option value="New" ${librarySortBy === 'New' ? 'selected' : ''}>New</option>
                                         <option value="ABC" ${librarySortBy === 'ABC' ? 'selected' : ''}>A to Z</option>
                                         <option value="ZYX" ${librarySortBy === 'ZYX' ? 'selected' : ''}>Z to A</option>
                                         <option value="Level-ASC" ${librarySortBy === 'Level-ASC' ? 'selected' : ''}>Level (↑)</option>
@@ -4524,7 +4523,7 @@
                 const isSortDisabled = currentActiveSubTab === 'Picks' && currentSubCategory === 'All';
 
                 // 1. Toolbar (Hide for Roadmap and Completed top, and hide for In Progress / Wishlist in Empty Mode)
-                const isMyLibraryEmptyTab = isLibraryEmptyMode && (currentActiveSubTab === 'In Progress' || currentActiveSubTab === '❤️ Wishlist');
+                const isMyLibraryEmptyTab = isLibraryEmptyMode && (currentActiveSubTab === 'Now Reading' || currentActiveSubTab === '❤️ Wishlist');
                 if (currentActiveSubTab !== 'Roadmap' && currentActiveSubTab !== 'Completed' && !isMyLibraryEmptyTab) {
                     html += `
                         <div class="flex items-center justify-between mb-8">
@@ -4532,7 +4531,7 @@
                                 <div class="relative group">
                                     <select onchange="setLibrarySort(this.value)" ${isSortDisabled ? 'disabled' : ''}
                                         class="appearance-none h-14 pl-6 pr-12 border-2 border-slate-100 rounded-2xl font-bold outline-none transition-all ${isSortDisabled ? 'bg-slate-100 text-slate-400 opacity-70 cursor-not-allowed' : 'bg-white text-slate-600 focus:border-[#fbbf24] cursor-pointer'}">
-                                        <option value="Recent" ${librarySortBy === 'Recent' ? 'selected' : ''}>Recent</option>
+                                        <option value="New" ${librarySortBy === 'New' ? 'selected' : ''}>New</option>
                                         <option value="ABC" ${librarySortBy === 'ABC' ? 'selected' : ''}>A to Z</option>
                                         <option value="ZYX" ${librarySortBy === 'ZYX' ? 'selected' : ''}>Z to A</option>
                                         <option value="Level-ASC" ${librarySortBy === 'Level-ASC' ? 'selected' : ''}>Level (↑)</option>
@@ -4638,7 +4637,7 @@
                                                         <div class="absolute bottom-4 left-1/2 -translate-x-1/2 w-max z-20"><div class="bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-xl shadow-lg border border-amber-100 text-xs leading-none">${stars}</div></div>
                                                     `;
                                                 } else if (randomState === 1) {
-                                                    html += `<div class="absolute top-4 right-4 flex items-center gap-1.5 px-4 py-2 bg-amber-400 rounded-full shadow-xl z-10"><svg class="w-4 h-4 text-slate-900 fill-current" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg><span class="text-xs font-black text-slate-900 leading-none">In Progress</span></div>`;
+                                                    html += `<div class="absolute top-4 right-4 flex items-center gap-1.5 px-4 py-2 bg-amber-400 rounded-full shadow-xl z-10"><span class="text-xs font-black text-slate-900 leading-none">Now Reading</span></div>`;
                                                 }
 
                                                 if (randomState !== 2) {
@@ -4671,7 +4670,7 @@
                                                         <div class="absolute bottom-2 left-1/2 -translate-x-1/2 w-max z-20"><div class="bg-white/95 backdrop-blur-sm px-1.5 py-0.5 rounded-lg shadow-sm border border-amber-100 text-[9px] leading-none">${stars}</div></div>
                                                     `;
                                                 } else if (randomState === 1) {
-                                                    badgeHtml = `<div class="absolute top-2 right-2 flex items-center gap-1 px-2 py-1 bg-amber-400 rounded-full shadow-lg z-10"><svg class="w-3 h-3 text-slate-900 fill-current" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg><span class="text-[10px] font-black text-slate-900 leading-none">In Progress</span></div>`;
+                                                    badgeHtml = `<div class="absolute top-2 right-2 flex items-center gap-1 px-2.5 py-1 bg-amber-400 rounded-full shadow-lg z-10"><span class="text-[10px] font-black text-slate-900 leading-none">Now Reading</span></div>`;
                                                 }
 
                                                 return `
@@ -4746,7 +4745,7 @@
                                             <div class="absolute bottom-3 left-1/2 -translate-x-1/2 w-max z-20"><div class="bg-white/95 backdrop-blur-sm px-2 py-1 rounded-xl shadow-md border border-amber-100 text-[10px] leading-none">${stars}</div></div>
                                         `;
                                     } else if (isInProgress) {
-                                        badgeHtml = `<div class="absolute top-3 right-3 flex items-center gap-1 px-2.5 py-1 bg-amber-400 rounded-full shadow-lg z-10"><svg class="w-3.5 h-3.5 text-slate-900 fill-current" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg><span class="text-[11px] font-black text-slate-900 leading-none">In Progress</span></div>`;
+                                        badgeHtml = `<div class="absolute top-3 right-3 flex items-center gap-1 px-3 py-1 bg-amber-400 rounded-full shadow-lg z-10"><span class="text-[11px] font-black text-slate-900 leading-none">Now Reading</span></div>`;
                                     }
 
                                     return `
@@ -4772,7 +4771,7 @@
                     // My Library View
                     if (currentActiveSubTab === 'Roadmap') {
                         html += renderRoadmap(MY_LIBRARY_DUMMY_DATA.roadmap);
-                    } else if (currentActiveSubTab === 'In Progress') {
+                    } else if (currentActiveSubTab === 'Now Reading') {
                         const inProgressBooks = booksData.slice(0, 4);
                         const isAllSelected = inProgressSelectedIds.length === inProgressBooks.length && inProgressBooks.length > 0;
                         
@@ -4802,13 +4801,13 @@
                                     </button>
                                 </div>
 
-                                ${renderInProgressGrid(inProgressBooks, "No Books in Progress", "You haven't started any books yet.")}
+                                ${renderInProgressGrid(inProgressBooks, "Nothing Reading Now", "You haven't started any books yet.")}
                                 `}
                             </div>
                         `;
                     } else if (currentActiveSubTab === 'Completed') {
                         if (isLibraryEmptyMode) {
-                            html += getEmptyStateHtml('trophy', 'No trophies yet!', 'Finish your first book to earn a shiny trophy and see your achievements here.', 'Complete a Book!', "setActiveSubTab('In Progress')");
+                            html += getEmptyStateHtml('trophy', 'No trophies yet!', 'Finish your first book to earn a shiny trophy and see your achievements here.', 'Complete a Book!', "setActiveSubTab('Now Reading')");
                         } else {
                             const completedBooks = MY_LIBRARY_DUMMY_DATA.completed;
                             // Demo: take first 4 completed books for favorites
@@ -4853,7 +4852,7 @@
                                         <div class="relative group">
                                             <select onchange="setLibrarySort(this.value)"
                                                 class="appearance-none h-14 pl-6 pr-12 border-2 border-slate-100 rounded-2xl font-bold outline-none transition-all bg-white text-slate-600 focus:border-[#fbbf24] cursor-pointer shadow-sm">
-                                                <option value="Recent" ${librarySortBy === 'Recent' ? 'selected' : ''}>Recent</option>
+                                                <option value="New" ${librarySortBy === 'New' ? 'selected' : ''}>New</option>
                                                 <option value="ABC" ${librarySortBy === 'ABC' ? 'selected' : ''}>A to Z</option>
                                                 <option value="ZYX" ${librarySortBy === 'ZYX' ? 'selected' : ''}>Z to A</option>
                                                 <option value="Level-ASC" ${librarySortBy === 'Level-ASC' ? 'selected' : ''}>Level (↑)</option>
@@ -4990,7 +4989,7 @@
                                                     <div class="absolute bottom-2 left-1/2 -translate-x-1/2 w-max z-20"><div class="bg-white/95 backdrop-blur-sm px-1.5 py-0.5 rounded-lg shadow-sm border border-amber-100 text-[10px] leading-none">${stars}</div></div>
                                                 `;
                                             } else if (randomState === 1) {
-                                                return `<div class="absolute top-2 right-2 flex items-center gap-1 px-2 py-1 bg-amber-400 rounded-full shadow-lg z-10"><i data-lucide="play" class="w-3 h-3 text-slate-900 fill-current"></i><span class="text-[10px] font-black text-slate-900 leading-none">In Progress</span></div>`;
+                                                return `<div class="absolute top-2 right-2 flex items-center gap-1 px-2 py-1 bg-amber-400 rounded-full shadow-lg z-10"><span class="text-[10px] font-black text-slate-900 leading-none">Now Reading</span></div>`;
                                             }
                                             return '';
                                         })()}
@@ -5209,8 +5208,7 @@
                                 ` : ''}
                                 ${isInProgress ? `
                                     <div class="absolute top-2 right-2 flex items-center gap-1 px-2 py-1 bg-amber-400 rounded-full shadow-lg z-10">
-                                        <i data-lucide="play" class="w-3 h-3 text-slate-900 fill-current"></i>
-                                        <span class="text-[10px] font-black text-slate-900 leading-none">In Progress</span>
+                                        <span class="text-[10px] font-black text-slate-900 leading-none">Now Reading</span>
                                     </div>
                                 ` : ''}
                                 

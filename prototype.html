@@ -623,7 +623,7 @@
                 </button>
                 
                 <!-- Library Icon (Book Zone) -->
-                <button id="globalLibraryBtn" onclick="openLibraryFullPage('Book Zone', 'For you')"
+                <button id="globalLibraryBtn" onclick="openLibraryFullPage('Book Zone', 'Picks')"
                     class="w-10 h-10 rounded-xl flex items-center justify-center text-white/70 hover:text-white hover:bg-white/10 transition-all">
                     <i data-lucide="book-open" class="w-5 h-5"></i>
                 </button>
@@ -655,6 +655,10 @@
                 class="px-6 py-3 rounded-2xl text-xs font-black transition-all border-[3px] shadow-xl bg-rose-900 text-rose-300 border-rose-800 hover:text-white hover:border-rose-600 active:scale-95 whitespace-nowrap">
                 DEV: EMPTY VIEW (OFF)
             </button>
+            <button onclick="openOnboarding()"
+                class="px-6 py-3 rounded-2xl text-xs font-black transition-all border-[3px] shadow-xl bg-purple-900 text-purple-300 border-purple-800 hover:text-white hover:border-purple-600 active:scale-95 whitespace-nowrap">
+                DEV: ONBOARDING
+            </button>
         </div>
 
         <!-- Main Content Area with padding for fixed header -->
@@ -677,10 +681,6 @@
                                 </span>
                                 For you
                             </h3>
-                            <button onclick="openLibraryFullPage('Book Zone', 'For you');"
-                                class="px-5 py-2.5 bg-[#0f172a] text-[#fbbf24] font-black rounded-full text-xs flex items-center gap-2 hover:scale-105 active:scale-95 transition-all group font-fredoka uppercase tracking-widest shadow-lg shadow-black/10">
-                                SEE ALL <i data-lucide="chevron-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
-                            </button>
                         </div>
 
                         <div class="relative group/scroll px-2 flex-grow flex flex-col justify-center min-h-[16rem]">
@@ -1043,7 +1043,7 @@
                                 </button>
                                 
                                 <!-- Library Icon (Book Zone) -->
-                                <button id="libLibraryBtn" onclick="setActiveZone('Book Zone'); setActiveSubTab('For you');"
+                                <button id="libLibraryBtn" onclick="setActiveZone('Book Zone'); setActiveSubTab('Picks');"
                                     class="w-10 h-10 rounded-xl flex items-center justify-center text-white/70 hover:text-white hover:bg-white/10 transition-all">
                                     <i data-lucide="book-open" class="w-5 h-5"></i>
                                 </button>
@@ -1551,7 +1551,7 @@
             let isLibraryEmptyMode = false;
 
             const libraryZones = {
-                'Book Zone': ['Picks', 'For you', 'Topics'],
+                'Book Zone': ['Picks', 'Topics'],
                 'Media Zone': ['All Media', 'Vocab', 'Movie Book', 'Audio Book'],
                 'My Library': ['Now Reading', 'Completed', '❤️ Wishlist', 'Roadmap']
             };
@@ -6033,6 +6033,311 @@
                 openUnifiedPlayer(items, index);
             }
 
+            // --- Onboarding Logic ---
+            let onboardingStep = 0;
+            let obSelectedCategories = [];
+            let obSelectedMoods = [];
+            let obSelectedCharacters = [];
+            let obLevelAnswers = { 1: [], 3: [], 5: [] };
+            let obReviewStep = 3;
+            let obCurrentOptions = [];
+
+            const OB_CATEGORIES = [
+                { id: 'Fairy Tales', icon: '🏰' }, { id: 'Heroes', icon: '🦸' }, { id: 'Family', icon: '👨‍👩‍👧‍👦' },
+                { id: 'Friends & School', icon: '🏫' }, { id: 'Me & Growing Up', icon: '🌱' }, { id: 'Animals', icon: '🦁' },
+                { id: 'Nature', icon: '🌳' }, { id: 'Sports & Hobbies', icon: '⚽' }, { id: 'Arts & Music', icon: '🎨' },
+                { id: 'Science & Technology', icon: '🚀' }, { id: 'Space', icon: '🪐' }, { id: 'World & History', icon: '🗺️' }
+            ];
+            const OB_MOODS = [
+                { id: 'Fun', icon: '😂' }, { id: 'Adventure', icon: '🏕️' }, { id: 'Warm', icon: '☕' },
+                { id: 'Calm', icon: '😌' }, { id: 'Brave', icon: '🦁' }, { id: 'Proud', icon: '🥇' },
+                { id: 'Inspiring', icon: '✨' }, { id: 'Serious', icon: '🤔' }, { id: 'Touching', icon: '🥺' },
+                { id: 'Challenge', icon: '🧗' }
+            ];
+            const OB_CHARACTERS = [
+                { id: 'Brave Hero', icon: '🦸‍♂️' }, { id: 'Kind Friend', icon: '🤝' }, { id: 'Funny Friend', icon: '🤡' },
+                { id: 'Curious Explorer', icon: '🔍' }, { id: 'Creative Artist', icon: '🧑‍🎨' }, { id: 'Smart Inventor', icon: '💡' },
+                { id: 'Animal Friend', icon: '🐶' }, { id: 'Quiet Thinker', icon: '🧘' }, { id: 'Strong Player', icon: '🏋️' },
+                { id: 'Magical Character', icon: '🧙' }
+            ];
+            const OB_LEVEL_TESTS = [
+                {
+                    targets: [
+                        { word: 'book', image: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=800&auto=format&fit=crop' },
+                        { word: 'rabbit', image: 'https://images.unsplash.com/photo-1585110396000-c9fd4e4e3258?q=80&w=800&auto=format&fit=crop' },
+                        { word: 'castle', image: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=800&auto=format&fit=crop' },
+                        { word: 'instrument', image: 'https://images.unsplash.com/photo-1511192336575-5a79af67a629?q=80&w=800&auto=format&fit=crop' }
+                    ],
+                    distractors: ['sun', 'kitchen', 'crown', 'waterfall']
+                },
+                {
+                    targets: [
+                        { word: 'run', image: 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?q=80&w=800&auto=format&fit=crop' },
+                        { word: 'smile', image: 'https://images.unsplash.com/photo-1544717305-2782549b5136?q=80&w=800&auto=format&fit=crop' },
+                        { word: 'bridge', image: 'https://images.unsplash.com/photo-1545459720-aac8509eb02c?q=80&w=800&auto=format&fit=crop' },
+                        { word: 'trophy', image: 'https://images.unsplash.com/photo-1569517282132-25d22f4573e6?q=80&w=800&auto=format&fit=crop' }
+                    ],
+                    distractors: ['eat', 'climb', 'party', 'competition']
+                },
+                {
+                    targets: [
+                        { word: 'boy', image: 'https://images.unsplash.com/photo-1488161628813-04466f872be2?q=80&w=800&auto=format&fit=crop' },
+                        { word: 'friend', image: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?q=80&w=800&auto=format&fit=crop' },
+                        { word: 'uniform', image: 'https://images.unsplash.com/photo-1516223725307-6f76b9ec8742?q=80&w=800&auto=format&fit=crop' },
+                        { word: 'inventor', image: 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?q=80&w=800&auto=format&fit=crop' }
+                    ],
+                    distractors: ['baby', 'teacher', 'glasses', 'scientist']
+                }
+            ];
+
+            function openOnboarding() {
+                onboardingStep = 0;
+                obSelectedCategories = [];
+                obSelectedMoods = [];
+                obSelectedCharacters = [];
+                obLevelSubStep = 0;
+                obFoundWords = [];
+                const container = document.getElementById('onboardingContainer');
+                container.classList.remove('hidden');
+                container.classList.add('flex');
+                document.body.style.overflow = 'hidden';
+                renderOnboarding();
+            }
+
+            function closeEmotionModal() {
+                document.getElementById('emotionModal').classList.add('hidden');
+                document.getElementById('emotionModal').classList.remove('flex');
+            }
+
+            function closeOnboarding(proceedToEmotion = false) {
+                const container = document.getElementById('onboardingContainer');
+                container.classList.add('hidden');
+                container.classList.remove('flex');
+                document.body.style.overflow = 'auto';
+                if (proceedToEmotion) {
+                    document.getElementById('emotionModal').classList.remove('hidden');
+                    document.getElementById('emotionModal').classList.add('flex');
+                }
+            }
+
+            function getLevelOptions() {
+                // Not used dynamically anymore, see next/prev step logic
+                return [];
+            }
+
+            function prevOnboardingStep() {
+                if (onboardingStep > 0) {
+                    onboardingStep--;
+                    if (onboardingStep % 2 !== 0) {
+                        const levelIndex = Math.floor(onboardingStep / 2);
+                        const test = OB_LEVEL_TESTS[levelIndex];
+                        obCurrentOptions = [...test.targets.map(t => t.word), ...test.distractors].sort(() => Math.random() - 0.5);
+                        obReviewStep = 3;
+                    }
+                    renderOnboarding();
+                }
+            }
+
+            function nextOnboardingStep() {
+                if (onboardingStep >= 5) {
+                    closeOnboarding(true);
+                } else {
+                    onboardingStep++;
+                    if (onboardingStep % 2 !== 0) {
+                        const levelIndex = Math.floor(onboardingStep / 2);
+                        const test = OB_LEVEL_TESTS[levelIndex];
+                        obCurrentOptions = [...test.targets.map(t => t.word), ...test.distractors].sort(() => Math.random() - 0.5);
+                        obLevelAnswers[onboardingStep] = [];
+                        obReviewStep = 3;
+                    }
+                    renderOnboarding();
+                }
+            }
+            
+            function handleObWordClick(word) {
+                const currentAnswers = obLevelAnswers[onboardingStep] || [];
+                if (currentAnswers.length >= 4) return;
+                
+                currentAnswers.push(word);
+                obLevelAnswers[onboardingStep] = currentAnswers;
+                
+                if (currentAnswers.length === 4) {
+                    obReviewStep = 3;
+                }
+                renderOnboarding();
+            }
+
+            function skipObWordClick() {
+                handleObWordClick('UNKNOWN');
+            }
+            
+            function setObReviewStep(step) {
+                obReviewStep = Math.max(0, Math.min(3, step));
+                renderOnboarding();
+            }
+
+            function toggleTasteSelection(id, listName) {
+                let list = [];
+                if (listName === 'categories') list = obSelectedCategories;
+                else if (listName === 'moods') list = obSelectedMoods;
+                else if (listName === 'characters') list = obSelectedCharacters;
+
+                const index = list.indexOf(id);
+                if (index > -1) {
+                    list.splice(index, 1);
+                } else {
+                    list.push(id);
+                }
+                renderOnboarding();
+            }
+
+            function getNavigationHtml(canProceed) {
+                const isLastStep = onboardingStep === 5;
+                const currentAnswers = obLevelAnswers[onboardingStep] || [];
+                const isLevelComplete = currentAnswers.length >= 4;
+                const nextLabel = isLastStep ? 'DONE' : 'NEXT';
+                const nextIcon = isLastStep ? 'check' : 'chevron-right';
+                const backBtnClass = onboardingStep === 0 ? 'opacity-0 pointer-events-none' : 'text-slate-400 hover:text-slate-600 active:scale-95 cursor-pointer';
+                
+                let nextBtnClass = 'text-[#0f172a] hover:text-[#f97316] hover:translate-x-1 active:scale-95 cursor-pointer';
+                if (!canProceed) nextBtnClass = 'opacity-30 cursor-not-allowed text-slate-400';
+                else if (isLastStep && isLevelComplete) nextBtnClass = 'text-[#f97316] hover:text-orange-500 animate-pulse scale-110 active:scale-95 drop-shadow-md cursor-pointer';
+
+                const dotsHtml = [0,1,2,3,4,5].map(i => `<div class="w-3 h-3 rounded-full transition-all duration-300 ${onboardingStep === i ? 'bg-[#f97316] scale-150' : onboardingStep > i ? 'bg-[#fdba74]' : 'bg-orange-100'}"></div>`).join('');
+
+                return `
+                    <div class="flex items-center justify-between w-full max-w-md mx-auto mt-6 px-4">
+                        <button onclick="prevOnboardingStep()" class="flex items-center gap-2 font-black text-lg transition-all duration-300 ${backBtnClass}">
+                            <i data-lucide="chevron-left" class="w-6 h-6"></i> BACK
+                        </button>
+                        <div class="flex items-center justify-center gap-3">
+                            ${dotsHtml}
+                        </div>
+                        <button onclick="${canProceed ? 'nextOnboardingStep()' : ''}" ${!canProceed ? 'disabled' : ''} class="flex items-center gap-2 font-black text-lg transition-all duration-300 ${nextBtnClass}">
+                            ${nextLabel} <i data-lucide="${nextIcon}" class="w-6 h-6"></i>
+                        </button>
+                    </div>
+                `;
+            }
+
+            function renderOnboarding() {
+                const container = document.getElementById('onboardingContainer');
+                let html = `
+                    <div class="absolute top-6 right-6 z-[100000]">
+                        <button onclick="closeOnboarding()" class="w-12 h-12 bg-white/80 backdrop-blur-md rounded-full shadow-sm border border-slate-100 flex items-center justify-center text-slate-400 hover:bg-slate-100 transition-colors">
+                            <span class="font-black">X</span>
+                        </button>
+                    </div>
+                `;
+
+                if (onboardingStep % 2 === 0) {
+                    const isCat = onboardingStep === 0;
+                    const isMood = onboardingStep === 2;
+                    const title = isCat ? 'What stories do you like?' : isMood ? 'What mood are you looking for?' : 'Who is your favorite character?';
+                    const items = isCat ? OB_CATEGORIES : isMood ? OB_MOODS : OB_CHARACTERS;
+                    const selectedList = isCat ? obSelectedCategories : isMood ? obSelectedMoods : obSelectedCharacters;
+                    const listName = isCat ? 'categories' : isMood ? 'moods' : 'characters';
+                    const canProceed = true;
+
+                    html += `
+                        <div class="flex-1 flex flex-col items-center justify-center animate-in fade-in zoom-in-95 duration-500 max-w-5xl mx-auto w-full px-4 pt-12 pb-24">
+                            <div class="text-center mb-10">
+                                <h2 class="text-4xl md:text-5xl font-black text-slate-800 font-fredoka mb-4 flex items-center justify-center gap-3">
+                                    ${title}
+                                </h2>
+                                <div class="flex items-center justify-center gap-4 text-xl text-slate-500 font-bold">
+                                    <span>Select all you like!</span>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 w-full">
+                                ${items.map(item => {
+                                    const isSelected = selectedList.includes(item.id);
+                                    let btnClass = 'bg-white border-2 border-slate-100 hover:border-sky-200 hover:bg-sky-50 shadow-sm';
+                                    if (isSelected) {
+                                        btnClass = 'bg-white border-2 border-sky-400 shadow-[0_0_20px_rgba(56,189,248,0.2)] scale-[1.02] z-10';
+                                    }
+                                    return `
+                                        <button onclick="toggleTasteSelection('${item.id}', '${listName}')" class="relative p-6 rounded-[24px] flex flex-col items-center justify-center gap-4 transition-all duration-300 ${btnClass}">
+                                            <div class="text-5xl mb-2">${item.icon}</div>
+                                            <span class="font-black text-lg text-center font-fredoka leading-tight ${isSelected ? 'text-sky-600' : 'text-slate-600'}">${item.id}</span>
+                                            ${isSelected ? `<div class="absolute -top-3 -right-3 w-8 h-8 bg-sky-400 rounded-full flex items-center justify-center text-white shadow-md"><i data-lucide="check" class="w-5 h-5 stroke-[3]"></i></div>` : ''}
+                                        </button>
+                                    `;
+                                }).join('')}
+                            </div>
+                            <div class="mt-12 flex flex-col items-center w-full">
+                                ${getNavigationHtml(canProceed)}
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    // Level Step
+                    const levelIndex = Math.floor(onboardingStep / 2);
+                    const currentTest = OB_LEVEL_TESTS[levelIndex];
+                    
+                    const currentAnswers = obLevelAnswers[onboardingStep] || [];
+                    const isComplete = currentAnswers.length >= 4;
+                    const activeIndex = isComplete ? obReviewStep : currentAnswers.length;
+                    const currentTarget = currentTest.targets[activeIndex];
+                    const selectedWord = isComplete ? currentAnswers[obReviewStep] : null;
+
+                    let wordsHtml = obCurrentOptions.map(word => {
+                        const isSelected = selectedWord === word;
+                        let btnClass = 'bg-white text-slate-700 border-2 border-slate-200 hover:border-sky-400 hover:bg-sky-50 hover:-translate-y-1 shadow-sm active:scale-95';
+                        if (isComplete) {
+                            btnClass = isSelected ? 'bg-sky-50 border-2 border-sky-400 text-sky-600 shadow-sm scale-105 z-10' : 'bg-white border-2 border-slate-100 text-slate-300 opacity-60 cursor-default';
+                        }
+                        return `
+                            <button ${isComplete ? 'disabled' : `onclick="handleObWordClick('${word}')"`} class="py-6 rounded-2xl font-black text-2xl font-fredoka tracking-wider transition-all duration-200 ${btnClass}">
+                                ${word}
+                            </button>
+                        `;
+                    }).join('');
+
+                    html += `
+                        <div class="flex-1 flex flex-col items-center justify-center animate-in fade-in slide-in-from-right duration-500 max-w-5xl mx-auto w-full px-4 pt-12 pb-24">
+                            <div class="text-center mb-8 w-full flex flex-col items-center justify-center gap-4">
+                                <h2 class="text-3xl md:text-4xl font-black text-slate-800 font-fredoka flex items-center justify-center gap-3">
+                                    Choose the right word!
+                                </h2>
+                                <div class="flex items-center justify-center gap-2">
+                                    ${isComplete ? `<button onclick="setObReviewStep(${obReviewStep - 1})" ${obReviewStep === 0 ? 'disabled' : ''} class="p-2 hover:bg-slate-200 rounded-full disabled:opacity-30 transition-all"><i data-lucide="chevron-left" class="w-5 h-5 text-slate-600"></i></button>` : ''}
+                                    <div class="px-5 py-1.5 bg-slate-100 rounded-full font-bold text-slate-500 text-lg">${activeIndex + 1} / 4</div>
+                                    ${isComplete ? `<button onclick="setObReviewStep(${obReviewStep + 1})" ${obReviewStep === 3 ? 'disabled' : ''} class="p-2 hover:bg-slate-200 rounded-full disabled:opacity-30 transition-all"><i data-lucide="chevron-right" class="w-5 h-5 text-slate-600"></i></button>` : ''}
+                                </div>
+                            </div>
+                            <div class="w-full md:w-[calc(50%-0.5rem)] aspect-video md:aspect-[4/3] relative bg-slate-100 rounded-[32px] overflow-hidden shadow-xl mb-10 border-4 border-white transition-all duration-300 mx-auto">
+                                ${currentTarget ? `
+                                    <img src="${currentTarget.image}" class="absolute inset-0 w-full h-full object-cover animate-in fade-in duration-500" />
+                                ` : `
+                                    <div class="absolute inset-0 bg-slate-900"></div>
+                                `}
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent pointer-events-none"></div>
+                                ${onboardingStep === 5 && isComplete ? `
+                                    <div class="absolute inset-0 z-50 flex items-center justify-center bg-white/40 backdrop-blur-md animate-in fade-in duration-700 pointer-events-none">
+                                        <div class="text-5xl md:text-7xl font-black text-amber-500 drop-shadow-[0_0_20px_rgba(255,255,255,1)] animate-bounce flex flex-col items-center gap-4">
+                                            🎉 Fantastic! 🎉
+                                        </div>
+                                    </div>
+                                ` : ''}
+                            </div>
+                            <div class="w-full animate-in fade-in slide-in-from-bottom-4 duration-500" key="${activeIndex}">
+                                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 w-full">
+                                    ${wordsHtml}
+                                </div>
+                            </div>
+                            <div class="mt-10 flex flex-col items-center w-full">
+                                ${isComplete ? (selectedWord === 'UNKNOWN' ? `<div class="px-8 py-3 rounded-full font-bold bg-slate-100 text-slate-400 border-2 border-slate-200 mb-6">Skipped 🤔</div>` : `<div class="h-12 mb-6"></div>`) : `<button onclick="skipObWordClick()" class="px-8 py-3 rounded-full font-bold text-slate-400 hover:bg-slate-200 hover:text-slate-600 transition-colors mb-6">I don't know 🤔</button>`}
+                                ${getNavigationHtml(isComplete)}
+                            </div>
+                        </div>
+                    `;
+                }
+
+                container.innerHTML = html;
+                lucide.createIcons();
+            }
+
             // --- Home Screen Initializer ---
             document.addEventListener('DOMContentLoaded', () => {
                 try {
@@ -6069,6 +6374,37 @@
                     <button onclick="closeDeleteModal()" class="flex-1 py-4 bg-[#fbbf24] hover:bg-amber-400 text-[#0f172a] rounded-2xl font-black text-lg transition-all shadow-lg shadow-amber-200/40 active:scale-95 uppercase">
                         NO
                     </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- [NEW] Onboarding Container -->
+        <div id="onboardingContainer" class="fixed inset-0 bg-[#fffdf8] z-[100000] hidden flex-col overflow-y-auto font-fredoka">
+        </div>
+
+        <!-- [NEW] Emotion Check-in Cloud Modal -->
+        <div id="emotionModal" class="fixed inset-0 z-[6000] hidden items-center justify-center p-4">
+            <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-md transition-opacity" onclick="closeEmotionModal()"></div>
+            
+            <div class="relative w-full max-w-lg bg-white/95 backdrop-blur-xl rounded-[48px] p-12 shadow-2xl flex flex-col items-center text-center animate-in zoom-in-95 duration-700 ease-out border-4 border-white/80">
+                <!-- Cloud Fluffs -->
+                <div class="absolute -top-12 -left-8 w-32 h-32 bg-white rounded-full blur-lg animate-pulse" style="animation-duration: 3s"></div>
+                <div class="absolute -bottom-10 -right-10 w-40 h-40 bg-white rounded-full blur-lg animate-pulse" style="animation-delay: 1s; animation-duration: 4s"></div>
+                <div class="absolute -top-6 -right-6 w-24 h-24 bg-white rounded-full blur-lg animate-pulse" style="animation-delay: 0.5s; animation-duration: 2.5s"></div>
+                
+                <div class="relative z-10 flex flex-col items-center gap-6">
+                    <div class="text-6xl animate-bounce" style="animation-duration: 2s">☁️</div>
+                    <h2 class="text-4xl font-black text-slate-800 font-fredoka leading-tight">
+                        How do you feel <br/><span class="text-sky-500">today?</span>
+                    </h2>
+                    
+                    <div class="grid grid-cols-3 gap-4 w-full mt-6">
+                        <button onclick="closeEmotionModal()" class="py-6 bg-slate-50 border-2 border-slate-100 rounded-[32px] hover:border-sky-300 hover:bg-sky-50 hover:scale-105 transition-all text-5xl active:scale-95 shadow-sm">😄</button>
+                        <button onclick="closeEmotionModal()" class="py-6 bg-slate-50 border-2 border-slate-100 rounded-[32px] hover:border-sky-300 hover:bg-sky-50 hover:scale-105 transition-all text-5xl active:scale-95 shadow-sm">😌</button>
+                        <button onclick="closeEmotionModal()" class="py-6 bg-slate-50 border-2 border-slate-100 rounded-[32px] hover:border-sky-300 hover:bg-sky-50 hover:scale-105 transition-all text-5xl active:scale-95 shadow-sm">🥺</button>
+                    </div>
+                    
+                    <p class="text-slate-400 font-bold mt-4 text-sm">Pick one to start your journey!</p>
                 </div>
             </div>
         </div>

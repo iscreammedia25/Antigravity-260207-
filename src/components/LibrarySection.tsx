@@ -63,7 +63,7 @@ const LibrarySection: React.FC<LibrarySectionProps> = ({ userName, onViewInfo, o
     const [playerStartIndex, setPlayerStartIndex] = useState(0);
 
     const zones: Record<Zone, string[]> = {
-        'Book Zone': ['Picks', 'For you', 'Topics'],
+        'Book Zone': ['Picks', 'Topics'],
         'Media Zone': ['All Media', 'Vocab', 'Movie Book', 'Audio Book'],
         'My Library': ['Now Reading', 'Completed', '❤️ Wishlist', 'Roadmap']
     };
@@ -1311,12 +1311,6 @@ const OriginalLibrarySlider: React.FC<Pick<LibrarySectionProps, 'userName' | 'on
                     </span>
                     For you
                 </h3>
-                <button
-                    onClick={onSeeAll}
-                    className="px-5 py-2.5 bg-[#0f172a] text-[#fbbf24] font-black rounded-2xl text-xs flex items-center gap-2 hover:scale-105 active:scale-95 transition-all group font-fredoka uppercase tracking-widest shadow-lg shadow-black/10"
-                >
-                    SEE ALL <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                </button>
             </div>
 
             <div className="relative group/library px-2">

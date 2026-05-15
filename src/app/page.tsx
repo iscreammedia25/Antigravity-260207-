@@ -14,14 +14,16 @@ import MyLibrarySection from '@/components/MyLibrarySection';
 import GNB from '@/components/GNB';
 import QuizSection from '@/components/QuizSection';
 import TalkSection from '@/components/TalkSection';
+import Onboarding from '@/components/Onboarding';
 
 
 export default function Home() {
     const userName = "Ami";
-    const [view, setView] = useState<'home' | 'word' | 'read' | 'quiz' | 'speak' | 'library' | 'my-library'>('home');
+    const [view, setView] = useState<'onboarding' | 'home' | 'word' | 'read' | 'quiz' | 'speak' | 'library' | 'my-library'>('home');
     const [libraryTab, setLibraryTab] = useState<{ zone: string, subTab: string } | null>(null);
     const [currentBook, setCurrentBook] = useState<Book | null>(null);
     const [isDemoMode, setIsDemoMode] = useState(true);
+    const [showEmotionModal, setShowEmotionModal] = useState(false);
 
     // Mock History for Demo (Initial state: Silent Stick, Hans, Milo + 4 completed books)
     const mockHistory: ReadingHistory[] = [
@@ -248,6 +250,16 @@ export default function Home() {
     };
 
     return (
+        <>
+        {view === 'onboarding' ? (
+            <Onboarding 
+                onComplete={() => { 
+                    setView('home'); 
+                    setShowEmotionModal(true); 
+                }} 
+                onClose={() => setView('home')} 
+            />
+        ) : (
         <div className="min-h-screen">
             {/* Global GNB for Home and My Library */}
             {view !== 'library' && view !== 'word' && view !== 'read' && view !== 'quiz' && view !== 'speak' && (
@@ -256,7 +268,7 @@ export default function Home() {
                     currentView={view}
                     onNavigate={(v) => {
                         if (v === 'library') {
-                            setLibraryTab({ zone: 'Book Zone', subTab: 'For you' });
+                            setLibraryTab({ zone: 'Book Zone', subTab: 'Picks' });
                         }
                         setView(v);
                     }} 
@@ -321,15 +333,21 @@ export default function Home() {
                         </div>
                     </div>
 
-                    {/* DEV Mode Toggle FAB */}
-                    <div className="fixed bottom-6 right-6 z-[3000]">
-                        <button
-                            onClick={() => setIsDemoMode(!isDemoMode)}
-                            className={`px-6 py-3 rounded-2xl text-xs font-black transition-all border-[3px] shadow-xl whitespace-nowrap ${isDemoMode ? 'bg-slate-800 text-slate-400 border-slate-700 hover:text-white hover:border-slate-600' : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300'} active:scale-95`}
-                        >
-                            DEV: {isDemoMode ? 'HISTORY MODE' : 'FRESH MODE'}
-                        </button>
-                    </div>
+                    {/* Floating Dev Toggle */}
+            <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-2">
+                <button 
+                    onClick={() => setIsDemoMode(!isDemoMode)}
+                    className={`px-6 py-3 rounded-2xl text-xs font-black transition-all border-[3px] shadow-xl ${isDemoMode ? 'bg-slate-800 text-slate-400 border-slate-700' : 'bg-white text-slate-600 border-slate-200'} hover:scale-105 active:scale-95`}
+                >
+                    DEV: {isDemoMode ? 'HISTORY MODE' : 'FRESH MODE'}
+                </button>
+                <button 
+                    onClick={() => setView('onboarding')}
+                    className="px-6 py-3 rounded-2xl text-xs font-black transition-all border-[3px] shadow-xl bg-purple-900 text-purple-300 border-purple-800 hover:text-white hover:border-purple-600 active:scale-95"
+                >
+                    DEV: ONBOARDING
+                </button>
+            </div>        </div>
 
                     {/* Shared Book Detail Modal */}
                     {selectedBook && (
@@ -565,6 +583,37 @@ export default function Home() {
                 </div>
             )}
         </div>
+        )}
+
+        {/* Emotion Check-in Cloud Modal */}
+        {showEmotionModal && (
+            <div className="fixed inset-0 z-[6000] flex items-center justify-center p-4">
+                <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-md transition-opacity" onClick={() => setShowEmotionModal(false)}></div>
+                
+                <div className="relative w-full max-w-lg bg-white/95 backdrop-blur-xl rounded-[48px] p-12 shadow-2xl flex flex-col items-center text-center animate-in zoom-in-95 duration-700 ease-out border-4 border-white/80">
+                    {/* Cloud Fluffs */}
+                    <div className="absolute -top-12 -left-8 w-32 h-32 bg-white rounded-full blur-lg animate-pulse" style={{animationDuration: '3s'}}></div>
+                    <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-white rounded-full blur-lg animate-pulse" style={{animationDelay: '1s', animationDuration: '4s'}}></div>
+                    <div className="absolute -top-6 -right-6 w-24 h-24 bg-white rounded-full blur-lg animate-pulse" style={{animationDelay: '0.5s', animationDuration: '2.5s'}}></div>
+                    
+                    <div className="relative z-10 flex flex-col items-center gap-6">
+                        <div className="text-6xl animate-bounce" style={{animationDuration: '2s'}}>☁️</div>
+                        <h2 className="text-4xl font-black text-slate-800 font-fredoka leading-tight">
+                            How do you feel <br/><span className="text-sky-500">today?</span>
+                        </h2>
+                        
+                        <div className="grid grid-cols-3 gap-4 w-full mt-6">
+                            <button onClick={() => setShowEmotionModal(false)} className="py-6 bg-slate-50 border-2 border-slate-100 rounded-[32px] hover:border-sky-300 hover:bg-sky-50 hover:scale-105 transition-all text-5xl active:scale-95 shadow-sm">😄</button>
+                            <button onClick={() => setShowEmotionModal(false)} className="py-6 bg-slate-50 border-2 border-slate-100 rounded-[32px] hover:border-sky-300 hover:bg-sky-50 hover:scale-105 transition-all text-5xl active:scale-95 shadow-sm">😌</button>
+                            <button onClick={() => setShowEmotionModal(false)} className="py-6 bg-slate-50 border-2 border-slate-100 rounded-[32px] hover:border-sky-300 hover:bg-sky-50 hover:scale-105 transition-all text-5xl active:scale-95 shadow-sm">🥺</button>
+                        </div>
+                        
+                        <p className="text-slate-400 font-bold mt-4 text-sm">Pick one to start your journey!</p>
+                    </div>
+                </div>
+            </div>
+        )}
+        </>
     );
 }
 
